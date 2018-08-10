@@ -1,0 +1,164 @@
+/*
+* Point WordPress Theme
+* https://mythemeshop.com/themes/point/
+* RTL File
+*/
+blockquote:after { right: 0 }
+pre { margin: 5px 0 20px 0 }
+dt { float: right; clear: right; text-align: left; }
+dd { margin: 0 110px 0 0; padding: 0 0 0.5em 0; }
+/*-[ Header ]-----------------------*/
+.site-branding h1, .site-branding h2 { float: right }
+.site-branding { padding-left: 0; padding-right: 2%; }
+.widget-header { float: right }
+.widget-header-bottom-right { float: left }
+.primary-navigation { float: left }
+/*-[ Navigation ]-----------------*/
+#navigation ul li { float: right }
+.widget_nav_menu .toggle-caret { right: auto; left: 0; }
+.widget_nav_menu .menu-item-has-children ul { margin: 0 10px 0 0 }
+.trending-articles li { float: right }
+#navigation > ul li:first-child a { border-left: 1px solid #fff }
+#navigation > ul li:last-child a { border-right: 1px solid #E2E2E2; border-left: 0; }
+.primary-navigation .wpmm-entry-date, .primary-navigation .wpmm-entry-author { float: right; margin-right: 0; margin-left: 10px; }
+.primary-navigation .wpmm-entry-author { margin-left: 0 }
+.primary-navigation #wpmm-megamenu .wpmm-post i { margin-right: 0; margin-left: 4px; }
+/*-[ Content ]--------------------*/
+#content_box { float: right }
+.post { float: right }
+.ss-full-width #content_box { padding-left: 0; padding-right: 0; }
+.wp-post-image { float: right }
+.featured-thumbnail { float: right }
+#featured-thumbnail.widgetfull { float: right; margin-left: 20px; margin-right: 0; }
+.single-title { float: right; padding: 0 0 0 0; }
+.post-info { float: right }
+/**********latest-posts***********/
+article header { float: none; overflow: hidden; }
+.latestPost { float: right }
+.article img.left, .article img.alignleft, .wp-caption.alignleft { margin: 0.3em 0 0.5em 1.571em; float: right; }
+.article img.right, .article img.alignright, .wp-caption.alignright { margin: 0.3em 1.571em 0.5em 0; float: left; }
+.article img.center, .article img.aligncenter, .wp-caption.aligncenter { margin: 0.3em auto 0.5em auto }
+.article .iconlist { margin-right: 0 }
+.featured-cat { left: 0; right: auto; }
+#tabber .inside { padding: 0 0 15px 0 }
+#tabber ul.tabs li { float: right; margin-right: 0; }
+#tabber ul.tabs li a { float: right; padding: 2px 0 2px 0; }
+#tabber ul.tabs li.tab-recent-posts a { border-right: 0 }
+#tabber .inside li { padding: 15px 0 0 0; margin-right: 15px; margin-left: 15px; }
+#tabber .tab-thumb { float: right; margin: 0px 0px 0px 12px; }
+#tabber .inside .tabsSep { float: right }
+.widget_nav_menu .fa > a, .widget_nav_menu .fa > a { padding-right: 5px }
+.single .pagination { text-align: right }
+/*-[ Tables ]--------------------*/
+table { text-align: right }
+table th, table td { text-align: right }
+/*-[ Search Form ]------------------*/
+#searchform { float: right }
+.sbutton, #searchsubmit { left: 8px; right: auto; border-left: none!important; border-right: 1px solid #D8D8D8!important; }
+#searchform .fa-search { left: 0px; padding: 9px 10px 9px 8px; }
+#s { float: right; padding: 9px 0 9px 0; }
+/* Microphone icon position fix */
+input::-webkit-input-speech-button { margin-left: 14px; margin-right: 4px; }
+/*-[ Read More ]-------------------*/
+.readMore { float: left }
+/*-[ Bottom Ad in post ]-----------*/
+.bottomad { float: right }
+#sidebars .wp-post-image, footer .wp-post-image, .widget .wp-post-image, .widget .wpt_thumb_small, .wpt_avatar { margin-left: 10px; margin-right: 0; float: right; }
+.widget { float: right }
+.widget h3 { margin: 0px 0 15px 0 }
+/*-[ Related Posts ]---------------------------*/
+.related-posts { float: right }
+.related-posts ul { margin-right: 0 }
+.related-posts h5 { padding-right: 80px }
+.related-posts .relatepostli3, .related-posts .relatepostli1 { margin-left: 0; float: left; }
+.rthumb { float: right; margin-left: 10px; margin-right: 0; }
+.related-posts .last { margin-left: 0 }
+/*-[ Post Tags ]---------------------------------*/
+.tags { margin: 20px 0 0 0; float: right; }
+.tags a { margin-right: 5px }
+/*-[ Author Box ]--------------------------------*/
+.postauthor { float: right }
+.postauthor img { float: right; margin: 5px 0 15px 20px; }
+.bypostauthor:after { left: 0; right: auto; }
+.left { float: right }
+.right { float: left }
+.last { margin-left: 0 }
+/*-[ Tag widget ]------------------------------*/
+.tagcloud a, .widget .wpt_widget_content #tags-tab-content ul li { float: right; margin-left: 5px; margin-right: 0; }
+/*-[ Subscribe Widget ]------------------------*/
+.mts-subscribe input[type="text"] { float: right; border-left: 0; }
+#mts_subscribe_widget { border: 1px solid #F1F1F1 !important }
+.mts-subscribe input[type="submit"] { float: right }
+/*-[ Ad Widgets ]------------------------------*/
+.ad-125 ul { float: right }
+.ad-125 li { float: right; padding-right: 0; margin-right: 0; }
+.ad-125 li:nth-child(2n+2) { float: left!important }
+#wp-calendar td { border-left: 1px solid #F1F4F6 }
+#wp-calendar #prev { text-align: right; padding-right: 12px; }
+/*-[ Tag Widgets ]------------------------------*/
+.tagcloud a { float: right; margin-right: 0; margin-left: 5px; }
+/*-[Comments]--------------*/
+.nocomments { float: right }
+#comments { float: right }
+#commentsAdd { float: right }
+#comments .avatar { float: right; margin-left: 20px; }
+.comment time { padding-right: 10px }
+ul.children .commentImageLeft { border-right: 1px solid #c1bbb6; right: -70px; }
+input#author, input#email, input#url { margin-left: 10px }
+#commentform input#submit, .contactform #submit { float: left }
+.contactform #submit { float: right }
+ol.commentlist { margin-right: 0 }
+.commentlist li { margin: 0 0 30px 0; padding-right: 0; float: right; }
+.reply { float: left }
+.reply a { float: right }
+.commentlist .children { margin-right: 10%; float: right; }
+.avatar { float: right }
+#commentform p { float: right }
+#commentform p label { padding-right: 10px }
+.cancel-comment-reply a { float: left }
+.comment-notes .required { padding-right: 0 }
+#commentform p label { float: right; padding-right: 0; padding-left: 10px; }
+/*-[ WP Review ]--------------------------------*/
+.latestPost-review-wrapper { left: 0; right: auto; }
+.review-star { left: 15px; right: auto; }
+.review-result-wrapper i { float: left }
+.review-star { left: 15px; right: auto; }
+.review-result-wrapper i { float: left }
+.review-desc { float: right }
+.review-total-wrapper { float: left; margin-right: 0; margin-left: 15px; }
+.user-total-wrapper { float: right; text-align: right; }
+.user-total-wrapper span { float: right }
+span#mts-user-reviews-counter { float: none }
+.review-total-star.allowed-to-rate { float: left }
+.review-comment-field-msg { margin-right: 0; margin-left: 12px; }
+/*-[ WP Tab Widget ]--------------------------------*/
+.wpt_widget_content .inside li { text-align: right!important }
+#featured-thumbnail { float: right; margin-right: 0; margin-left: 3%; }
+.frontTitle { padding-right: 15px; padding-left: 0; } /*
+#navigation > ul > li:first-child a { border-left: 0; border-right: 1px solid #E2E2E2; }
+#navigation > ul > li:last-child a { border-right: 1px solid #E2E2E2; border-left: 0; }*/
+.trending-articles li.firstlink { float: right }
+/*-[ Carousel ]--------------------------------*/
+.carousel .excerpt { float: right; margin-right: 0; margin-left: 2%; }
+.carousel .excerpt:last-child { margin-left: 0 }
+.carousel .excerpt div.hover i { margin-left: -9px }
+/*-[ Copyrights ]--------------------------------*/
+.foot-logo { margin-right: 0; margin-left: 10px; float: right; }
+.copyright-left-text, .copyright-text { float: right }
+.copyright-text { margin-right: 5px; margin-left: 0; }
+.footer-navigation { float: left }
+/*-[ Responsive ]--------------------------------*/
+@media screen and (max-width: 865px) { 
+	a#pull { padding-left: 20px }
+	a#pull:after { right: 0 }
+	#navigation > ul li a { padding-left: 25px }
+}
+@media screen and (max-width: 720px) { 
+	.carousel .excerpt:nth-last-child(2) { margin-left: 0 }
+}
+@media screen and (max-width: 600px) { 
+	.carousel .excerpt:nth-last-child(3) { margin-left: 0 }
+}
+@media screen and (max-width: 480px) { 
+	.carousel .excerpt:nth-last-child(4) { margin-left: 0 }
+}

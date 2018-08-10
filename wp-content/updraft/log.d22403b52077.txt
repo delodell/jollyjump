@@ -1,0 +1,42 @@
+0000.006 () Opened log file at time: Wed, 08 Aug 2018 21:12:33 +0000 on http://localhost:8888/jollyjump.org
+0000.006 () UpdraftPlus WordPress backup plugin (https://updraftplus.com): 2.14.12.1 WP: 4.9.8 PHP: 7.2.7 (apache2handler, Darwin Michaels-MacBook-Pro.local 17.7.0 Darwin Kernel Version 17.7.0: Thu Jun 21 22:53:14 PDT 2018; root:xnu-4570.71.2~1/RELEASE_X86_64 x86_64) MySQL: 5.7.21 WPLANG: en_US Server: Apache/2.2.34 (Unix) mod_wsgi/3.5 Python/2.7.13 PHP/7.2.7 mod_ssl/2.2.34 OpenSSL/1.0.2o DAV/2 mod_fastcgi/mod_fastcgi-SNAP-0910052141 mod_perl/2.0.9 Perl/v5.24.0 safe_mode: 0 max_execution_time: 900 memory_limit: 256M (used: 24.9M | 14M) multisite: N openssl: OpenSSL 1.0.2o  27 Mar 2018 mcrypt: N LANG:  ZipArchive::addFile: Y
+0000.006 () Free space on disk containing Updraft's temporary directory: 141768.6 MB
+0000.007 () Restore job started. Entities to restore: plugins, themes, uploads, others. Restore options: {"updraft_encryptionphrase":"","updraft_restorer_wpcore_includewpconfig":false,"updraft_incremental_restore_point":-1}
+0000.042 () Entity: plugins
+0000.042 () restore_backup(backup_file=backup_2017-10-29-0016_The_Jump_Blog_314b519bfc01-plugins.zip, type=plugins, info=a:2:{s:4:"path";s:68:"/Users/mikedelrosso/sites/wordpress/jollyjump.org/wp-content/plugins";s:11:"description";s:7:"Plugins";}, last_one=)
+0000.042 () Unpacking backup... (backup_2017-10-29-0016_The_Jump_Blog_314b519bfc01-plugins.zip, 20 Mb)
+0003.906 () Moving old data: filesystem method / updraft_dir is potentially possible
+0003.907 () Moving old data: can potentially use wp_filesystem method / -old
+0003.907 () Moving old data out of the way...
+0005.192 () Top-level entities being moved: index.php, akismet, updraftplus, hello.php
+0005.194 () Moving unpacked backup into place...
+0008.139 () Top-level entities being moved: wp-tab-widget, index.php, ninja-forms-paypal-express, wp-subscribe, wp-review, better-search-replace, contact-form-7, synved-shortcodes, wp-shortcode, wp-file-upload, quick-setup, updraftplus, wpsso, ninja-forms, social-media-feather, disable-comments, user-role-editor, limit-login-attempts
+0008.148 () Cleaning up rubbish...
+0008.152 () Entity: themes
+0008.153 () restore_backup(backup_file=backup_2017-10-29-0016_The_Jump_Blog_314b519bfc01-themes.zip, type=themes, info=a:2:{s:4:"path";s:67:"/Users/mikedelrosso/sites/wordpress/jollyjump.org/wp-content/themes";s:11:"description";s:6:"Themes";}, last_one=)
+0008.153 () Unpacking backup... (backup_2017-10-29-0016_The_Jump_Blog_314b519bfc01-themes.zip, 0.6 Mb)
+0008.226 () Moving old data: filesystem method / updraft_dir is potentially possible
+0008.226 () Moving old data: can potentially use wp_filesystem method / -old
+0008.226 () Moving old data out of the way...
+0008.344 () Top-level entities being moved: twentyseventeen, twentysixteen, twentyfifteen, index.php
+0008.345 () Moving unpacked backup into place...
+0008.389 () Top-level entities being moved: index.php, point
+0008.390 () Cleaning up rubbish...
+0008.393 () Entity: uploads
+0008.393 () restore_backup(backup_file=backup_2017-10-29-0016_The_Jump_Blog_314b519bfc01-uploads.zip, type=uploads, info=a:2:{s:4:"path";s:68:"/Users/mikedelrosso/sites/wordpress/jollyjump.org/wp-content/uploads";s:11:"description";s:7:"Uploads";}, last_one=)
+0008.393 () Unpacking backup... (backup_2017-10-29-0016_The_Jump_Blog_314b519bfc01-uploads.zip, 136.3 Mb)
+0011.718 () Moving old data: filesystem method / updraft_dir is potentially possible
+0011.718 () Moving old data: can potentially use wp_filesystem method / -old
+0011.718 () Moving old data out of the way...
+0011.722 () Moving unpacked backup into place...
+0012.791 () Cleaning up rubbish...
+0012.793 () restore_backup(backup_file=backup_2017-10-29-0016_The_Jump_Blog_314b519bfc01-uploads2.zip, type=uploads, info=a:2:{s:4:"path";s:68:"/Users/mikedelrosso/sites/wordpress/jollyjump.org/wp-content/uploads";s:11:"description";s:7:"Uploads";}, last_one=)
+0012.793 () Unpacking backup... (backup_2017-10-29-0016_The_Jump_Blog_314b519bfc01-uploads2.zip, 0 Mb)
+0012.807 () Moving unpacked backup into place...
+0012.829 () Cleaning up rubbish...
+0012.831 () Entity: others
+0012.831 () restore_backup(backup_file=backup_2017-10-29-0016_The_Jump_Blog_314b519bfc01-others.zip, type=others, info=a:2:{s:4:"path";s:60:"/Users/mikedelrosso/sites/wordpress/jollyjump.org/wp-content";s:11:"description";s:6:"Others";}, last_one=1)
+0012.831 () Unpacking backup... (backup_2017-10-29-0016_The_Jump_Blog_314b519bfc01-others.zip, 0 Mb)
+0012.834 () Cleaning up rubbish...
+0012.841 () Restore successful!
+0012.842 () Restore successful

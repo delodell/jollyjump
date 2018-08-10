@@ -1,0 +1,293 @@
+0000.000 (0) Opened log file at time: Thu, 09 Aug 2018 00:14:53 +0000 on http://localhost:8888/jollyjump.org
+0000.002 (0) UpdraftPlus WordPress backup plugin (https://updraftplus.com): 1.13.12 WP: 4.9.8 PHP: 7.2.7 (apache2handler, Darwin Michaels-MacBook-Pro.local 17.7.0 Darwin Kernel Version 17.7.0: Thu Jun 21 22:53:14 PDT 2018; root:xnu-4570.71.2~1/RELEASE_X86_64 x86_64) MySQL: 5.7.21 WPLANG: en_US Server: Apache/2.2.34 (Unix) mod_wsgi/3.5 Python/2.7.13 PHP/7.2.7 mod_ssl/2.2.34 OpenSSL/1.0.2o DAV/2 mod_fastcgi/mod_fastcgi-SNAP-0910052141 mod_perl/2.0.9 Perl/v5.24.0 safe_mode: 0 max_execution_time: 900 memory_limit: 256M (used: 33.9M | 4.3M) multisite: N openssl: OpenSSL 1.0.2o  27 Mar 2018 mcrypt: N LANG:  ZipArchive::addFile: Y
+0000.002 (0) Free space on disk containing Updraft's temporary directory: 140720.7 MB
+0000.004 (0) Tasks: Backup files: 1 (schedule: weekly) Backup DB:  (schedule: daily)
+0000.005 (0) Processed schedules. Tasks now: Backup files: 1 Backup DB: 
+0000.012 (0) Requesting semaphore lock (f) (apparently not via scheduler)
+0000.013 (0) Semaphore (f, wp_options) was stuck, set lock time to 2018-08-09 00:14:53
+0000.014 (0) Semaphore (f, wp_options) reset to 1
+0000.015 (0) Set semaphore last lock (f) time to 2018-08-09 00:14:53
+0000.016 (0) Semaphore lock (f) complete
+0000.019 (0) Backup run: resumption=0, nonce=bc94b5661081, begun at=1533773693 (0s ago), job type=backup
+0000.021 (0) Scheduling a resumption (1) after 300 seconds (1533773993) in case this run gets aborted
+0000.034 (0) Checking if we have a zip executable available
+0000.034 (0) Testing: /usr/bin/zip
+0000.041 (0) Output: zip warning: binziptest/test.zip not found or empty
+0000.043 (0) Output: adding: binziptest/subdir1/	(in=0) (out=0) (stored 0%)
+0000.043 (0) Output: adding: binziptest/subdir1/subdir2/	(in=0) (out=0) (stored 0%)
+0000.044 (0) Output: adding: binziptest/subdir1/subdir2/test.html	(in=131) (out=107) (deflated 18%)
+0000.045 (0) Output: total bytes=131, compressed=107 -> 18% savings
+0000.054 (0) Output: adding: binziptest/subdir1/subdir2/test2.html	(in=138) (out=113) (deflated 18%)
+0000.056 (0) Output: total bytes=269, compressed=220 -> 18% savings
+0000.068 (0) Working binary zip found: /usr/bin/zip
+0000.071 (0) Zip engine: found/will use a binary zip: /usr/bin/zip
+0000.071 (0) Creation of backups of directories: beginning
+0000.075 (0) PHP event: code E_WARNING: count(): Parameter must be an array or an object that implements Countable (line 1345, wp-content/plugins/updraftplus/backup.php)
+0000.076 (0) Beginning creation of dump of plugins (split every: 25 MB)
+0000.246 (0) Total entities for the zip file: 557 directories, 3867 files (0 skipped as non-modified), 51.8 MB
+0000.252 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 100 files added (on-disk size: 0 KB)
+0000.258 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 200 files added (on-disk size: 0 KB)
+0000.263 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 300 files added (on-disk size: 0 KB)
+0000.269 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 400 files added (on-disk size: 0 KB)
+0000.274 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 500 files added (on-disk size: 0 KB)
+0000.275 (0) Adding batch to zip file (UpdraftPlus_BinZip): over 500 files added on this batch (5.9 MB, 3867 files batched, 501 (501) added so far); re-opening (prior size: 0 KB)
+0000.648 (0) backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: size is now: 3.10 MB
+0000.656 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 600 files added (on-disk size: 3191.2 KB)
+0000.662 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 700 files added (on-disk size: 3191.2 KB)
+0000.668 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 800 files added (on-disk size: 3191.2 KB)
+0000.674 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 900 files added (on-disk size: 3191.2 KB)
+0000.680 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 1000 files added (on-disk size: 3191.2 KB)
+0000.681 (0) Adding batch to zip file (UpdraftPlus_BinZip): over 500 files added on this batch (18 MB, 3867 files batched, 501 (1002) added so far); re-opening (prior size: 3191.2 KB)
+0001.731 (0) backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: size is now: 8.20 MB
+0001.739 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 1100 files added (on-disk size: 8407.4 KB)
+0001.745 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 1200 files added (on-disk size: 8407.4 KB)
+0001.751 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 1300 files added (on-disk size: 8407.4 KB)
+0001.757 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 1400 files added (on-disk size: 8407.4 KB)
+0001.763 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 1500 files added (on-disk size: 8407.4 KB)
+0001.763 (0) Adding batch to zip file (UpdraftPlus_BinZip): over 500 files added on this batch (1.4 MB, 3867 files batched, 501 (1503) added so far); re-opening (prior size: 8407.4 KB)
+0002.050 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 1600 files added (on-disk size: 8979.9 KB)
+0002.056 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 1700 files added (on-disk size: 8979.9 KB)
+0002.062 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 1800 files added (on-disk size: 8979.9 KB)
+0002.067 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 1900 files added (on-disk size: 8979.9 KB)
+0002.073 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 2000 files added (on-disk size: 8979.9 KB)
+0002.074 (0) Adding batch to zip file (UpdraftPlus_BinZip): over 500 files added on this batch (3.7 MB, 3867 files batched, 501 (2004) added so far); re-opening (prior size: 8979.9 KB)
+0002.470 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 2100 files added (on-disk size: 10287.3 KB)
+0002.476 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 2200 files added (on-disk size: 10287.3 KB)
+0002.482 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 2300 files added (on-disk size: 10287.3 KB)
+0002.488 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 2400 files added (on-disk size: 10287.3 KB)
+0002.494 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 2500 files added (on-disk size: 10287.3 KB)
+0002.495 (0) Adding batch to zip file (UpdraftPlus_BinZip): over 500 files added on this batch (15.5 MB, 3867 files batched, 501 (2505) added so far); re-opening (prior size: 10287.3 KB)
+0003.483 (0) backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: size is now: 14.80 MB
+0003.492 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 2600 files added (on-disk size: 15199.7 KB)
+0003.499 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 2700 files added (on-disk size: 15199.7 KB)
+0003.508 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 2800 files added (on-disk size: 15199.7 KB)
+0003.514 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 2900 files added (on-disk size: 15199.7 KB)
+0003.520 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 3000 files added (on-disk size: 15199.7 KB)
+0003.521 (0) Adding batch to zip file (UpdraftPlus_BinZip): over 500 files added on this batch (3.9 MB, 3867 files batched, 501 (3006) added so far); re-opening (prior size: 15199.7 KB)
+0003.885 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 3100 files added (on-disk size: 17361.1 KB)
+0003.891 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 3200 files added (on-disk size: 17361.1 KB)
+0003.897 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 3300 files added (on-disk size: 17361.1 KB)
+0003.903 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 3400 files added (on-disk size: 17361.1 KB)
+0003.908 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 3500 files added (on-disk size: 17361.1 KB)
+0003.910 (0) Adding batch to zip file (UpdraftPlus_BinZip): over 500 files added on this batch (1.2 MB, 3867 files batched, 501 (3507) added so far); re-opening (prior size: 17361.1 KB)
+0004.184 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 3600 files added (on-disk size: 18699.7 KB)
+0004.190 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 3700 files added (on-disk size: 18699.7 KB)
+0004.196 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip.tmp: 3800 files added (on-disk size: 18699.7 KB)
+0005.085 (0) Created plugins zip (0) - 20459.6 KB in 5 s (4086.5 KB/s) (sha1: 6e5c632b89508d73dcd534a8cdc9214b6007c1b6, sha256: 278402a19c9339ae1f660f8f540e02e84848a3b07dccbc2013d168c5e9aede30)
+0005.089 (0) PHP event: code E_WARNING: count(): Parameter must be an array or an object that implements Countable (line 1345, wp-content/plugins/updraftplus/backup.php)
+0005.090 (0) Beginning creation of dump of themes (split every: 25 MB)
+0005.097 (0) Total entities for the zip file: 10 directories, 55 files (0 skipped as non-modified), 0.9 MB
+0005.151 (0) backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-themes.zip.tmp: size is now: 0.60 MB
+0005.174 (0) Created themes zip (0) - 613.8 KB in 0.1 s (7481.7 KB/s) (sha1: 8af2cf50223c2d67230a85c0fd9708591983d543, sha256: 06f1d0d67291fe621f603ef9a41a49d41fd46748f53f587163825778fac1f04d)
+0005.177 (0) Exclusion option setting (uploads): 
+0005.178 (0) Looking for candidates to back up in: /Users/mikedelrosso/sites/wordpress/jollyjump.org/wp-content/uploads
+0005.179 (0) finding files: 2015: adding to list (1)
+0005.180 (0) finding files: .DS_Store: adding to list (2)
+0005.181 (0) finding files: facebook-image: adding to list (3)
+0005.182 (0) finding files: bws-custom-code: adding to list (4)
+0005.182 (0) finding files: 2017: adding to list (5)
+0005.183 (0) finding files: 2018: adding to list (6)
+0005.184 (0) finding files: 2016: adding to list (7)
+0005.184 (0) finding files: wp-file-upload-XEnhPU.tmp: adding to list (8)
+0005.185 (0) finding files: brownie.jpg: adding to list (9)
+0005.186 (0) Beginning creation of dump of uploads (split every: 25 MB)
+0005.261 (0) Total entities for the zip file: 36 directories, 1858 files (0 skipped as non-modified), 157.8 MB
+0005.266 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads.zip.tmp: 100 files added (on-disk size: 0 KB)
+0005.272 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads.zip.tmp: 200 files added (on-disk size: 0 KB)
+0005.277 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads.zip.tmp: 300 files added (on-disk size: 0 KB)
+0005.283 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads.zip.tmp: 400 files added (on-disk size: 0 KB)
+0005.288 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads.zip.tmp: 500 files added (on-disk size: 0 KB)
+0005.289 (0) Adding batch to zip file (UpdraftPlus_BinZip): over 500 files added on this batch (24.5 MB, 1858 files batched, 501 (501) added so far); re-opening (prior size: 0 KB)
+0005.863 (0) backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads.zip.tmp: size is now: 24.60 MB
+0005.880 (0) Adding batch to zip file (UpdraftPlus_BinZip): possibly approaching split limit (0.3 MB, 6 (507) files added so far); last ratio: 1; re-opening (prior size: 25233.4 KB)
+0005.970 (0) Zip size is at/near split limit (25 MB / 25 MB) - bumping index (from: 0)
+0006.699 (0) Created uploads zip (0) - 25590 KB in 0.8 s (32683.7 KB/s) (checksums: sha1: 8d1d53a4e24033e5ee11210564e7905ebe3cf110, sha256: 56e3996608958b895184d77216a38dbc6d1cd1f8f9b0761a6163e10778d395d7)
+0006.706 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads2.zip.tmp: 600 files added (on-disk size: 0 KB)
+0006.713 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads2.zip.tmp: 700 files added (on-disk size: 0 KB)
+0006.719 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads2.zip.tmp: 800 files added (on-disk size: 0 KB)
+0006.725 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads2.zip.tmp: 900 files added (on-disk size: 0 KB)
+0006.728 (0) Adding batch to zip file (UpdraftPlus_BinZip): over 25 MB added on this batch (25 MB, 1858 files batched, 446 (953) added so far); re-opening (prior size: 0 KB)
+0007.269 (0) backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads2.zip.tmp: size is now: 25.10 MB
+0007.272 (0) A useful amount of data was added after this amount of zip processing: 1.3 s (normalised: 1.3 s, rate: 19316.2 KB/s)
+0007.273 (0) Performance is good - but we will not increase the amount of data we batch, as we are already at the present limit (time=1.3266088962555, normalised_time=1.325312774902, max_time=-1, data points known=0, max_bytes=26214400)
+0007.274 (0) Zip size is at/near split limit (25.1 MB / 25 MB) - bumping index (from: 1)
+0008.024 (0) Created uploads zip (1) - 25721.3 KB in 0.6 s (44702.5 KB/s) (checksums: sha1: b662388d5b3a633f3b13830a1769f11a1f342016, sha256: f0d25f7076b56295a1ffd43fb578cfd3bbf02326694b25f0fd67e4305fe553c3)
+0008.031 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads3.zip.tmp: 1000 files added (on-disk size: 0 KB)
+0008.041 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads3.zip.tmp: 1100 files added (on-disk size: 0 KB)
+0008.052 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads3.zip.tmp: 1200 files added (on-disk size: 0 KB)
+0008.056 (0) Adding batch to zip file (UpdraftPlus_BinZip): over 25 MB added on this batch (25 MB, 1858 files batched, 268 (1221) added so far); re-opening (prior size: 0 KB)
+0008.671 (0) backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads3.zip.tmp: size is now: 24.60 MB
+0008.674 (0) A useful amount of data was added after this amount of zip processing: 1.7 s (normalised: 1.7 s, rate: 14811.6 KB/s)
+0008.675 (0) Performance is good - but we will not increase the amount of data we batch, as we are already at the present limit (time=1.7291600704193, normalised_time=1.7283738944886, max_time=-1, data points known=0, max_bytes=26214400)
+0008.678 (0) Adding batch to zip file (UpdraftPlus_BinZip): possibly approaching split limit (0.3 MB, 13 (1234) files added so far); last ratio: 0.9852; re-opening (prior size: 25233.3 KB)
+0008.826 (0) Zip size is at/near split limit (25 MB / 25 MB) - bumping index (from: 2)
+0009.660 (0) Created uploads zip (2) - 25587.7 KB in 0.8 s (31893.4 KB/s) (checksums: sha1: 76a06e383ea1bf21d049e9e5e2705bf6fa33981b, sha256: 1a279ecc648d4193c1e429af5bbddd21335d0842b20af51032bd37d66e8ca678)
+0009.667 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads4.zip.tmp: 1300 files added (on-disk size: 0 KB)
+0009.676 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads4.zip.tmp: 1400 files added (on-disk size: 0 KB)
+0009.679 (0) Adding batch to zip file (UpdraftPlus_BinZip): over 25 MB added on this batch (25.6 MB, 1858 files batched, 187 (1421) added so far); re-opening (prior size: 0 KB)
+0010.006 (0) backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads4.zip.tmp: size is now: 25.60 MB
+0010.009 (0) A useful amount of data was added after this amount of zip processing: 2.1 s (normalised: 2 s, rate: 12694.1 KB/s)
+0010.010 (0) Performance is good - but we will not increase the amount of data we batch, as we are already at the present limit (time=2.0633978843689, normalised_time=2.0166912762533, max_time=-1, data points known=0, max_bytes=26214400)
+0010.012 (0) Zip size is at/near split limit (25.6 MB / 25 MB) - bumping index (from: 3)
+0010.722 (0) Created uploads zip (3) - 26232.1 KB in 0.4 s (74659.8 KB/s) (checksums: sha1: d345ee8d00d15c512fc47dc4e572d2a61a7c6125, sha256: 3c7dbae5122b7d7472cf3a2bfd588a79b256100bdcb71cdd6edd68aa58abf061)
+0010.728 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads5.zip.tmp: 1500 files added (on-disk size: 0 KB)
+0010.732 (0) Adding batch to zip file (UpdraftPlus_BinZip): over 25 MB added on this batch (25.3 MB, 1858 files batched, 138 (1559) added so far); re-opening (prior size: 0 KB)
+0011.559 (0) backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads5.zip.tmp: size is now: 23.50 MB
+0011.572 (0) A useful amount of data was added after this amount of zip processing: 1.6 s (normalised: 1.6 s, rate: 15902.7 KB/s)
+0011.573 (0) Performance is good - but we will not increase the amount of data we batch, as we are already at the present limit (time=1.6266429424286, normalised_time=1.609785526118, max_time=-1, data points known=0, max_bytes=26214400)
+0011.576 (0) Adding batch to zip file (UpdraftPlus_BinZip): possibly approaching split limit (1.8 MB, 12 (1571) files added so far); last ratio: 0.9306; re-opening (prior size: 24073.8 KB)
+0011.707 (0) Zip size is at/near split limit (25.4 MB / 25 MB) - bumping index (from: 4)
+0012.399 (0) Created uploads zip (4) - 25963.3 KB in 1 s (26363.2 KB/s) (checksums: sha1: 7c4930cc5a52e67d0bf50e241d6a4e11622cfe8b, sha256: 4c619f2183524f093473379c82fd2912f7a11c66811b82231fb3e39a15614d2c)
+0012.403 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads6.zip.tmp: 1600 files added (on-disk size: 0 KB)
+0012.408 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads6.zip.tmp: 1700 files added (on-disk size: 0 KB)
+0012.413 (0) Adding batch to zip file (UpdraftPlus_BinZip): over 25 MB added on this batch (25.3 MB, 1858 files batched, 220 (1791) added so far); re-opening (prior size: 0 KB)
+0013.918 (0) backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads6.zip.tmp: size is now: 19.70 MB
+0013.923 (0) A useful amount of data was added after this amount of zip processing: 3 s (normalised: 2.9 s, rate: 8688.6 KB/s)
+0013.925 (0) Performance is good - but we will not increase the amount of data we batch, as we are already at the present limit (time=2.9773869514465, normalised_time=2.9463836323724, max_time=-1, data points known=0, max_bytes=26214400)
+0013.929 (0) Zip: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads6.zip.tmp: 1800 files added (on-disk size: 20146.5 KB)
+0014.105 (0) backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads6.zip.tmp: size is now: 24.30 MB
+0014.800 (0) Created uploads zip (5) - 24842.5 KB in 2.4 s (10348.7 KB/s) (sha1: 3f2fb7a9097363a797d7b5b4dd9a4d0b5c5d00f3, sha256: 44912855a07ddb85ba0481a99ac25186dd780c18cd33d353c3d235425bf3a481)
+0014.803 (0) Beginning backup of other directories found in the content directory (index: 0)
+0014.804 (0) Exclusion option setting (others): 
+0014.805 (0) Looking for candidates to back up in: /Users/mikedelrosso/sites/wordpress/jollyjump.org/wp-content
+0014.806 (0) finding files: upgrade: adding to list (1)
+0014.807 (0) finding files: .DS_Store: adding to list (2)
+0014.807 (0) finding files: index.php: adding to list (3)
+0014.808 (0) finding files: plugins: skipping: this is the plugins directory
+0014.809 (0) finding files: uploads: skipping: this is the uploads directory
+0014.809 (0) finding files: updraft: skipping: this is the updraft directory
+0014.810 (0) finding files: themes: skipping: this is the themes directory
+0014.814 (0) Total entities for the zip file: 1 directories, 2 files (0 skipped as non-modified), 0 MB
+0014.824 (0) backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-others.zip.tmp: size is now: 0.00 MB
+0014.831 (0) Created others zip (0) - 2.5 KB in 0 s (136.8 KB/s) (sha1: b3c2a8754238233c89cc543de293dcbcf4ff21c4, sha256: 730feb1b0d66f51b04ba4c05b6ab1eeb43822974aae53ff70446bfd2ff3ee732)
+0014.837 (0) Saving backup status to database (elements: 13)
+0014.840 (0) No database backup (wp) - not part of this run
+0014.843 (0) backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip: plugins: This file has not yet been successfully uploaded: will queue
+0014.843 (0) backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-themes.zip: themes: This file has not yet been successfully uploaded: will queue
+0014.844 (0) backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads.zip: uploads: This file has not yet been successfully uploaded: will queue
+0014.845 (0) backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads2.zip: uploads: This file has not yet been successfully uploaded: will queue
+0014.845 (0) backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads3.zip: uploads: This file has not yet been successfully uploaded: will queue
+0014.846 (0) backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads4.zip: uploads: This file has not yet been successfully uploaded: will queue
+0014.847 (0) backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads5.zip: uploads: This file has not yet been successfully uploaded: will queue
+0014.848 (0) backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads6.zip: uploads: This file has not yet been successfully uploaded: will queue
+0014.848 (0) backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-others.zip: others: This file has not yet been successfully uploaded: will queue
+0014.849 (0) Saving backup history. Total backup size: 170.9 MB
+0014.853 (0) Requesting upload of the files that have not yet been successfully uploaded (9)
+0014.856 (0) Cloud backup selection (1/1): dropbox (last)
+0014.857 (0) Beginning dispatch of backup to remote (dropbox)
+0014.858 (0) Dropbox: begin cloud upload (using API version 2 with OAuth v2 token)
+0014.869 (0) Dropbox: access gained; setting chunk size to: 1024 KB
+0015.243 (0) Dropbox error: exception (Dropbox_BadRequestException) occurred whilst getting account info: Error in call to API function "users/get_space_usage": request body: could not decode input as JSON
+0015.244 (0) Dropbox: Attempt to upload: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip to: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip
+0016.784 (0) Dropbox chunked upload: 5 % uploaded (AAAAAAAAOUumg1XqZ-IiFQ, 1048576, 5632 KB)
+0023.958 (0) Dropbox chunked upload: 32.5 % uploaded (AAAAAAAAOUumg1XqZ-IiFQ, 6815744, 6656 KB)
+0030.931 (0) Dropbox chunked upload: 65.1 % uploaded (AAAAAAAAOUumg1XqZ-IiFQ, 13631488, 8192 KB)
+0040.398 (0) Dropbox chunked upload: 100 % uploaded (AAAAAAAAOUumg1XqZ-IiFQ, 20950587, 8192 KB)
+0042.289 (0) Recording as successfully uploaded: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip (4e188c90a793b54339b4b6f287931bc9)
+0042.300 (0) Deleting local file: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip: skipped: user has unchecked updraft_delete_local option
+0042.303 (0) Dropbox: File upload success (backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-plugins.zip): 20459 KB in 27s (756 KB/s)
+0042.627 (0) Dropbox error: exception (Dropbox_BadRequestException) occurred whilst getting account info: Error in call to API function "users/get_space_usage": request body: could not decode input as JSON
+0042.628 (0) Dropbox: Attempt to upload: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-themes.zip to: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-themes.zip
+0045.364 (0) Dropbox chunked upload: 100 % uploaded (AAAAAAAAOUxTRlERkNt0FQ, 628525, 8192 KB)
+0046.411 (0) Recording as successfully uploaded: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-themes.zip (ee06476869bfd1040ad25d5aa3312409)
+0046.418 (0) Deleting local file: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-themes.zip: skipped: user has unchecked updraft_delete_local option
+0046.419 (0) Dropbox: File upload success (backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-themes.zip): 613 KB in 3s (161 KB/s)
+0046.724 (0) Dropbox error: exception (Dropbox_BadRequestException) occurred whilst getting account info: Error in call to API function "users/get_space_usage": request body: could not decode input as JSON
+0046.725 (0) Dropbox: Attempt to upload: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads.zip to: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads.zip
+0054.184 (0) Dropbox chunked upload: 32 % uploaded (AAAAAAAAOU3oITIbus3b0Q, 8388608, 9728 KB)
+0063.358 (0) Dropbox chunked upload: 70 % uploaded (AAAAAAAAOU3oITIbus3b0Q, 18350080, 9216 KB)
+0071.573 (0) Dropbox chunked upload: 100 % uploaded (AAAAAAAAOU3oITIbus3b0Q, 26204185, 9216 KB)
+0073.312 (0) Recording as successfully uploaded: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads.zip (d9b171611fbe11702a29a1529af06c43)
+0073.317 (0) Deleting local file: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads.zip: skipped: user has unchecked updraft_delete_local option
+0073.317 (0) Dropbox: File upload success (backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads.zip): 25590 KB in 26s (962 KB/s)
+0073.598 (0) Dropbox error: exception (Dropbox_BadRequestException) occurred whilst getting account info: Error in call to API function "users/get_space_usage": request body: could not decode input as JSON
+0073.599 (0) Dropbox: Attempt to upload: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads2.zip to: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads2.zip
+0081.927 (0) Dropbox chunked upload: 35.8 % uploaded (AAAAAAAAOU6uC0paOvu6Dg, 9437184, 9728 KB)
+0091.038 (0) Dropbox chunked upload: 73.7 % uploaded (AAAAAAAAOU6uC0paOvu6Dg, 19398656, 9216 KB)
+0098.809 (0) Dropbox chunked upload: 100 % uploaded (AAAAAAAAOU6uC0paOvu6Dg, 26338631, 9216 KB)
+0099.958 (0) Recording as successfully uploaded: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads2.zip (38187a50875815aa657ad83b49ee639e)
+0099.962 (0) Deleting local file: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads2.zip: skipped: user has unchecked updraft_delete_local option
+0099.963 (0) Dropbox: File upload success (backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads2.zip): 25721 KB in 26s (975 KB/s)
+0100.239 (0) Dropbox error: exception (Dropbox_BadRequestException) occurred whilst getting account info: Error in call to API function "users/get_space_usage": request body: could not decode input as JSON
+0100.241 (0) Dropbox: Attempt to upload: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads3.zip to: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads3.zip
+0109.884 (0) Dropbox chunked upload: 36 % uploaded (AAAAAAAAOU9H1SpYwaOVsg, 9437184, 8192 KB)
+0117.741 (0) Dropbox chunked upload: 68 % uploaded (AAAAAAAAOU9H1SpYwaOVsg, 17825792, 9216 KB)
+0125.979 (0) Dropbox chunked upload: 100 % uploaded (AAAAAAAAOU9H1SpYwaOVsg, 26201820, 9216 KB)
+0127.185 (0) Recording as successfully uploaded: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads3.zip (ea33f71b5e9085659ad11436c0910297)
+0127.190 (0) Deleting local file: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads3.zip: skipped: user has unchecked updraft_delete_local option
+0127.190 (0) Dropbox: File upload success (backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads3.zip): 25587 KB in 26s (949 KB/s)
+0127.462 (0) Dropbox error: exception (Dropbox_BadRequestException) occurred whilst getting account info: Error in call to API function "users/get_space_usage": request body: could not decode input as JSON
+0127.464 (0) Dropbox: Attempt to upload: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads4.zip to: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads4.zip
+0135.889 (0) Dropbox chunked upload: 35.1 % uploaded (AAAAAAAAOVBKL6osS8-_gA, 9437184, 9728 KB)
+0144.894 (0) Dropbox chunked upload: 72.2 % uploaded (AAAAAAAAOVBKL6osS8-_gA, 19398656, 9216 KB)
+0152.345 (0) Dropbox chunked upload: 100 % uploaded (AAAAAAAAOVBKL6osS8-_gA, 26861682, 9216 KB)
+0154.268 (0) Recording as successfully uploaded: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads4.zip (340be9eb5021591c1f877521ac7b27e8)
+0154.272 (0) Deleting local file: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads4.zip: skipped: user has unchecked updraft_delete_local option
+0154.273 (0) Dropbox: File upload success (backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads4.zip): 26232 KB in 26s (978 KB/s)
+0154.607 (0) Dropbox error: exception (Dropbox_BadRequestException) occurred whilst getting account info: Error in call to API function "users/get_space_usage": request body: could not decode input as JSON
+0154.608 (0) Dropbox: Attempt to upload: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads5.zip to: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads5.zip
+0164.509 (0) Dropbox chunked upload: 35.5 % uploaded (AAAAAAAAOVGX9T08AqGReQ, 9437184, 8192 KB)
+0172.754 (0) Dropbox chunked upload: 67 % uploaded (AAAAAAAAOVGX9T08AqGReQ, 17825792, 8704 KB)
+0181.346 (0) Dropbox chunked upload: 100 % uploaded (AAAAAAAAOVGX9T08AqGReQ, 26586409, 8704 KB)
+0182.687 (0) Recording as successfully uploaded: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads5.zip (01cc87a36285c646e3de49038935d7e6)
+0182.691 (0) Deleting local file: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads5.zip: skipped: user has unchecked updraft_delete_local option
+0182.692 (0) Dropbox: File upload success (backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads5.zip): 25963 KB in 28s (924 KB/s)
+0182.961 (0) Dropbox error: exception (Dropbox_BadRequestException) occurred whilst getting account info: Error in call to API function "users/get_space_usage": request body: could not decode input as JSON
+0182.962 (0) Dropbox: Attempt to upload: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads6.zip to: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads6.zip
+0190.931 (0) Dropbox chunked upload: 35 % uploaded (AAAAAAAAOVLZwm6sOdGaAQ, 8912896, 9728 KB)
+0199.894 (0) Dropbox chunked upload: 74.2 % uploaded (AAAAAAAAOVLZwm6sOdGaAQ, 18874368, 9728 KB)
+0206.067 (0) Dropbox chunked upload: 100 % uploaded (AAAAAAAAOVLZwm6sOdGaAQ, 25438744, 9728 KB)
+0207.037 (0) Recording as successfully uploaded: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads6.zip (3e86bd2f0e37b55884a8612ea2a5380e)
+0207.041 (0) Deleting local file: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads6.zip: skipped: user has unchecked updraft_delete_local option
+0207.042 (0) Dropbox: File upload success (backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-uploads6.zip): 24842 KB in 24s (1031 KB/s)
+0207.311 (0) Dropbox error: exception (Dropbox_BadRequestException) occurred whilst getting account info: Error in call to API function "users/get_space_usage": request body: could not decode input as JSON
+0207.312 (0) Dropbox: Attempt to upload: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-others.zip to: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-others.zip
+0208.066 (0) Dropbox chunked upload: 100 % uploaded (AAAAAAAAOVPPGmAbAD1m8A, 2580, 9728 KB)
+0209.268 (0) Recording as successfully uploaded: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-others.zip (3d578d8ef5133dd77f098252c84ac1b7)
+0209.274 (0) Deleting local file: backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-others.zip: skipped: user has unchecked updraft_delete_local option
+0209.275 (0) Dropbox: File upload success (backup_2018-08-09-0014_The_Jump_Blog_bc94b5661081-others.zip): 2 KB in 1s (1 KB/s)
+0209.282 (0) Retain: beginning examination of existing backup sets; user setting: retain_files=1, retain_db=1
+0209.284 (0) Number of backup sets in history: 2; groups (db): 1
+0209.285 (0) Examining (for databases) backup set with group_id=0, nonce=bc94b5661081, datestamp=1533773693 (Aug 09 2018 00:14:53)
+0209.286 (0) Examining (for databases) backup set with group_id=0, nonce=936a85e3ecf3, datestamp=1533772724 (Aug 08 2018 23:58:44)
+0209.286 (0) This backup set remains non-empty (f=1/d=1); will retain in history
+0209.287 (0) Number of backup sets in history: 2; groups (files): 1
+0209.288 (0) Examining (for files) backup set with nonce=bc94b5661081, datestamp=1533773693 (Aug 09 2018 00:14:53)
+0209.288 (0) This backup set is the backup set just made, so will not be deleted.
+0209.289 (0) This backup set is the backup set just made, so will not be deleted.
+0209.290 (0) This backup set is the backup set just made, so will not be deleted.
+0209.290 (0) This backup set is the backup set just made, so will not be deleted.
+0209.290 (0) This backup set remains non-empty (f=1/d=0); will retain in history
+0209.291 (0) Examining (for files) backup set with nonce=936a85e3ecf3, datestamp=1533772724 (Aug 08 2018 23:58:44)
+0209.291 (0) plugins: over retain limit (1); will delete this file entity
+0209.291 (0) themes: over retain limit (1); will delete this file entity
+0209.291 (0) uploads: over retain limit (1); will delete this file entity
+0209.291 (0) others: over retain limit (1); will delete this file entity
+0209.291 (0) Delete file: backup_2018-08-08-2358_The_Jump_Blog_936a85e3ecf3-plugins.zip, service=dropbox
+0209.292 (0) Deleting local copy (backup_2018-08-08-2358_The_Jump_Blog_936a85e3ecf3-plugins.zip)
+0209.295 (0) Delete file: backup_2018-08-08-2358_The_Jump_Blog_936a85e3ecf3-themes.zip, service=dropbox
+0209.296 (0) Deleting local copy (backup_2018-08-08-2358_The_Jump_Blog_936a85e3ecf3-themes.zip)
+0209.296 (0) Delete file: backup_2018-08-08-2358_The_Jump_Blog_936a85e3ecf3-uploads.zip, service=dropbox
+0209.297 (0) Deleting local copy (backup_2018-08-08-2358_The_Jump_Blog_936a85e3ecf3-uploads.zip)
+0209.298 (0) Delete file: backup_2018-08-08-2358_The_Jump_Blog_936a85e3ecf3-uploads2.zip, service=dropbox
+0209.298 (0) Deleting local copy (backup_2018-08-08-2358_The_Jump_Blog_936a85e3ecf3-uploads2.zip)
+0209.299 (0) Delete file: backup_2018-08-08-2358_The_Jump_Blog_936a85e3ecf3-uploads3.zip, service=dropbox
+0209.300 (0) Deleting local copy (backup_2018-08-08-2358_The_Jump_Blog_936a85e3ecf3-uploads3.zip)
+0209.301 (0) Delete file: backup_2018-08-08-2358_The_Jump_Blog_936a85e3ecf3-uploads4.zip, service=dropbox
+0209.301 (0) Deleting local copy (backup_2018-08-08-2358_The_Jump_Blog_936a85e3ecf3-uploads4.zip)
+0209.302 (0) Delete file: backup_2018-08-08-2358_The_Jump_Blog_936a85e3ecf3-uploads5.zip, service=dropbox
+0209.303 (0) Deleting local copy (backup_2018-08-08-2358_The_Jump_Blog_936a85e3ecf3-uploads5.zip)
+0209.304 (0) Delete file: backup_2018-08-08-2358_The_Jump_Blog_936a85e3ecf3-uploads6.zip, service=dropbox
+0209.304 (0) Deleting local copy (backup_2018-08-08-2358_The_Jump_Blog_936a85e3ecf3-uploads6.zip)
+0209.305 (0) Delete file: backup_2018-08-08-2358_The_Jump_Blog_936a85e3ecf3-others.zip, service=dropbox
+0209.306 (0) Deleting local copy (backup_2018-08-08-2358_The_Jump_Blog_936a85e3ecf3-others.zip)
+0209.307 (0) Dropbox: request deletion: backup_2018-08-08-2358_The_Jump_Blog_936a85e3ecf3-plugins.zip
+0210.301 (0) Dropbox error: path_lookup (line: 229, file: /Users/mikedelrosso/sites/wordpress/jollyjump.org/wp-content/plugins/updraftplus/includes/Dropbox2/OAuth/Consumer/Curl.php)
+0210.312 (0) This backup set remains non-empty (f=0/d=1); will retain in history
+0210.313 (0) Retain: saving new backup history (sets now: 2) and finishing retain operation
+0210.319 (0) Resume backup (bc94b5661081, 0): finish run
+0210.321 (0) Decremented the semaphore (f) by 1
+0210.323 (0) Semaphore (f) unlocked
+0210.324 (0) There were no errors in the uploads, so the 'resume' event (1) is being unscheduled
+0210.328 (0) No email will/can be sent - the user has not configured an email address.
+0210.329 (0) The backup apparently succeeded and is now complete

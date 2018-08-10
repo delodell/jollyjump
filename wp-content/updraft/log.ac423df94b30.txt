@@ -1,0 +1,18 @@
+0000.003 () Opened log file at time: Wed, 08 Aug 2018 21:34:28 +0000 on http://localhost:8888/jollyjump.org
+0000.003 () UpdraftPlus WordPress backup plugin (https://updraftplus.com): 1.13.12 WP: 4.9.8 PHP: 7.2.7 (apache2handler, Darwin Michaels-MacBook-Pro.local 17.7.0 Darwin Kernel Version 17.7.0: Thu Jun 21 22:53:14 PDT 2018; root:xnu-4570.71.2~1/RELEASE_X86_64 x86_64) MySQL: 5.7.21 WPLANG: en_US Server: Apache/2.2.34 (Unix) mod_wsgi/3.5 Python/2.7.13 PHP/7.2.7 mod_ssl/2.2.34 OpenSSL/1.0.2o DAV/2 mod_fastcgi/mod_fastcgi-SNAP-0910052141 mod_perl/2.0.9 Perl/v5.24.0 safe_mode: 0 max_execution_time: 900 memory_limit: 256M (used: 41M | 4.3M) multisite: N openssl: OpenSSL 1.0.2o  27 Mar 2018 mcrypt: N LANG:  ZipArchive::addFile: Y
+0000.003 () Free space on disk containing Updraft's temporary directory: 141274.2 MB
+0000.004 () Restore job started. Entities to restore: uploads. Restore options: {"updraft_restorer_replacesiteurl":false,"updraft_encryptionphrase":"","updraft_restorer_wpcore_includewpconfig":false}
+0000.034 () Entity: uploads
+0000.034 () restore_backup(backup_file=backup_2017-10-20-0222_The_Jump_Blog_0f682073fabb-uploads.zip, type=uploads, info=a:2:{s:4:"path";s:68:"/Users/mikedelrosso/sites/wordpress/jollyjump.org/wp-content/uploads";s:11:"description";s:7:"Uploads";}, last_one=)
+0000.034 () Unpacking backup... (backup_2017-10-20-0222_The_Jump_Blog_0f682073fabb-uploads.zip, 133.3 Mb)
+0002.895 () Moving old data: filesystem method / updraft_dir is potentially possible
+0002.895 () Moving old data: can potentially use wp_filesystem method / -old
+0002.895 () Moving old data out of the way...
+0004.138 () Moving unpacked backup into place...
+0005.112 () Cleaning up rubbish...
+0005.113 () restore_backup(backup_file=backup_2017-10-20-0222_The_Jump_Blog_0f682073fabb-uploads2.zip, type=uploads, info=a:2:{s:4:"path";s:68:"/Users/mikedelrosso/sites/wordpress/jollyjump.org/wp-content/uploads";s:11:"description";s:7:"Uploads";}, last_one=1)
+0005.113 () Unpacking backup... (backup_2017-10-20-0222_The_Jump_Blog_0f682073fabb-uploads2.zip, 0 Mb)
+0005.125 () Moving unpacked backup into place...
+0005.154 () Cleaning up rubbish...
+0005.161 () Restore successful!
+0005.161 () Restore successful

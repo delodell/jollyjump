@@ -1,0 +1,133 @@
+v2.0.3 (Apr 29th, 2016)
+-----------------------------
+- Added full-width page template
+
+Files Updated:
+- style.css
+- functions.php
+- page-fullwidth.php
+
+
+v2.0.2 (Apr 20th, 2016)
+-----------------------------
+- Fixed a bug in Customizer
+
+Files Updated:
+- style.css
+- inc/customizer.php
+
+
+v2.0.1 (Apr 19th, 2016)
+-----------------------------
+- Fixed back to top button related jQuery issue
+- Improved 'Appearance >> Install Plugins' page
+- Reduced width of mobile menu
+- Fixed text domain of ‘Read More’ text
+- Updated point.pot file
+
+Files Updated:
+- style.css
+- functions.php
+- css/addons.css
+- js/customscripts.js
+- inc/plugin-activation.php
+- languages/point.pot
+
+
+v2.0 (Feb 6th, 2016)
+-----------------------------
+​PLEASE NOTE: UPDATING WILL REMOVE THEME OPTIONS PANEL AND ANY CUSTOMIZATION.
+
+- Removed Options Panel and Moved Settings to Customizer
+- Rewritten theme code from scratch for better performance
+- Added Recommended Plugin Page
+- Added PointPro Notification
+- Added Improved Social Icons Widget
+- Replaced all image icons with Font Icons for speed optimization
+- Added Improved Mobile Menu
+- Removed option to disable Responsiveness
+- Replaced numbered pagination code with WordPress' default pagination
+- Optimized Code
+
+NOTE: If you have customized your theme by editing theme files, will lose all those customizations after updating. Make sure you take a backup of current version before applying this update.
+
+
+v1.2.7 (Aug 14th, 2015)
+-----------------------------
+- Fixed JS issue
+
+
+v1.2.6 (Aug 8th, 2015)
+-----------------------------
+- Fixed Facebook Like Box Widget
+- Fixed Sidebar bug
+
+
+v1.2.5 (Jul 27th, 2015)
+-----------------------------
+- Added Missing words in translation file
+- Added schema markup for comments
+- Added support for add_theme_support( 'title-tag' )
+- Added code to prevent font-size change when changing orientation in iOS
+- Added new Facebook Like Box Widget
+- Improved Plugin activation code
+- Fixed - On theme options page, color picker CSS was not enqueued by the color
+field
+- Fixed - Made comments template child-theme compatible
+- Changed Knowledge base link to Support Forums
+
+
+v1.2.4 (Jun 20th, 2015)
+-----------------------------
+- Fixed minor CSS issue
+
+
+v1.2.3 (Jan 28th, 2015)
+-----------------------------
+- Added support for WP Mega Menu Plugin
+- Optimized Images for speed improvements
+- Added WP Subscribe plugin in recommended plugin list
+- Optimized CSS
+- Added missing text in translation file
+
+
+v1.2.2 (Oct 15th, 2014)
+-----------------------------
+- Removed default Logos and Favicon
+
+
+v1.2.1 (Oct 6th, 2014)
+-----------------------------
+- Fixed walker function notification
+
+
+v1.2 (Oct 2nd, 2014)
+-----------------------------
+- Updated Options Panel
+- Fixed 404 error image calls in style.css
+- Optimized images present in theme
+
+
+v1.1 (June 28th, 2014)
+-----------------------------
+- Added Right to Left(RTL) Language Support
+- Added New Improved Options Panel
+- Theme is now compatible with Child themes
+- Removed Google Plus Badge Widget
+- Removed Tab Widget
+- Added Option to show full posts on homepage
+- Added Support for WP Review Plugin to show average review value on homepage
+- Added WP Tab Widget Plugin
+- Added WP Shortcode Plugin
+- Added Google Plus Badge Widget Plugin
+- Optimized Theme Images(56% size reduction!)
+- Removed modernizr Script
+- Replaced Superfish script with lightweight code
+- Removed Unused jQuery Code
+- Optimized Code
+- Fixed other small bugs
+
+
+v1.0
+-----------------------------
+- Theme Released
