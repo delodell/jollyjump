@@ -4,24 +4,34 @@ Plugin Name: WP Shortcode by MyThemeShop
 Plugin URI: http://mythemeshop.com/
 Description: With the vast array of shortcodes, you can quickly and easily build content for your posts and pages and turbocharge your blogging experience.
 Author: MyThemeShop
-Version: 1.4.6
+Version: 1.4.14
 Author URI: http://mythemeshop.com/
 */
 
 function mts_wpshortcodes_scripts() {
-            
     wp_register_style('tipsy', plugins_url('css/tipsy.css', __FILE__));
-    wp_enqueue_style( 'tipsy' );
-
     wp_register_style('mts_wpshortcodes', plugins_url('css/wp-shortcode.css', __FILE__));
-    wp_enqueue_style('mts_wpshortcodes');
-    
     wp_register_script('tipsy', plugins_url('js/jquery.tipsy.js', __FILE__), array('jquery'));
-    wp_enqueue_script( 'tipsy' );
     wp_register_script('mts_wpshortcodes', plugins_url('js/wp-shortcode.js', __FILE__), array('jquery'));
-    wp_enqueue_script('mts_wpshortcodes');
 }
 add_action('wp_enqueue_scripts', 'mts_wpshortcodes_scripts', 99);
+
+add_action('admin_enqueue_scripts', function(){
+  wp_enqueue_script( 'mts_wpshortcodes_admin', plugins_url('js/admin.js', __FILE__), array('jquery') );
+});
+
+function mts_wps_enqueue_scripts($shortcode = '') {
+ 
+  if($shortcode == 'tooltip') {
+    wp_enqueue_style( 'tipsy' );
+    wp_enqueue_script( 'tipsy' );
+  }
+  wp_enqueue_style('mts_wpshortcodes');
+  if($shortcode == 'tooltip' || $shortcode == 'tabs' || $shortcode == 'toggle') {
+    wp_enqueue_script('mts_wpshortcodes');
+  }
+}
+add_action('wps_enqueue_style', 'mts_wps_enqueue_scripts', 10, 1);
 
 function mts_wpshortcodes_load_textdomain() {
   load_plugin_textdomain( 'wp-shortcode', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' ); 
@@ -100,6 +110,7 @@ function mts_button_brown( $atts, $content = null ) {
     if ($position == 'center') {
         $out = '<div class="button-center">'.$out.'</div>';
     }
+    do_action('wps_enqueue_style');
     return $out;
 }
 
@@ -114,6 +125,8 @@ function mts_button_blue( $atts, $content = null ) {
     if ($position == 'center') {
         $out = '<div class="button-center">'.$out.'</div>';
     }
+
+    do_action('wps_enqueue_style');
     return $out;
 }
 
@@ -128,6 +141,8 @@ function mts_button_green( $atts, $content = null ) {
     if ($position == 'center') {
         $out = '<div class="button-center">'.$out.'</div>';
     }
+
+    do_action('wps_enqueue_style');
     return $out;
 }
 
@@ -142,6 +157,8 @@ function mts_button_red( $atts, $content = null ) {
     if ($position == 'center') {
         $out = '<div class="button-center">'.$out.'</div>';
     }
+
+    do_action('wps_enqueue_style');
     return $out;
 }
 
@@ -156,6 +173,8 @@ function mts_button_white( $atts, $content = null ) {
     if ($position == 'center') {
         $out = '<div class="button-center">'.$out.'</div>';
     }
+
+    do_action('wps_enqueue_style');
     return $out;
 }
 
@@ -170,6 +189,8 @@ function mts_button_yellow( $atts, $content = null ) {
     if ($position == 'center') {
         $out = '<div class="button-center">'.$out.'</div>';
     }
+
+    do_action('wps_enqueue_style');
     return $out;
 }
 
@@ -182,6 +203,8 @@ function mts_alert_note( $atts, $content = null ) {
 		'style'    	 => 'note'
     ), $atts));
 	$out = "<div class=\"message_box note\"><p>".do_shortcode($content)."</p></div>";
+
+    do_action('wps_enqueue_style');
     return $out;
 }
 
@@ -189,7 +212,9 @@ function mts_alert_announce( $atts, $content = null ) {
     extract(shortcode_atts(array(
 		'style'    	 => 'announce'
     ), $atts));
-	$out = "<div class=\"message_box announce\"><p>".do_shortcode($content)."</p></div>";
+    $out = "<div class=\"message_box announce\"><p>".do_shortcode($content)."</p></div>";
+
+    do_action('wps_enqueue_style');
     return $out;
 }
 
@@ -198,6 +223,8 @@ function mts_alert_success( $atts, $content = null ) {
 		'style'    	 => 'success'
     ), $atts));
 	$out = "<div class=\"message_box success\"><p>".do_shortcode($content)."</p></div>";
+
+    do_action('wps_enqueue_style');
     return $out;
 }
 
@@ -205,7 +232,9 @@ function mts_alert_warning( $atts, $content = null ) {
     extract(shortcode_atts(array(
 		'style'    	 => 'warning'
     ), $atts));
-	$out = "<div class=\"message_box warning\"><p>".do_shortcode($content)."</p></div>";
+    $out = "<div class=\"message_box warning\"><p>".do_shortcode($content)."</p></div>";
+
+    do_action('wps_enqueue_style');
     return $out;
 }
 
@@ -214,91 +243,113 @@ function mts_alert_warning( $atts, $content = null ) {
 /*-----------------------------------------------------------------------------------*/
 
 function mts_one_third( $atts, $content = null ) {
+    do_action('wps_enqueue_style');
    return '<div class="one_third">' . do_shortcode($content) . '</div>';
 }
 
 function mts_one_third_last( $atts, $content = null ) {
+  do_action('wps_enqueue_style');
    return '<div class="one_third column-last">' . do_shortcode($content) . '</div><div class="clear"></div>';
 }
 
 function mts_two_third( $atts, $content = null ) {
+  do_action('wps_enqueue_style');
    return '<div class="two_third">' . do_shortcode($content) . '</div>';
 }
 
 function mts_two_third_last( $atts, $content = null ) {
+  do_action('wps_enqueue_style');
    return '<div class="two_third column-last">' . do_shortcode($content) . '</div><div class="clear"></div>';
 }
 
 function mts_one_half( $atts, $content = null ) {
+  do_action('wps_enqueue_style');
    return '<div class="one_half">' . do_shortcode($content) . '</div>';
 }
 
 function mts_one_half_last( $atts, $content = null ) {
+  do_action('wps_enqueue_style');
    return '<div class="one_half column-last">' . do_shortcode($content) . '</div><div class="clear"></div>';
 }
 
 function mts_one_fourth( $atts, $content = null ) {
+  do_action('wps_enqueue_style');
    return '<div class="one_fourth">' . do_shortcode($content) . '</div>';
 }
 
 function mts_one_fourth_last( $atts, $content = null ) {
+  do_action('wps_enqueue_style');
    return '<div class="one_fourth column-last">' . do_shortcode($content) . '</div><div class="clear"></div>';
 }
 
 function mts_three_fourth( $atts, $content = null ) {
+  do_action('wps_enqueue_style');
    return '<div class="three_fourth">' . do_shortcode($content) . '</div>';
 }
 
 function mts_three_fourth_last( $atts, $content = null ) {
+  do_action('wps_enqueue_style');
    return '<div class="three_fourth column-last">' . do_shortcode($content) . '</div><div class="clear"></div>';
 }
 
 function mts_one_fifth( $atts, $content = null ) {
-   return '<div class="one_fifth">' . do_shortcode($content) . '</div>';
+  do_action('wps_enqueue_style');
+  return '<div class="one_fifth">' . do_shortcode($content) . '</div>';
 }
 
 function mts_one_fifth_last( $atts, $content = null ) {
-   return '<div class="one_fifth column-last">' . do_shortcode($content) . '</div><div class="clear"></div>';
+  do_action('wps_enqueue_style');
+  return '<div class="one_fifth column-last">' . do_shortcode($content) . '</div><div class="clear"></div>';
 }
 
 function mts_two_fifth( $atts, $content = null ) {
-   return '<div class="two_fifth">' . do_shortcode($content) . '</div>';
+  do_action('wps_enqueue_style');
+  return '<div class="two_fifth">' . do_shortcode($content) . '</div>';
 }
 
 function mts_two_fifth_last( $atts, $content = null ) {
-   return '<div class="two_fifth column-last">' . do_shortcode($content) . '</div><div class="clear"></div>';
+  do_action('wps_enqueue_style');
+  return '<div class="two_fifth column-last">' . do_shortcode($content) . '</div><div class="clear"></div>';
 }
 
 function mts_three_fifth( $atts, $content = null ) {
-   return '<div class="three_fifth">' . do_shortcode($content) . '</div>';
+  do_action('wps_enqueue_style');
+  return '<div class="three_fifth">' . do_shortcode($content) . '</div>';
 }
 
 function mts_three_fifth_last( $atts, $content = null ) {
-   return '<div class="three_fifth column-last">' . do_shortcode($content) . '</div><div class="clear"></div>';
+  do_action('wps_enqueue_style');
+  return '<div class="three_fifth column-last">' . do_shortcode($content) . '</div><div class="clear"></div>';
 }
 
 function mts_four_fifth( $atts, $content = null ) {
-   return '<div class="four_fifth">' . do_shortcode($content) . '</div>';
+  do_action('wps_enqueue_style');
+  return '<div class="four_fifth">' . do_shortcode($content) . '</div>';
 }
 
 function mts_four_fifth_last( $atts, $content = null ) {
-   return '<div class="four_fifth column-last">' . do_shortcode($content) . '</div><div class="clear"></div>';
+  do_action('wps_enqueue_style');
+  return '<div class="four_fifth column-last">' . do_shortcode($content) . '</div><div class="clear"></div>';
 }
 
 function mts_one_sixth( $atts, $content = null ) {
-   return '<div class="one_sixth">' . do_shortcode($content) . '</div>';
+  do_action('wps_enqueue_style');
+  return '<div class="one_sixth">' . do_shortcode($content) . '</div>';
 }
 
 function mts_one_sixth_last( $atts, $content = null ) {
-   return '<div class="one_sixth column-last">' . do_shortcode($content) . '</div><div class="clear"></div>';
+  do_action('wps_enqueue_style');
+  return '<div class="one_sixth column-last">' . do_shortcode($content) . '</div><div class="clear"></div>';
 }
 
 function mts_five_sixth( $atts, $content = null ) {
-   return '<div class="five_sixth">' . do_shortcode($content) . '</div>';
+  do_action('wps_enqueue_style');
+  return '<div class="five_sixth">' . do_shortcode($content) . '</div>';
 }
 
 function mts_five_sixth_last( $atts, $content = null ) {
-   return '<div class="five_sixth column-last">' . do_shortcode($content) . '</div><div class="clear"></div>';
+  do_action('wps_enqueue_style');
+  return '<div class="five_sixth column-last">' . do_shortcode($content) . '</div><div class="clear"></div>';
 }
 
 /*-----------------------------------------------------------------------------------*/
@@ -312,6 +363,7 @@ function mts_youtube_video( $atts, $content = null ) {
 		    'position'   => 'left'
     ), $atts));  
     $out = "<div class=\"youtube-video " .sanitize_html_class( $position ) . "\"><iframe width=\"" .esc_attr( $width ) . "\" height=\"" .esc_attr( $height ) ."\" src=\"//www.youtube.com/embed/" . esc_attr( $id ) . "?rel=0\" frameborder=\"0\" allowfullscreen></iframe></div>";
+    do_action('wps_enqueue_style');
 	return $out;
 }  
 
@@ -323,6 +375,7 @@ function mts_vimeo_video( $atts, $content = null ) {
 		'position'   => 'left'
     ), $atts));  
     $out = "<div class=\"vimeo-video " . sanitize_html_class( $position ) . "\"><iframe width=\"" .esc_attr( $width ) . "\" height=\"" .esc_attr( $height ) ."\" src=\"//player.vimeo.com/video/" . esc_attr( $id ) . "?title=0&amp;byline=0&amp;portrait=0\" frameborder=\"0\" allowfullscreen></iframe></div>";
+    do_action('wps_enqueue_style');
 	return $out;
 }  
 
@@ -342,6 +395,7 @@ function mts_googleMaps($atts, $content = null) {
    } else {
      $out = "<div class=\"googlemaps " .sanitize_html_class( $position ) . "\"><iframe width=\"".esc_attr( $width )."\" height=\"".esc_attr( $height )."\" frameborder=\"0\" scrolling=\"no\" marginheight=\"0\" marginwidth=\"0\" src=\"//maps.google.com/maps?q=".urlencode( $address )."&output=embed\"></iframe></div>";
    }
+   do_action('wps_enqueue_style');
    return $out;
 }
 
@@ -373,6 +427,7 @@ function mts_tabs( $atts, $content = null ) {
 		}
 		$tabcontent .= '</div>';
 
+    do_action('wps_enqueue_style', 'tabs');
 		return '<div class="tab_widget wp_shortcodes_tabs">' . $tabnav . $tabcontent . '</div><div class="clear"></div>';
 	}
     
@@ -391,7 +446,7 @@ function mts_toggle( $atts, $content = null ) {
     extract(shortcode_atts(array(
 		'title' => __('Toggle Title', 'wp-shortcode')
 	), $atts));
-    
+  do_action('wps_enqueue_style', 'toggle');
 	return '<div class="toggle clearfix wp_shortcodes_toggle"><div class="wps_togglet"><span>' . wp_kses_post( $title ) . '</span></div><div class="togglec clearfix">' . do_shortcode(trim($content)) . '</div></div><div class="clear"></div>';
 }
 
@@ -400,16 +455,19 @@ function mts_toggle( $atts, $content = null ) {
 /*-----------------------------------------------------------------------------------*/
 // simple divider
 function mts_divider( $atts ) {
+    do_action('wps_enqueue_style');
     return '<div class="divider"></div>';
 }
 
 // Divider with an anchor link to top of page.
 function mts_divider_top( $atts ) {
+    do_action('wps_enqueue_style');
     return '<div class="top-of-page"><a href="#top">'.__('Back to Top', 'wp-shortcode').'</a></div>';
 }
 
 // Used to clear an element of its neighbors, no floating elements are allowed on the left or the right side.
 function mts_clear( $atts ) {
+    do_action('wps_enqueue_style');
     return '<div class="clear"></div>';
 }
 
@@ -424,6 +482,54 @@ function mts_tooltip( $atts, $content ) {
       'gravity' => 'n',
       'fade' => '0'
     ), $atts);
+    do_action('wps_enqueue_style', 'tooltip');
     return '<span class="wp_shortcodes_tooltip" title="'.esc_attr( $atts['content'] ).'" data-gravity="'.esc_attr( $atts['gravity'] ).'" data-fade="'.esc_attr( $atts['fade'] ).'">'.$content.'</span>';
 }
-?>
+
+register_activation_hook( __FILE__, 'wp_shortcode_activation' );
+
+if(!function_exists('wp_shortcode_activation')) {
+  function wp_shortcode_activation(){
+    /* Loads activation functions */
+    update_option('wp_shortcode_activated', time());
+  }
+}
+
+
+/* Display a notice */
+add_action('admin_notices', 'wp_shortcode_admin_notice');
+function wp_shortcode_admin_notice() {
+  global $current_user ;
+  $user_id = $current_user->ID;
+  /* Check that the user hasn't already clicked to ignore the message */
+  /* Only show the notice 2 days after plugin activation */
+  if ( ! get_user_meta($user_id, 'wp_shortcode_ignore_notice') && time() >= (get_option( 'wp_shortcode_activated', 0 ) + (2 * 24 * 60 * 60)) ) {
+    echo '<div class="updated notice-info wp-shortcode-notice" id="wpshortcode-notice" style="position:relative;">';
+    printf(__('<p>Like WP Shortcode plugin? You will LOVE <a target="_blank" href="https://mythemeshop.com/plugins/wp-shortcode-pro/?utm_source=WP+Shortcode&utm_medium=Notification+Link&utm_content=WP+Shortcode+Pro+LP&utm_campaign=WordPressOrg"><strong>WP Shortcode Pro!</strong></a></p><a class="notice-dismiss mts-notice-dismiss" data-ignore="0" href="%1$s"></a>', 'wp-shortcode'), '?wp_shortcode_admin_notice_ignore=0');
+    echo "</div>";
+  }
+  /* Other notice appears right after activating */
+  /* And it gets hidden after showing 3 times */
+  if ( ! get_user_meta($user_id, 'wp_shortcode_ignore_notice_2') && get_option('wp_shortcode_notice_views', 0) < 3 && get_option( 'wp_shortcode_activated', 0 ) ) {
+    $views = get_option('wp_shortcode_notice_views', 0);
+    update_option( 'wp_shortcode_notice_views', ($views + 1) );
+    echo '<div class="updated notice-info wp-shortcode-notice" id="wpshortcode-notice2" style="position:relative;">';
+    echo '<p>';
+    _e('Thank you for trying WP Shortcode. We hope you will like it.', 'wp-shortcode');
+    echo '</p><a class="notice-dismiss mts-notice-dismiss" data-ignore="1" href="?wp_shortcode_admin_notice_ignore=0"></a>';
+    echo "</div>";
+  }
+}
+
+add_action('wp_ajax_mts_dismiss_plugin_notice', function(){
+  global $current_user;
+  $user_id = $current_user->ID;
+  /* If user clicks to ignore the notice, add that to their user meta */
+  if ( isset($_POST['dismiss']) ) {
+    if ( '0' == $_POST['dismiss'] ) {
+      add_user_meta($user_id, 'wp_shortcode_ignore_notice', '1', true);
+    } elseif ( '1' == $_POST['dismiss'] ) {
+      add_user_meta($user_id, 'wp_shortcode_ignore_notice_2', '1', true);
+    }
+  }
+});

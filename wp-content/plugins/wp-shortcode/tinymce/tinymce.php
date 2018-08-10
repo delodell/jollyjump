@@ -41,15 +41,6 @@
 	
 	function add_tinymce_plugin($plugin_array) 
 	{
-		global $page_handle;
-		global $post_id;
-		
-		if(isset($_GET['post'])) {
-			$post_id = $_GET['post'];
-		}
-		$post = get_post($post_id);
-		$post_type = $post->post_type;
-
         $plugin_array[$this->pluginname] =  $this->path . 'editor_plugin.js';
 			
 		return $plugin_array;

@@ -1,4 +1,5 @@
 <?php 
+
 $shortcodes = array(
     "button-brown" => array(
         "self-closing" => false,
@@ -151,12 +152,14 @@ $shortcodes = array(
     "divider" => array(
         "self-closing" => true,
         "atts" => array(),
+        "label" => __("Divider", "wp-shortcode"),
         "content" => "Divider",
         "description" => __("Simple horizontal divider.", "wp-shortcode")
     ),
     "divider_top" => array(
         "self-closing" => true,
         "atts" => array(),
+        "label" => __("Divider with link", "wp-shortcode"),
         "content" => "Divider with link",
         "description" => __("Divider with an anchor link to top of page.", "wp-shortcode")
     ),
@@ -358,5 +361,8 @@ $shortcodes = array(
         "description" => __("Add a tooltip that appears on hover. Possible values for direction(Cardinal) of bubble: nw | n | ne | w | e | sw | s | se", "wp-shortcode")
     )
 );
-echo "<script type=\"text/javascript\">var shortcodes = ".json_encode($shortcodes).";</script>";
+
+$shortcodes = apply_filters( 'mts_wp_shortcode_list', $shortcodes );
+echo "<script type=\"text/javascript\">var shortcodes = ".json_encode(  $shortcodes  ).";</script>";
+
 ?>

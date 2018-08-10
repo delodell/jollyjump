@@ -1,8 +1,8 @@
 <?php
-/*
+/**
  * License: GPLv3
  * License URI: https://www.gnu.org/licenses/gpl.txt
- * Copyright 2012-2017 Jean-Sebastien Morisset (https://wpsso.com/)
+ * Copyright 2012-2018 Jean-Sebastien Morisset (https://wpsso.com/)
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -26,7 +26,7 @@ if ( ! class_exists( 'WpssoGplSocialBuddypress' ) ) {
 			if ( is_admin() || bp_current_component() ) {
 
 				$this->p->util->add_plugin_filters( $this, array( 
-					'get_defaults' => 1,
+					'get_defaults'            => 1,
 					'plugin_integration_rows' => 2,
 					'messages_tooltip_plugin' => 2,
 				), 200 );
@@ -35,8 +35,8 @@ if ( ! class_exists( 'WpssoGplSocialBuddypress' ) ) {
 
 		public function filter_get_defaults( $def_opts ) {
 
-			$lca = $this->p->cf['lca'];
-			$bio_const_name = strtoupper( $lca ).'_BP_MEMBER_BIOGRAPHICAL_FIELD';
+			$bio_const_name = strtoupper( $this->p->lca ).'_BP_MEMBER_BIOGRAPHICAL_FIELD';
+
 			$def_opts['plugin_bp_bio_field'] = SucomUtil::get_const( $bio_const_name );
 
 			return $def_opts;
@@ -64,5 +64,3 @@ if ( ! class_exists( 'WpssoGplSocialBuddypress' ) ) {
 		}
 	}
 }
-
-?>

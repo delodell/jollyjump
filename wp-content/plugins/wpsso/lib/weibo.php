@@ -1,8 +1,8 @@
 <?php
-/*
+/**
  * License: GPLv3
  * License URI: https://www.gnu.org/licenses/gpl.txt
- * Copyright 2012-2017 Jean-Sebastien Morisset (https://wpsso.com/)
+ * Copyright 2012-2018 Jean-Sebastien Morisset (https://wpsso.com/)
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -23,18 +23,13 @@ if ( ! class_exists( 'WpssoWeibo' ) ) {
 			}
 		}
 
-		public function get_array( array &$mod, array &$mt_og, $crawler_name = false ) {
+		public function get_array( array &$mod, array &$mt_og, $crawler_name ) {
 
-			if ( $crawler_name === false ) {
-				$crawler_name = SucomUtil::get_crawler_name();
-			}
-
-			// pinterest does not read weibo meta tags
-			if ( $crawler_name === 'pinterest' ) {
-				if ( $this->p->debug->enabled ) {
-					$this->p->debug->log( 'exiting early: '.$crawler_name.' crawler detected' );
+			if ( ! empty( $this->p->avail['*']['vary_ua'] ) ) {
+				switch ( $crawler_name ) {
+					case 'pinterest':
+						return array();
 				}
-				return array();
 			}
 
 			if ( $this->p->debug->enabled )
@@ -42,7 +37,7 @@ if ( ! class_exists( 'WpssoWeibo' ) ) {
 
 			$lca = $this->p->cf['lca'];
 			$mt_weibo = SucomUtil::preg_grep_keys( '/^weibo:/', $mt_og );	// read any pre-defined weibo meta tag values
-			$mt_weibo = apply_filters( $lca.'_weibo_seed', $mt_weibo, $mod['use_post'], $mod );
+			$mt_weibo = apply_filters( $lca.'_weibo_seed', $mt_weibo, $mod );
 
 			if ( $mt_og['og:type'] === 'article' ) {
 				foreach ( array(
@@ -55,9 +50,7 @@ if ( ! class_exists( 'WpssoWeibo' ) ) {
 				}
 			}
 
-			return (array) apply_filters( $lca.'_weibo', $mt_weibo, $mod['use_post'], $mod );
+			return (array) apply_filters( $lca.'_weibo', $mt_weibo, $mod );
 		}
 	}
 }
-
-?>

@@ -36,7 +36,7 @@ class NF_Fields_ListCountry extends NF_Abstracts_List
 
         add_filter( 'ninja_forms_custom_columns',                          array( $this, 'custom_columns'   ), 10, 2 );
         add_filter( 'ninja_forms_render_options_' . $this->_name,          array( $this, 'filter_options'   ), 10, 2 );
-        add_filter( 'ninja_forms_subs_export_field_value_' . $this->_name, array( $this, 'filter_csv_value' ), 10, 1 );
+        add_filter( 'ninja_forms_subs_export_field_value_' . $this->_name, array( $this, 'filter_csv_value' ), 10, 2 );
     }
 
     public function custom_columns( $value, $field )
@@ -86,6 +86,7 @@ class NF_Fields_ListCountry extends NF_Abstracts_List
     {
         ob_start();
         echo "<select name='fields[$id]'>";
+	    echo "<option value=''>- " . __( 'Select Country', 'ninja-forms' ) . " -</option>";
         foreach( Ninja_Forms()->config( 'CountryList' ) as $label => $abbr ){
             $selected = ( $value == $abbr ) ? ' selected' : '';
             echo "<option value='" . $abbr . "'" . $selected . ">" . $label . "</option>";
@@ -97,6 +98,11 @@ class NF_Fields_ListCountry extends NF_Abstracts_List
     private function get_default_value_options()
     {
         $options = array();
+        // Option to have no default country
+        $options[] = array(
+            'label' => '- ' . __( 'Select Country', 'ninja-forms' ) . ' -',
+	        'value' => ''
+        );
         foreach( Ninja_Forms()->config( 'CountryList' ) as $label => $value ){
             $options[] = array(
                 'label'  => $label,
@@ -111,6 +117,15 @@ class NF_Fields_ListCountry extends NF_Abstracts_List
     {
         $order = 0;
         $options = array();
+        // option to have no default country selected
+	    $options[] = array(
+		    'label' => '- ' . __( 'Select Country', 'ninja-forms' ) . ' -',
+		    'value' => '',
+		    'calc' => '',
+		    'selected' => 0,
+		    'order' => $order,
+	    );
+	    $order++;
         foreach( Ninja_Forms()->config( 'CountryList' ) as $label => $value ){
             $options[] = array(
                 'label'  => $label,
@@ -126,7 +141,7 @@ class NF_Fields_ListCountry extends NF_Abstracts_List
         return $options;
     }
 
-    public function filter_csv_value( $field_value )
+    public function filter_csv_value( $field_value, $field )
     {
         $lookup = array_flip( Ninja_Forms()->config( 'CountryList' ) );
         if( isset( $lookup[ $field_value ] ) ) $field_value = $lookup[ $field_value ];

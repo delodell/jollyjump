@@ -38,7 +38,9 @@ if ( post_password_required() ) { ?>
 	<div class="bordersperator2"></div>
 	<div id="commentsAdd">
 		<div id="respond" class="box m-t-6">
-			<?php global $aria_req; $comments_args = array(
+			<?php global $aria_req; 
+			$consent  = empty( $commenter['comment_author_email'] ) ? '' : ' checked="checked"';
+			$comments_args = array(
 				'title_reply'=>'<h4><span>'.__('Add a Comment','point').'</span></h4></h4>',
 				'label_submit' => __('Add Comment','point'),
 				'comment_field' => '<p class="comment-form-comment"><label for="comment">'.__('Comment:','point').'<span class="required">*</span></label><textarea id="comment" name="comment" cols="45" rows="5" aria-required="true"></textarea></p>',
@@ -51,8 +53,9 @@ if ( post_password_required() ) { ?>
 					'email' => '<p class="comment-form-email"><label for="email">' . __( 'Email Address', 'point' ) . ':<span class="required">*</span></label>' 
 						. ( $req ? '' : '' ) . '<input id="email" name="email" type="text" value="' . esc_attr(  $commenter['comment_author_email'] ) . '" size="30"' . $aria_req . ' /></p>',
 						
-					'url' => '<p class="comment-form-url"><label for="url">' . __( 'Website', 'point' ) . ':</label>' . 
-			'<input id="url" name="url" type="text" value="' . esc_attr( $commenter['comment_author_url'] ) . '" size="30" /></p>' 
+					'url' => '<p class="comment-form-url"><label for="url">' . __( 'Website', 'point' ) . ':</label>' . '<input id="url" name="url" type="text" value="' . esc_attr( $commenter['comment_author_url'] ) . '" size="30" /></p>',
+					'cookies' => '<p class="comment-form-cookies-consent"><input id="wp-comment-cookies-consent" name="wp-comment-cookies-consent" type="checkbox" value="yes"' . $consent . ' />' .
+					'<label for="wp-comment-cookies-consent">' . __( 'Save my name, email, and website in this browser for the next time I comment.', 'point' ) . '</label></p>', 
 			))
 			); 
 			comment_form($comments_args); ?>

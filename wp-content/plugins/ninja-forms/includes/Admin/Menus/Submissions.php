@@ -51,6 +51,56 @@ final class NF_Admin_Menus_Submissions extends NF_Abstracts_Submenu
         add_action( 'load-edit.php', array( $this, 'export_listen' ) );
 
         add_action('admin_head', array( $this, 'hide_page_title_action' ) );
+
+        add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+
+        // This will only run on our post type.
+        add_action( 'views_edit-nf_sub', array( $this, 'change_views' ) );
+    }
+
+    /**
+     * Change Views
+     * WordPress hook that modifies the links on our submissions CPT to allow
+     * users to switch between completed and trashed submissions.
+     * @since 3.2.17
+     *
+     * @param $views The views that are associated with this CPT.
+     *      $views[ 'view' ]
+     * @return array Returns modified views to allow our users access to the trash.
+     */
+    public function change_views( $views )
+    {
+        // Remove our unused views.
+        unset( $views[ 'mine' ] );
+        unset( $views[ 'publish' ] );
+
+        // If the Form ID is not empty...
+        if( ! empty( $_GET[ 'form_id' ] ) ) {
+            // ...populate the rest of the query string.
+            $form_id = '&form_id=' . $_GET[ 'form_id' ] . '&nf_form_filter&paged=1';
+        } else {
+            // ...otherwise send in an empty string.
+            $form_id = '';
+        }
+
+        // Build our new views.
+        $views[ 'all' ] = '<a href="' . admin_url( 'edit.php?post_status=all&post_type=nf_sub'  ) . $form_id . '">'
+                        . __( 'Completed', 'ninja-forms' ) . '</a>';
+
+        $views[ 'trash' ] = '<a href="' . admin_url( 'edit.php?post_status=trash&post_type=nf_sub' ) . $form_id . '">'
+                            . __( 'Trashed', 'ninja-forms' ) . '</a>';
+
+        // Checks to make sure we have a post status.
+        if( ! empty( $_GET[ 'post_status' ] ) ) {
+            // Depending on the domain set the value to plain text.
+            if ( 'all' == $_GET[ 'post_status' ] ) {
+                $views[ 'all' ] = __( 'Completed', 'ninja-forms' );
+            } else if ( 'trash' == $_GET[ 'post_status' ] ) {
+                $views[ 'trash' ] = __( 'Trashed', 'ninja-forms' );
+            }
+        }
+
+        return $views;
     }
 
     public function get_page_title()
@@ -66,6 +116,23 @@ final class NF_Admin_Menus_Submissions extends NF_Abstracts_Submenu
         // This section intentionally left blank.
     }
 
+	/**
+	 * enqueue scripts here
+	 */
+	public function enqueue_scripts() {
+		// let's check and make sure we're on the submissions page.
+		$test = strpos( $_SERVER[ 'REQUEST_URI' ], '/wp-admin/edit.php' );
+		if( isset( $_GET[ 'post_type' ] ) && 'nf_sub' == $_GET[ 'post_type' ]
+			&& -1 < strpos( $_SERVER[ 'REQUEST_URI' ], '/wp-admin/edit.php' )
+	) {
+			wp_enqueue_style( 'nf-admin-settings', Ninja_Forms::$url . 'assets/css/admin-settings.css' );
+
+			wp_register_script( 'ninja_forms_admin_submissions',
+				Ninja_Forms::$url . 'assets/js/admin-submissions.js', array( 'jquery' ), false, true );
+
+			wp_enqueue_script( 'ninja_forms_admin_submissions' );
+		}
+	}
     /**
      * Change Columns
      *
@@ -91,6 +158,8 @@ final class NF_Admin_Menus_Submissions extends NF_Abstracts_Submenu
         $hidden_field_types = apply_filters( 'ninja_forms_sub_hidden_field_types', array() );
 
         foreach( $fields as $field ){
+            
+            if ( is_null( $field ) ) continue;
 
             if( in_array( $field->get_setting( 'type' ), $hidden_field_types ) ) continue;
 
@@ -212,6 +281,7 @@ final class NF_Admin_Menus_Submissions extends NF_Abstracts_Submenu
             global $wpdb;
 
             $keywords = explode(' ', get_query_var('s'));
+
             $query = "";
 
             foreach ($keywords as $word) {
@@ -220,14 +290,17 @@ final class NF_Admin_Menus_Submissions extends NF_Abstracts_Submenu
             }
 
             if (!empty($query)) {
-                // add to where clause
-                $pieces['where'] = str_replace("((({$wpdb->posts}.post_title LIKE '%", "( {$query} (({$wpdb->posts}.post_title LIKE '%", $pieces['where']);
+                // Escape place holders for the where clause.
+                $pieces[ 'where' ] = $wpdb->remove_placeholder_escape( $pieces[ 'where' ] );
 
-                $pieces['join'] = $pieces['join'] . " INNER JOIN {$wpdb->postmeta} AS mypm1 ON ({$wpdb->posts}.ID = mypm1.post_id)";
+                // add to where clause
+                $pieces[ 'where' ] = str_replace("((({$wpdb->posts}.post_title LIKE '%", "({$query}(({$wpdb->posts}.post_title LIKE '%", $pieces[ 'where' ]);
+
+                $pieces[ 'join' ] = $pieces[ 'join' ] . " INNER JOIN {$wpdb->postmeta} AS mypm1 ON ({$wpdb->posts}.ID = mypm1.post_id)";
 
             }
         }
-        return ($pieces);
+        return ( $pieces );
     }
 
     public function remove_bulk_edit( $actions ) {
@@ -245,8 +318,8 @@ final class NF_Admin_Menus_Submissions extends NF_Abstracts_Submenu
             ?>
             <script type="text/javascript">
                 jQuery(document).ready(function() {
-                    jQuery('<option>').val('export').text('<?php _e('Export')?>').appendTo("select[name='action']");
-                    jQuery('<option>').val('export').text('<?php _e('Export')?>').appendTo("select[name='action2']");
+                    jQuery('<option>').val('export').text('<?php _e('Export', 'ninja-forms')?>').appendTo("select[name='action']");
+                    jQuery('<option>').val('export').text('<?php _e('Export', 'ninja-forms')?>').appendTo("select[name='action2']");
                     <?php
                     if ( ( isset ( $_POST['action'] ) && $_POST['action'] == 'export' ) || ( isset ( $_POST['action2'] ) && $_POST['action2'] == 'export' ) ) {
                         ?>
@@ -344,20 +417,20 @@ final class NF_Admin_Menus_Submissions extends NF_Abstracts_Submenu
         }
     }
 
-    public function hide_page_title_action() {
-
-        if(
-            ( isset( $_GET[ 'post_type' ] ) && 'nf_sub' == $_GET[ 'post_type'] ) ||
-            'nf_sub' == get_post_type()
-        ){
-            echo '<style type="text/css">.page-title-action, .subsubsub, .view-mode{display: none;}</style>';
+    public function hide_page_title_action()
+    {
+        // If we are on our the nf_sub post type then....
+        if( ( isset( $_GET[ 'post_type' ] ) && 'nf_sub' == $_GET[ 'post_type'] ) ||
+            'nf_sub' == get_post_type() ) {
+            // ...then hiding the "Add New" button on the CPT page.
+            echo '<style type="text/css">.page-title-action, .view-mode{display: none;}</style>';
         }
     }
+
 
     /*
      * PRIVATE METHODS
      */
-
     /**
      * Custom Columns: ID
      *
@@ -377,7 +450,12 @@ final class NF_Admin_Menus_Submissions extends NF_Abstracts_Submenu
      */
     private function custom_columns_sub_date( $sub )
     {
-        return $sub->get_sub_date( 'm/d/Y h:i A' );
+        // Grab the date and time format options
+        $date_format = get_option( 'date_format' );
+        $time_format = get_option( 'time_format' );
+
+        // Get the sub dates using the date and time formats.
+        return $sub->get_sub_date( $date_format . ' ' . $time_format );
     }
 
     /**
@@ -421,17 +499,12 @@ final class NF_Admin_Menus_Submissions extends NF_Abstracts_Submenu
         // Include submissions on the end_date.
         $end_date = date( 'm/d/Y', strtotime( '+1 day', strtotime( $end_date ) ) );
 
-        if( $begin_date > $end_date ){
-            $temp_date = $begin_date;
-            $begin_date = $end_date;
-            $end_date = $temp_date;
-        }
-
         if ( ! isset ( $vars['date_query'] ) ) {
 
             $vars['date_query'] = array(
                 'after' => $begin_date,
-                'before' => $end_date
+                'before' => $end_date,
+                'inclusive' => true,
             );
         }
 

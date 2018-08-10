@@ -50,6 +50,7 @@ class wp_subscribe extends WP_Widget {
             'title'             => esc_html__( 'Get more stuff', 'wp-subscribe' ),
             'text'              => esc_html__( 'Subscribe to our mailing list and get interesting stuff and updates to your email inbox.', 'wp-subscribe' ),
             'email_placeholder' => esc_html__( 'Enter your email here', 'wp-subscribe' ),
+            'consent_text'			=> esc_html__( 'I consent to my submitted data being collected via this form*', 'wp-subscribe' ),
             'name_placeholder'  => esc_html__( 'Enter your name here', 'wp-subscribe' ),
             'button_text'       => esc_html__( 'Sign Up Now', 'wp-subscribe' ),
             'success_message'   => esc_html__( 'Thank you for subscribing.', 'wp-subscribe' ),
@@ -77,15 +78,12 @@ class wp_subscribe extends WP_Widget {
 	 * @return void
 	 */
     function enqueue_scripts() {
-
-		$screen = get_current_screen();
-		$current_filter = current_filter();
-
-        if ( 'widgets' === $screen->id || 'customize_controls_enqueue_scripts' === $current_filter ) {
-
-            wp_enqueue_style( 'wp-subscribe-options', wps()->plugin_url() . '/assets/css/wp-subscribe-options.css' );
-			wp_enqueue_script( 'wp-subscribe-admin', wps()->plugin_url() . '/assets/js/wp-subscribe-admin.js', array( 'jquery' ) );
-        }
+			$screen = get_current_screen();
+			$current_filter = current_filter();
+      if ( 'widgets' === $screen->id || 'customize_controls_enqueue_scripts' === $current_filter ) {
+        wp_enqueue_style( 'wp-subscribe-options', wps()->plugin_url() . '/assets/css/wp-subscribe-options.css' );
+      }
+      wp_enqueue_script( 'wp-subscribe-admin', wps()->plugin_url() . '/assets/js/wp-subscribe-admin.js', array( 'jquery' ) );
     }
 
 	/**
@@ -213,6 +211,13 @@ class wp_subscribe extends WP_Widget {
 					));
 
 					$this->field_text(array(
+						'id'    => 'consent_text',
+						'name'  => 'consent_text',
+						'title' => esc_html( 'Consent Label', 'wp-subscribe' ),
+						'value' => $instance['consent_text']
+					));
+
+					$this->field_text(array(
 						'id'    => 'button_text',
 						'name'  => 'button_text',
 						'title' => esc_html( 'Button Text', 'wp-subscribe' ),
@@ -233,7 +238,7 @@ class wp_subscribe extends WP_Widget {
 						'value' => $instance['error_message']
 					));
 
-					$this->field_text(array(
+					$this->field_textarea(array(
 						'id'    => 'footer_text',
 						'name'  => 'footer_text',
 						'title' => esc_html( 'Footer Text', 'wp-subscribe' ),

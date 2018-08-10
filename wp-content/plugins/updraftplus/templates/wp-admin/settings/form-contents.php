@@ -45,19 +45,12 @@ foreach ($default_options as $k => $v) {
 
 				?>
 			</div>
-			<?php do_action('updraftplus_after_filesconfig'); ?>
+			<?php
+				do_action('updraftplus_incremental_cell', $selected_interval);
+				do_action('updraftplus_after_filesconfig');
+			?>
 		</td>
 	</tr>
-
-	<?php if (defined('UPDRAFTPLUS_EXPERIMENTAL') && UPDRAFTPLUS_EXPERIMENTAL) { ?>
-	<tr class="updraft_incremental_row">
-		<th><?php _e('Incremental file backup schedule', 'updraftplus'); ?>:</th>
-		<td>
-			<?php do_action('updraftplus_incremental_cell', $selected_interval); ?>
-			<a href="<?php echo apply_filters('updraftplus_com_link', "https://updraftplus.com/support/tell-me-more-about-incremental-backups/");?>"><em><?php _e('Tell me more about incremental backups', 'updraftplus'); ?><em></a>
-			</td>
-	</tr>
-	<?php } ?>
 
 	<?php apply_filters('updraftplus_after_file_intervals', false, $selected_interval); ?>
 	<tr>
@@ -104,7 +97,7 @@ foreach ($default_options as $k => $v) {
 	$active_service = UpdraftPlus_Options::get_updraft_option('updraft_service');
 ?>
 
-<table class="form-table width-900">
+<table id="remote-storage-holder" class="form-table width-900">
 	<tr>
 		<th><?php
 			echo __('Choose your remote storage', 'updraftplus').'<br>'.apply_filters('updraftplus_after_remote_storage_heading_message', '<em>'.__('(tap on an icon to select or unselect)', 'updraftplus').'</em>');
@@ -135,31 +128,11 @@ foreach ($default_options as $k => $v) {
 		
 		</td>
 	</tr>
-		
+
 	<tr class="updraftplusmethod none ud_nostorage" style="display:none;">
 		<td></td>
 		<td><em><?php echo htmlspecialchars(__('If you choose no remote storage, then the backups remain on the web-server. This is not recommended (unless you plan to manually copy them to your computer), as losing the web-server would mean losing both your website and the backups in one event.', 'updraftplus'));?></em></td>
 	</tr>
-
-	<?php
-		$storage_objects_and_ids = $updraftplus->get_storage_objects_and_ids(array_keys($updraftplus->backup_methods));
-
-		foreach ($storage_objects_and_ids as $method => $method_information) {
-			$storage_object = $method_information['object'];
-			if (!$storage_object->supports_feature('multi_options')) {
-				do_action('updraftplus_config_print_before_storage', $method, null);
-				$storage_object->config_print();
-			} else {
-				foreach ($method_information['instance_settings'] as $instance_id => $storage_options) {
-					$storage_object->set_options($storage_options, false, $instance_id);
-					$storage_object->print_configuration();
-				}
-			}
-			do_action('updraftplus_config_print_after_storage', $method);
-		}
-
-	?>
-
 </table>
 
 <hr style="width:900px; float:left;">
@@ -205,8 +178,7 @@ foreach ($default_options as $k => $v) {
 				<p><h3><?php _e("Manually decrypt a database backup file", 'updraftplus'); ?></h3></p>
 
 				<?php
-				global $wp_version;
-				if (version_compare($wp_version, '3.3', '<')) {
+				if (version_compare($updraftplus->get_wordpress_version(), '3.3', '<')) {
 					echo '<em>'.sprintf(__('This feature requires %s version %s or later', 'updraftplus'), 'WordPress', '3.3').'</em>';
 				} else {
 				?>
@@ -258,7 +230,7 @@ foreach ($default_options as $k => $v) {
 		if (!empty($moredbs_config)) {
 		?>
 			<tr>
-				<th><?php _e('Back up more databases', 'updraftplus');?>:</th>
+				<th><?php _e('Backup more databases', 'updraftplus');?>:</th>
 				<td><?php echo $moredbs_config; ?>
 				</td>
 			</tr>
@@ -300,7 +272,7 @@ foreach ($default_options as $k => $v) {
 <script type="text/javascript">
 /* <![CDATA[ */
 <?php
-
+	$storage_objects_and_ids = $updraftplus->get_storage_objects_and_ids(array_keys($updraftplus->backup_methods));
 	// In PHP 5.5+, there's array_column() for this
 	$method_objects = array();
 	foreach ($storage_objects_and_ids as $method => $method_information) {
@@ -329,7 +301,7 @@ foreach ($default_options as $k => $v) {
 
 	<tr class="expertmode updraft-hidden" style="display:none;">
 		<th><?php _e('Debug mode', 'updraftplus');?>:</th>
-		<td><input type="checkbox" id="updraft_debug_mode" name="updraft_debug_mode" value="1" <?php echo $debug_mode; ?> /> <br><label for="updraft_debug_mode"><?php _e('Check this to receive more information and emails on the backup process - useful if something is going wrong.', 'updraftplus');?> <?php _e('This will also cause debugging output from all plugins to be shown upon this screen - please do not be surprised to see these.', 'updraftplus');?></label></td>
+		<td><input type="checkbox" id="updraft_debug_mode" data-updraft_settings_test="debug_mode" name="updraft_debug_mode" value="1" <?php echo $debug_mode; ?> /> <br><label for="updraft_debug_mode"><?php _e('Check this to receive more information and emails on the backup process - useful if something is going wrong.', 'updraftplus');?> <?php _e('This will also cause debugging output from all plugins to be shown upon this screen - please do not be surprised to see these.', 'updraftplus');?></label></td>
 	</tr>
 
 	<tr class="expertmode updraft-hidden" style="display:none;">
@@ -344,21 +316,18 @@ foreach ($default_options as $k => $v) {
 
 	<tr class="expertmode backupdirrow updraft-hidden" style="display:none;">
 		<th><?php _e('Backup directory', 'updraftplus');?>:</th>
-		<td><input type="text" name="updraft_dir" id="updraft_dir" style="width:525px" value="<?php echo htmlspecialchars($updraftplus_admin->prune_updraft_dir_prefix($updraft_dir)); ?>" /></td>
+		<td><input type="text" name="updraft_dir" id="updraft_dir" style="width:525px" value="<?php echo htmlspecialchars(UpdraftPlus_Manipulation_Functions::prune_updraft_dir_prefix($updraft_dir)); ?>" /></td>
 	</tr>
 	<tr class="expertmode backupdirrow updraft-hidden" style="display:none;">
 		<td></td>
 		<td>
 			<span id="updraft_writable_mess">
-				<?php
-				$dir_info = $updraftplus_admin->really_writable_message($really_is_writable, $updraft_dir);
-				echo $dir_info;
-				?>
+				<?php echo $updraftplus_admin->really_writable_message($really_is_writable, $updraft_dir); ?>
 			</span>
-				<?php
-					echo __("This is where UpdraftPlus will write the zip files it creates initially.  This directory must be writable by your web server. It is relative to your content directory (which by default is called wp-content).", 'updraftplus').' '.__("<b>Do not</b> place it inside your uploads or plugins directory, as that will cause recursion (backups of backups of backups of...).", 'updraftplus');
-					?>
-			</td>
+			<?php
+				echo __("This is where UpdraftPlus will write the zip files it creates initially.  This directory must be writable by your web server. It is relative to your content directory (which by default is called wp-content).", 'updraftplus').' '.__("<b>Do not</b> place it inside your uploads or plugins directory, as that will cause recursion (backups of backups of backups of...).", 'updraftplus');
+			?>
+		</td>
 	</tr>
 
 	<tr class="expertmode updraft-hidden" style="display:none;">

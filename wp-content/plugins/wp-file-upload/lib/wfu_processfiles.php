@@ -23,6 +23,10 @@ function wfu_process_files($params, $method) {
 	// determine if this is an upload without a file
 	$nofileupload = ( $params["allownofile"] == "true" && isset($_POST['nofileupload_'.$sid]) ? ( $_POST['nofileupload_'.$sid] == "1" ) : false );
 	$force_notifications = ( WFU_VAR("WFU_FORCE_NOTIFICATIONS") == "true" );
+	$consent_revoked = ( $plugin_options["personaldata"] == "1" && wfu_check_user_consent($user) == "0" );
+	$not_store_files = ( $params["personaldatatypes"] == "userdata and files" );
+	$empty_userdata_fields = $params["userdata_fields"];
+	$store_nothing = ( $consent_revoked && $not_store_files );
 
 	$suppress_admin_messages = ( $params["adminmessages"] != "true" || !$is_admin );
 	$success_count = 0;
@@ -167,7 +171,11 @@ function wfu_process_files($params, $method) {
 		// determine if file data have been saved to session variables, due to a previous pass of this file
 		$file_map = "filedata_".$unique_id."_".$real_file_index;
 		// retrieve unique id of the file, used in filter actions for identifying each separate file
-		$file_unique_id = ( isset($_SESSION[$file_map]) ? $_SESSION[$file_map]['file_unique_id'] : '' );
+		if ( WFU_USVAR_exists($file_map) ) {
+			$file_map_arr = WFU_USVAR($file_map);
+			$file_unique_id = $file_map_arr['file_unique_id'];
+		}
+		else $file_unique_id = '';
 		$filedata_previously_defined = ( $file_unique_id != '' );
 		/* generate unique id for each file for use in filter actions if it has not been previously defined */
 		if ( !$filedata_previously_defined )
@@ -202,12 +210,14 @@ function wfu_process_files($params, $method) {
 				/* store file data and upload result to filedata session array 
 				   for use by after_upload filters */
 				if ( !$nofileupload ) {
-					if ( !isset($_SESSION["filedata_".$unique_id]) ) $_SESSION["filedata_".$unique_id] = array();
-					$_SESSION["filedata_".$unique_id][$real_file_index] = array(
+					if ( !WFU_USVAR_exists("filedata_".$unique_id) ) WFU_USVAR_store("filedata_".$unique_id, array());
+					$filedata_id = WFU_USVAR("filedata_".$unique_id);
+					$filedata_id[$real_file_index] = array(
 						"file_unique_id"	=> $file_unique_id,
 						"original_filename"	=> $only_filename,
 						"filesize" 			=> $filesize,
 					);
+					WFU_USVAR_store("filedata_".$unique_id, $filedata_id);
 				}
 				// prepare parameters for wfu_before_file_check filter
 				// if this is a no file upload the prepare parameters for
@@ -234,17 +244,21 @@ function wfu_process_files($params, $method) {
 				// filters again, so we store the changable data to session
 				// variables for this specific file
 				if ( $only_check && !$nofileupload ) {
-					$_SESSION[$file_map]['file_unique_id'] = $file_unique_id;
-					$_SESSION[$file_map]['filepath'] = $target_path;
-					$_SESSION[$file_map]['userdata'] = $userdata_fields;
+					if ( !WFU_USVAR_exists($file_map) ) WFU_USVAR_store($file_map, array());
+					$file_map_arr = WFU_USVAR($file_map);
+					$file_map_arr['file_unique_id'] = $file_unique_id;
+					$file_map_arr['filepath'] = $target_path;
+					$file_map_arr['userdata'] = $userdata_fields;
+					WFU_USVAR_store($file_map, $file_map_arr);
 				}
 			}
 			// if this is a second pass of the file, because a first pass with file checking was done before, then retrieve
 			// file data that may have previously changed because of application of filters
 			if ( $filedata_previously_defined ) {
-				$target_path = $_SESSION[$file_map]['filepath'];
+				$file_map_arr = WFU_USVAR($file_map);
+				$target_path = $file_map_arr['filepath'];
 				$only_filename = wfu_basename($target_path);
-				$userdata_fields = $_SESSION[$file_map]['userdata'];
+				$userdata_fields = $file_map_arr['userdata'];
 			}
 			if ( $filter_error_message != '' ) {
 				//errorabort flag designates that file will be aborted and no resuming will be attempted
@@ -394,7 +408,9 @@ function wfu_process_files($params, $method) {
 							   previous filter wfu_before_file_check, corresponding them to the unique file id */
 							if ( $file_unique_id != '' ) {
 								$target_path = apply_filters('wfu_before_file_upload', $target_path, $file_unique_id);
-								$_SESSION[$file_map]['filepath'] = $target_path;
+								$file_map_arr = WFU_USVAR($file_map);
+								$file_map_arr['filepath'] = $target_path;
+								WFU_USVAR_store($file_map, $file_map_arr);
 							}
 							//recalculate $only_filename in case it changed with wfu_before_file_upload filter
 							$only_filename = wfu_basename($target_path);
@@ -457,7 +473,9 @@ function wfu_process_files($params, $method) {
 							   previous filter wfu_before_file_check, corresponding them to the unique file id */
 							if ( $file_unique_id != '' ) {
 								$target_path = apply_filters('wfu_before_file_upload', $target_path, $file_unique_id);
-								$_SESSION[$file_map]['filepath'] = $target_path;
+								$file_map_arr = WFU_USVAR($file_map);
+								$file_map_arr['filepath'] = $target_path;
+								WFU_USVAR_store($file_map, $file_map_arr);
 							}
 							//recalculate $only_filename in case it changed with wfu_before_file_upload filter
 							$only_filename = wfu_basename($target_path);
@@ -677,8 +695,13 @@ function wfu_process_files($params, $method) {
 			/* Log file upload action if file has finished uploading
 			   uccessfully. If this is a no file upload then log action will be
 			   datasubmit. */
-			if ( !$nofileupload ) $fileid = wfu_log_action('upload', $target_path, $user->ID, $unique_id, $params['pageid'], $params['blogid'], $sid, $userdata_fields);
-			else $fileid = wfu_log_action('datasubmit', '', $user->ID, $unique_id, $params['pageid'], $params['blogid'], $sid, $userdata_fields);
+			if ( !$nofileupload ) {
+				if ( !$consent_revoked ) $fileid = wfu_log_action('upload', $target_path, $user->ID, $unique_id, $params['pageid'], $params['blogid'], $sid, $userdata_fields);
+				elseif ( !$not_store_files ) $fileid = wfu_log_action('upload', $target_path, 0, $unique_id, $params['pageid'], $params['blogid'], $sid, $empty_userdata_fields);
+			}
+			else {
+				if ( !$consent_revoked ) $fileid = wfu_log_action('datasubmit', '', $user->ID, $unique_id, $params['pageid'], $params['blogid'], $sid, $userdata_fields);
+			}
 			/* Apply wfu_after_file_upload filter after failed upload, in order to allow the user to perform any post-upload actions.
 			   If additional data are required, such as user_id or userdata values or filepath, they can be retrieved by implementing
 			   the previous filters wfu_before_file_check and wfu_before_file_upload, corresponding them to the unique file id.
@@ -703,17 +726,24 @@ function wfu_process_files($params, $method) {
 		/* add file to Media or attach file to current post if any of these options is activated and the file has finished uploading successfully */
 		if ( ( $params["medialink"] == "true" || $params["postlink"] == "true" ) && $file_finished_successfully && !$ignore_server_actions && !$nofileupload ) {
 			$pageid = ( $params["postlink"] == "true" ? $params['pageid'] : 0 );
-			wfu_process_media_insert($target_path, $userdata_fields, $pageid);
+			if ( !$consent_revoked ) wfu_process_media_insert($target_path, $userdata_fields, $pageid);
+			elseif ( !$not_store_files ) wfu_process_media_insert($target_path, empty_userdata_fields, $pageid);
 		}
 
 		/* store final file data and upload result to filemap session array for
 		   use by after_upload filters */
-		if ( ( $file_finished_successfully || $file_finished_unsuccessfully ) && isset($_SESSION["filedata_".$unique_id][$real_file_index]) && !$ignore_server_actions && !$nofileupload ) {
-			$_SESSION["filedata_".$unique_id][$real_file_index]["filepath"] = $target_path;
-			$_SESSION["filedata_".$unique_id][$real_file_index]["user_data"] = $userdata_fields;
-			$_SESSION["filedata_".$unique_id][$real_file_index]["upload_result"] = $file_output['message_type'];
-			$_SESSION["filedata_".$unique_id][$real_file_index]["message"] = $file_output['message'];
-			$_SESSION["filedata_".$unique_id][$real_file_index]["admin_messages"] = $file_output['admin_messages'];
+		if ( ( $file_finished_successfully || $file_finished_unsuccessfully ) && !$ignore_server_actions && !$nofileupload ) {
+			if ( WFU_USVAR_exists("filedata_".$unique_id) ) {
+				$filedata_id = WFU_USVAR("filedata_".$unique_id);
+				if ( isset($filedata_id[$real_file_index]) ) {
+					$filedata_id[$real_file_index]["filepath"] = $target_path;
+					$filedata_id[$real_file_index]["user_data"] = $userdata_fields;
+					$filedata_id[$real_file_index]["upload_result"] = $file_output['message_type'];
+					$filedata_id[$real_file_index]["message"] = $file_output['message'];
+					$filedata_id[$real_file_index]["admin_messages"] = $file_output['admin_messages'];
+					WFU_USVAR_store("filedata_".$unique_id, $filedata_id);
+				}
+			}
 		}
 	}
 

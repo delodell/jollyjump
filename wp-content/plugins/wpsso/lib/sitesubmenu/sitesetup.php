@@ -1,8 +1,8 @@
 <?php
-/*
+/**
  * License: GPLv3
  * License URI: https://www.gnu.org/licenses/gpl.txt
- * Copyright 2012-2017 Jean-Sebastien Morisset (https://wpsso.com/)
+ * Copyright 2012-2018 Jean-Sebastien Morisset (https://wpsso.com/)
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -14,5 +14,3 @@ if ( ! class_exists( 'WpssoSitesubmenuSitesetup' ) && class_exists( 'WpssoSubmen
 	class WpssoSitesubmenuSitesetup extends WpssoSubmenuSetup {
 	}
 }
-
-?>

@@ -23,7 +23,7 @@ $point_relatedposts_section = get_theme_mod('point_relatedposts_section', '1');
 							<h1 class="title single-title"><?php the_title(); ?></h1>
 							<!-- End Title -->
 							<!-- Start Post Meta -->
-							<div class="post-info"><span class="theauthor"><?php the_author_posts_link(); ?></span> | <span class="thetime"><?php the_time( get_option( 'date_format' ) ); ?></span> | <span class="thecategory"><?php the_category(', ') ?></span></div>
+							<div class="post-info"><span class="theauthor"><?php the_author_posts_link(); ?></span> | <span class="thetime"><?php the_time( get_option( 'date_format' ) ); ?></span> | <span class="thecategory"><?php the_category(', ') ?></span> | <span class="thecomment"><a href="<?php comments_link(); ?>"><?php comments_number();?></a></span></div>
 							<!-- End Post Meta -->
 						</header>
 						<!-- Start Content -->
@@ -71,8 +71,7 @@ $point_relatedposts_section = get_theme_mod('point_relatedposts_section', '1');
 										</span>
 									</a>
 									<div class="meta">
-<!-- comments ommitted -->
-										<span class="thetime"><?php the_time('M j, Y'); ?></span>
+										<a href="<?php comments_link(); ?>" rel="nofollow"><?php comments_number();?></a> | <span class="thetime"><?php the_time('M j, Y'); ?></span>
 									</div> <!--end .entry-meta-->
 								</li>
 								<?php $pexcerpt++;?>

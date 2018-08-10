@@ -1,8 +1,8 @@
 <?php
-/*
+/**
  * License: GPLv3
  * License URI: https://www.gnu.org/licenses/gpl.txt
- * Copyright 2012-2017 Jean-Sebastien Morisset (https://wpsso.com/)
+ * Copyright 2012-2018 Jean-Sebastien Morisset (https://wpsso.com/)
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -62,17 +62,18 @@ if ( ! class_exists( 'WpssoException' ) ) {
 
 			$this->p =& Wpsso::get_instance();
 
-			if ( $this->p->debug->enabled )
+			if ( $this->p->debug->enabled ) {
 				$this->p->debug->mark();
+			}
 
-			if ( $message === null && isset( $this->httpResultCodes[(int) $code] ) )
+			if ( null === $message && isset( $this->httpResultCodes[(int) $code] ) )
 				$message .= ' HTTP '.$code.' '.$this->httpResultCodes[(int) $code].'.';
 
 			parent::__construct( trim( $message ), $code, $previous );
 		}
 
 		public function errorMessage( $ret = false ) {
-			/*
+			/**
 			 * getMessage();        // message of exception
 			 * getCode();           // code of exception
 			 * getFile();           // source filename
@@ -81,16 +82,15 @@ if ( ! class_exists( 'WpssoException' ) ) {
 			 * getPrevious();       // previous exception
 			 * getTraceAsString();  // formatted string of trace
 			 */
-			$err_msg = $this->getMessage();
+			$error_msg = $this->getMessage();
 
-			if ( $this->p->debug->enabled )
-				$this->p->debug->log( $err_msg );
+			if ( $this->p->debug->enabled ) {
+				$this->p->debug->log( $error_msg );
+			}
 
-			$this->p->notice->err( $err_msg );
+			$this->p->notice->err( $error_msg );
 
 			return  $ret;
 		}
 	}
 }
-
-?>

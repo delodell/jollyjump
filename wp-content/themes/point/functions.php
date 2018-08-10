@@ -12,7 +12,7 @@ if ( ! function_exists( 'point_setup' ) ) :
  * as indicating support for post thumbnails.
  */
 function point_setup() {
-	define( 'MTS_THEME_VERSION', '2.0.3' );
+	define( 'MTS_THEME_VERSION', '2.0.6' );
 	/*
 	 * Make theme available for translation.
 	 * Translations can be filed in the /languages/ directory.

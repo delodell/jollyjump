@@ -23,6 +23,7 @@ dd { margin: 0 110px 0 0; padding: 0 0 0.5em 0; }
 .primary-navigation .wpmm-entry-date, .primary-navigation .wpmm-entry-author { float: right; margin-right: 0; margin-left: 10px; }
 .primary-navigation .wpmm-entry-author { margin-left: 0 }
 .primary-navigation #wpmm-megamenu .wpmm-post i { margin-right: 0; margin-left: 4px; }
+.rtl #commentform .comment-form-cookies-consent input { margin-right: 0; margin-left: 8px; }
 /*-[ Content ]--------------------*/
 #content_box { float: right }
 .post { float: right }

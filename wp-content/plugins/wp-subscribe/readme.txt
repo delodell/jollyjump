@@ -3,8 +3,8 @@ Contributors: mythemeshop
 Creator's website link: http://mythemeshop.com/plugins/wp-subscribe/
 Tags: subscribe, subscription, subscription box, newsletter, subscribe widget, mailchimp, aweber, feedburner,
 Requires at least: 4.0
-Tested up to: 4.7.3
-Stable tag: 1.2.5
+Tested up to: 4.9.1
+Stable tag: 1.2.10
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -81,6 +81,21 @@ Please disable all plugins and check if plugin is working properly. Then you can
 2. WP Subscribe Settings
 
 == Changelog ==
+
+= 1.2.10 =
+* Changed admin notices
+
+= 1.2.9 =
+* Updated admin notices
+
+= 1.2.8 =
+* Added consent field
+
+= 1.2.7 =
+* Fixed SVN issue
+
+= 1.2.6 =
+* Fixed PHP notices
 
 = 1.2.5 =
 * Fixed aweber list issue

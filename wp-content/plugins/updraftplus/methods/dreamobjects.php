@@ -9,8 +9,19 @@ require_once(UPDRAFTPLUS_DIR.'/methods/s3.php');
  */
 class UpdraftPlus_BackupModule_dreamobjects extends UpdraftPlus_BackupModule_s3 {
 
-	// When new endpoint introduced in future, Please add it here and also add it as hard coded option for endpoint dropdown in self::get_partial_configuration_template_for_endpoint()
-	private $dreamobjects_endpoints = array('objects-us-west-1.dream.io');
+	private $dreamobjects_endpoints = array();
+
+	public function __construct() {
+		// When new endpoint introduced in future, Please add it here and also add it as hard coded option for endpoint dropdown in self::get_partial_configuration_template_for_endpoint()
+		// Put the default first
+		$this->dreamobjects_endpoints = array(
+			// Endpoint, then the label
+			'objects-us-west-1.dream.io' => 'objects-us-west-1.dream.io',
+			'objects-us-east-1.dream.io' => 'objects-us-east-1.dream.io ('.__('launching some time in 2018', 'updraftplus').')',
+		);
+	}
+	
+	protected $use_v4 = false;
 
 	protected function set_region($obj, $region = '', $bucket_name = '') {
 		$config = $this->get_config();
@@ -27,7 +38,7 @@ class UpdraftPlus_BackupModule_dreamobjects extends UpdraftPlus_BackupModule_s3 
 	 */
 	public function get_supported_features() {
 		// This options format is handled via only accessing options via $this->get_options()
-		return array('multi_options', 'config_templates');
+		return array('multi_options', 'config_templates', 'multi_storage');
 	}
 
 	/**
@@ -53,8 +64,20 @@ class UpdraftPlus_BackupModule_dreamobjects extends UpdraftPlus_BackupModule_s3 
 		$opts['whoweare'] = 'DreamObjects';
 		$opts['whoweare_long'] = 'DreamObjects';
 		$opts['key'] = 'dreamobjects';
-		if (empty($opts['endpoint'])) $opts['endpoint'] = $this->dreamobjects_endpoints[0];
+		if (empty($opts['endpoint'])) {
+			$endpoints = array_keys($this->dreamobjects_endpoints);
+			$opts['endpoint'] = $endpoints[0];
+		}
 		return $opts;
+	}
+
+	/**
+	 * Get the pre configuration template
+	 *
+	 * @return String - the template
+	 */
+	public function get_pre_configuration_template() {
+		$this->get_pre_configuration_template_engine('dreamobjects', 'DreamObjects', 'DreamObjects', 'DreamObjects', 'https://panel.dreamhost.com/index.cgi?tree=storage.dreamhostobjects', '<a href="https://dreamhost.com/cloud/dreamobjects/"><img alt="DreamObjects" src="'.UPDRAFTPLUS_URL.'/images/dreamobjects_logo-horiz-2013.png"></a>');
 	}
 
 	/**
@@ -76,8 +99,10 @@ class UpdraftPlus_BackupModule_dreamobjects extends UpdraftPlus_BackupModule_s3 
 		return '<tr class="'.$this->get_css_classes().'">
 					<th>'.sprintf(__('%s end-point', 'updraftplus'), 'DreamObjects').'</th>
 					<td>
-						<select data-updraft_settings_test="endpoint" '.$this->output_settings_field_name_and_id('endpoint', true).' style="width: 360px">
-							<option value="'.esc_attr('objects-us-west-1.dream.io').'" {{#if is_objects_us_west_1_dream_io_endpoint}}selected="selected"{{/if}}>'.esc_html('objects-us-west-1.dream.io').'</option>				
+						<select data-updraft_settings_test="endpoint" '.$this->output_settings_field_name_and_id('endpoint', true).' style="width: 360px">							
+							{{#each dreamobjects_endpoints as |description endpoint|}}
+								<option value="{{endpoint}}" {{#ifeq ../endpoint endpoint}}selected="selected"{{/ifeq}}>{{description}}</option>
+							{{/each}}
 						</select>
 					</td>
 				</tr>';
@@ -89,10 +114,9 @@ class UpdraftPlus_BackupModule_dreamobjects extends UpdraftPlus_BackupModule_s3 
 	 * @param array $opts
 	 * @return array - Modified handerbar template options
 	 */
-	protected function transform_options_for_template($opts) {
-		if (isset($opts['endpoint']) && 'objects-us-west-1.dream.io' == $opts['endpoint']) {
-			$opts['is_objects_us_west_1_dream_io_endpoint'] = true;
-		}
+	public function transform_options_for_template($opts) {
+		$opts['endpoint'] = empty($opts['endpoint']) ? '' : $opts['endpoint'];
+		$opts['dreamobjects_endpoints'] = $this->dreamobjects_endpoints;
 		return $opts;
 	}
 

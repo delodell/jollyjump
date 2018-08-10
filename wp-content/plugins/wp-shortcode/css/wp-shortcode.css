@@ -284,3 +284,10 @@ a.btn_white { color: #4F4F4F!important }
     padding-bottom: 5px;
     border-bottom: 5px solid #EEE;
 }
+
+@media screen and (max-width: 480px) {
+    .one_half, .one_third, .two_third, .three_fourth, .one_fourth, .one_fifth, .two_fifth, .three_fifth, .four_fifth, .one_sixth, .five_sixth {
+        width: 100%;
+        margin-right: 0;
+    }
+}

@@ -5,18 +5,21 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 	global $wp_roles;
 	$siteurl = site_url();
  
+	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
 	$components = wfu_component_definitions();
 	if ( $shortcode_tag == 'wordpress_file_upload' ) {
 		$plugin_title = "Uploader";
 		$cats = wfu_category_definitions();
 		$defs = wfu_attribute_definitions();
+		//remove personaldata category if Personal Data are not activated in
+		//plugin's Settings
+		if ($plugin_options["personaldata"] != "1" && isset($cats["personaldata"])) unset($cats["personaldata"]);
 	}
 	else {
 		$plugin_title = "Browser";
 		$cats = wfu_browser_category_definitions();
 		$defs = wfu_browser_attribute_definitions();
 	}
-	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
 	
 	if ( $data == "" ) {
 		$shortcode = $plugin_options['shortcode'];
@@ -746,7 +749,7 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 			$fieldprops_default = array ( "type" => "text", "label" => "", "labelposition" => "left", "required" => false, "donotautocomplete" => false, "validate" => false, "default" => "", "data" => "", "group" => "", "format" => "", "hintposition" => "right", "typehook" => false );
 			//parse shortcode attribute to $fields
 			$fields = wfu_parse_userdata_attribute($def['value']);
-			$labelpositions = array("none", "top", "right", "bottom", "left");
+			$labelpositions = array("none", "top", "right", "bottom", "left", "placeholder");
 			$hintpositions = array("none", "inline", "top", "right", "bottom", "left");
 			if ( count($fields) == 0 ) array_push($fields, $fieldprops_default);
 			//set html template variable

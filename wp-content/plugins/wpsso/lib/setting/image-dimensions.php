@@ -1,8 +1,8 @@
 <?php
-/*
+/**
  * License: GPLv3
  * License URI: https://www.gnu.org/licenses/gpl.txt
- * Copyright 2012-2017 Jean-Sebastien Morisset (https://wpsso.com/)
+ * Copyright 2012-2018 Jean-Sebastien Morisset (https://wpsso.com/)
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -20,10 +20,10 @@ if ( ! class_exists( 'WpssoSettingImagedimensions' ) && class_exists( 'WpssoAdmi
 				$this->p->debug->mark();
 			}
 
-			$this->menu_id = $id;
+			$this->menu_id   = $id;
 			$this->menu_name = $name;
-			$this->menu_lib = $lib;
-			$this->menu_ext = $ext;	// lowercase acronyn for plugin or extension
+			$this->menu_lib  = $lib;
+			$this->menu_ext  = $ext;
 		}
 
 		protected function add_plugin_hooks() {
@@ -32,21 +32,24 @@ if ( ! class_exists( 'WpssoSettingImagedimensions' ) && class_exists( 'WpssoAdmi
 			) );
 		}
 
-		// called by the extended WpssoAdmin class
+		/**
+		 * Called by the extended WpssoAdmin class.
+		 */
 		protected function add_meta_boxes() {
 			add_meta_box( $this->pagehook.'_image_dimensions',
-				_x( 'Image Dimensions', 'metabox title', 'wpsso' ),
-					array( &$this, 'show_metabox_image_dimensions' ), $this->pagehook, 'normal' );
+				_x( 'Social and Search Image Sizes / Dimensions', 'metabox title', 'wpsso' ),
+					array( $this, 'show_metabox_image_dimensions' ), $this->pagehook, 'normal' );
 		}
 
 		public function filter_action_buttons( $action_buttons ) {
-			$action_buttons[0]['reload_default_sizes'] = _x( 'Reload Default Sizes',
-				'submit button', 'wpsso' );
+			$action_buttons[0]['reload_default_sizes'] = _x( 'Reload Default Sizes', 'submit button', 'wpsso' );
 			return $action_buttons;
 		}
 
 		public function show_metabox_image_dimensions() {
+
 			$metabox_id = $this->menu_id;
+
 			echo '<table class="sucom-settings '.$this->p->cf['lca'].'">';
 
 			$table_rows = array_merge( $this->get_table_rows( $metabox_id, 'general' ),
@@ -56,15 +59,17 @@ if ( ! class_exists( 'WpssoSettingImagedimensions' ) && class_exists( 'WpssoAdmi
 			sort( $table_rows );
 
 			foreach ( $table_rows as $num => $row ) {
-				echo '<tr>'.$row.'</tr>'."\n";
+				echo '<tr>'.$row.'</tr>' . "\n";
 			}
+
 			echo '</table>';
 		}
 
-		protected function get_table_rows( $metabox_id, $key ) {
+		protected function get_table_rows( $metabox_id, $tab_key ) {
+
 			$table_rows = array();
 
-			switch ( $metabox_id.'-'.$key ) {
+			switch ( $metabox_id.'-'.$tab_key ) {
 
 				case 'image-dimensions-general':
 
@@ -86,9 +91,8 @@ if ( ! class_exists( 'WpssoSettingImagedimensions' ) && class_exists( 'WpssoAdmi
 
 					break;
 			}
+
 			return $table_rows;
 		}
 	}
 }
-
-?>

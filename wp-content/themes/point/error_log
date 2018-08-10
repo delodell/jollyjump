@@ -1,5 +1,0 @@
-[08-Aug-2017 03:29:40 UTC] PHP Fatal error:  Call to undefined function get_header() in /home/debsjump/public_html/prod/blog/wp-content/themes/point/404.php on line 6
-[14-Aug-2017 02:25:50 UTC] PHP Fatal error:  Call to undefined function language_attributes() in /home/debsjump/public_html/prod/blog/wp-content/themes/point/header.php on line 9
-[14-Aug-2017 02:25:50 UTC] PHP Fatal error:  Call to undefined function get_header() in /home/debsjump/public_html/prod/blog/wp-content/themes/point/404.php on line 6
-[14-Aug-2017 02:25:50 UTC] PHP Fatal error:  Call to undefined function get_header() in /home/debsjump/public_html/prod/blog/wp-content/themes/point/archive.php on line 16
-[17-Aug-2017 15:15:16 UTC] PHP Fatal error:  Call to undefined function get_header() in /home/debsjump/public_html/prod/blog/wp-content/themes/point/index.php on line 8

@@ -18,6 +18,7 @@ DEFINE("WFU_CAPTCHAPROMPT", __('Please fill in the above words: ', 'wp-file-uplo
 DEFINE("WFU_UPLOADMEDIABUTTON", __('Upload Media', 'wp-file-upload'));
 DEFINE("WFU_VIDEONAME", __('videostream', 'wp-file-upload'));
 DEFINE("WFU_IMAGENAME", __('screenshot', 'wp-file-upload'));
+DEFINE("WFU_CONSENTQUESTION", __('By activating this option I agree to let the website keep my personal data', 'wp-file-upload'));
 //browser default values
 DEFINE("WFU_FILETITLE", __('File', 'wp-file-upload'));
 DEFINE("WFU_DATETITLE", __('Date', 'wp-file-upload'));
@@ -49,7 +50,7 @@ DEFINE("WFU_ERROR_ADMIN_DIR_PERMISSION", __("Error. Permission denied to write t
 DEFINE("WFU_ERROR_ADMIN_FILE_WRONGEXT", __("Error. This file was rejected because its extension is not correct. Its proper filename is: ", "wp-file-upload"));
 DEFINE("WFU_ERROR_ADMIN_DOS_ATTACK", __("Too many files are uploaded in a short period of time. This may be a Denial-Of-Service attack, so file was rejected. Please check the upload log for suspicious behaviour.", "wp-file-upload"));
 DEFINE("WFU_ERROR_DOS_ATTACK", __("File not uploaded in order to prevent overflow of the website. Please contact administrator.", "wp-file-upload"));
-DEFINE("WFU_ERROR_DIR_EXIST", __("Targer folder doesn't exist.", "wp-file-upload"));
+DEFINE("WFU_ERROR_DIR_EXIST", __("Target folder doesn't exist.", "wp-file-upload"));
 DEFINE("WFU_ERROR_DIR_NOTEMP", __("Upload failed! Missing a temporary folder.", "wp-file-upload"));
 DEFINE("WFU_ERROR_DIR_PERMISSION", __("Upload failed! Permission denied to write to target folder.", "wp-file-upload"));
 DEFINE("WFU_ERROR_FILE_ALLOW", __("File not allowed.", "wp-file-upload"));
@@ -133,6 +134,7 @@ DEFINE("WFU_WARNING_FILE_EXISTS", __("Upload skipped! File already exists.", "wp
 DEFINE("WFU_WARNING_FILE_SUSPICIOUS", __("The extension of the file does not match its contents.", "wp-file-upload"));
 DEFINE("WFU_WARNING_ADMIN_FILE_SUSPICIOUS", __("Upload succeeded but the file is suspicious because its contents do not match its extension. Its proper filename is: ", "wp-file-upload"));
 DEFINE("WFU_WARNING_NOFILES_SELECTED", __("No files have been selected!", "wp-file-upload"));
+DEFINE("WFU_WARNING_CONSENT_NOTCOMPLETED", __("Please complete the consent question before continuing the upload!", "wp-file-upload"));
 DEFINE("WFU_WARNING_WPFILEBASE_NOTUPDATED_NOFILES", __("WPFilebase Plugin not updated because there were no files uploaded.", "wp-file-upload"));
 DEFINE("WFU_WARNING_NOTIFY_NOTSENT_NOFILES", __("Notification email was not sent because there were no files uploaded.", "wp-file-upload"));
 DEFINE("WFU_WARNING_NOTIFY_NOTSENT_NORECIPIENTS", __("Notification email was not sent because no recipients were defined. Please check notifyrecipients attribute in the shortcode.", "wp-file-upload"));
@@ -186,6 +188,8 @@ DEFINE("WFU_BROWSER_DELETEFILE_PROMPT", __("Are you sure you want to delete this
 DEFINE("WFU_BROWSER_DELETEFILES_PROMPT", __("Are you sure you want to delete these files?", "wp-file-upload"));
 DEFINE("WFU_BROWSER_BULKACTION_TITLE", __("Bulk Actions", "wp-file-upload"));
 DEFINE("WFU_BROWSER_BULKACTION_LABEL", __("Apply", "wp-file-upload"));
+DEFINE("WFU_PAGINATION_PAGE", __("Page", "wp-file-upload"));
+DEFINE("WFU_PAGINATION_OF", __("of ", "wp-file-upload"));
 DEFINE("WFU_CANCEL_UPLOAD_PROMPT", __("Are you sure that you want to cancel the upload?", "wp-file-upload"));
 DEFINE("WFU_FILE_CANCEL_HINT", __("cancel upload of this file", "wp-file-upload"));
 DEFINE("WFU_UPLOAD_STATE0", __("Upload in progress", "wp-file-upload"));
@@ -236,7 +240,8 @@ $GLOBALS["WFU_GLOBALS"] = array(
 	"WFU_UPLOADPATH" => array( "Default Upload Path", "string", "uploads", "The default upload path of the uploader shortcode. It must be a folder relative to wp-content dir." ),
 	"WFU_FITMODE" => array( "Default Fit Mode", "string", "fixed", "The default fit mode of the uploader shortcode. It can be 'fixed' or 'responsive'." ),
 	"WFU_ALLOWNOFILE" => array( "Default Allow No File Mode", "string", "false", "The default mode for allowing no file uploads. If it is set to 'true' then an upload form can be submitted even if a file has not been selected. It can be 'true' or 'false'." ),
-	"WFU_CREATEPATH" => array( "Default Create Path State", "string", "false", "The default create path state (create or not the upload path if it does not exist) of the uploader shortcode. It can be 'true' or 'false'." ),
+	"WFU_ALLOWNOFILE" => array( "Default Allow No File Mode", "string", "false", "The default mode for allowing no file uploads. If it is set to 'true' then an upload form can be submitted even if a file has not been selected. It can be 'true' or 'false'." ),
+	"WFU_RESETMODE" => array( "Default Reset Form Mode", "string", "always", "The default reset mode of the upload form. It can be 'always', 'onsuccess' or 'never'." ),
 	"WFU_FORCEFILENAME" => array( "Default Force Filename State", "string", "false", "The default force filename state (force plugin to leave filename unchanged) of the uploader shortcode. It can be 'true' or 'false'." ),
 	"WFU_UPLOADPATTERNS" => array( "Default Upload Extensions", "string", "*.*", "The default allowed file extensions of the uploader shortcode. It can be a comma-separated list of wildcard extensions." ),
 	"WFU_MAXSIZE" => array( "Default Maximum File Size", "string", "50", "The default maximum allowed file size of the uploader shortcode in Megabytes. It can be any positive number." ),
@@ -281,7 +286,11 @@ $GLOBALS["WFU_GLOBALS"] = array(
 	"WFU_VIDEOASPECTRATIO" => array( "Default Video Aspect Ratio", "string", "", "The default preferable video aspect ratio for webcam video capture. It can be any positive value." ),
 	"WFU_VIDEOFRAMERATE" => array( "Default Video Frame Rate", "string", "", "The default preferable video frame rate for webcam video capture. It can be any positive value in frames/sec." ),
 	"WFU_CAMERAFACING" => array( "Default Camera Facing Mode", "string", "any", "The default preferable camera to be used for video/screenshot capture. It can be 'any', 'front' or 'back'." ),
-	"WFU_MAXRECORDTIME" => array( "Default Maximum Record Time", "string", "10", "The default maximum video recording time in seconds. The default value is 10 seconds." )
+	"WFU_MAXRECORDTIME" => array( "Default Maximum Record Time", "string", "10", "The default maximum video recording time in seconds. The default value is 10 seconds." ),
+	"WFU_ASKCONSENT" => array( "Default Ask Consent State", "string", "false", "The default state of personal data consent request. The default value is false." ),
+	"WFU_PERSONALDATATYPES" => array( "Default Personal Data Types", "string", "userdata", "The default personal data types. The default value is 'userdata'." ),
+	"WFU_CONSENTFORMAT" => array( "Default Consent Format", "string", "checkbox", "The default format of consent question. The default value is 'checkbox'." ),
+	"WFU_CONSENTPRESELECT" => array( "Default Consent Preselect State", "string", "false", "The default preselect state of consent question when checkbox format is active. The default value is false." )
 );
 //other plugin values
 $GLOBALS["WFU_GLOBALS"] += array(
@@ -292,11 +301,14 @@ $GLOBALS["WFU_GLOBALS"] += array(
 	"WFU_DOS_ATTACKS_TIME_INTERVAL" => array( "Denial-Of-Service Time Interval", "integer", 3600, "Defines the time interval for DOS attacks check. The time interval is given in seconds." ),
 	"WFU_DOS_ATTACKS_ADMIN_EMAIL_FREQUENCY" => array( "Denial-Of-Service Admin Email Frequency", "integer", 3600, "Defines how frequently an email will be sent to administrator notifying for Denial-Of-Service attacks. The time interval is given in seconds." ),
 	"WFU_SANITIZE_FILENAME_MODE" => array( "Filename Sanitization Mode", "string", "strict", "The sanitization mode for filenames. It can be 'strict' or 'loose'." ),
+	"WFU_SANITIZE_FILENAME_DOTS" => array( "Sanitize Filename Dots", "string", "true", "Convert dot symbols (.) in filename into dashes, in order to avoid double extensions. It can be 'true' or 'false'." ),
 	"WFU_WILDCARD_ASTERISK_MODE" => array( "Wildcard Asterisk Mode", "string", "strict", "The mode of wildcard pattern asterisk symbol. If it is strict, then the asterisk will not match dot (.) characters. It can be 'strict' or 'loose'." ),
 	"WFU_PHP_ARRAY_MAXLEN" => array( "Max PHP Array Length", "string", "10000", "The maximum allowable number of items of a PHP array." ),
+	"WFU_ADMINBROWSER_TABLE_MAXROWS" => array( "Admin Browser Rows Per Page", "integer", 25, "The number of rows per page of the admin browser. A value equal to zero or less denotes no pagination." ),
 	"WFU_HISTORYLOG_TABLE_MAXROWS" => array( "History Log Table Rows Per Page", "integer", 25, "The number of rows per page of the History Log table." ),
 	"WFU_ALTERNATIVE_RANDOMIZER" => array( "Use Alternative Randomizer", "string", "false", "On fast web servers the plugin's generator of random strings may not work properly causing various problems. If it is set to true, an alternative randomizer method is employed that works for fast web servers. It can be 'true' or 'false'." ),
 	"WFU_FORCE_NOTIFICATIONS" => array( "Force Email Notifications", "string", "false", "Send email notifications (if they are activated) even if no file has been uploaded. It can be 'true' or 'false'." ),
+	"WFU_UPDATE_MEDIA_ON_DELETE" => array( "Update Media on Delete", "string", "true", "When an uploaded file is deleted then delete also the corresponding Media Library item if exists. It can be 'true' or 'false'." ),
 	"WFU_DASHBOARD_PROTECTED" => array( "Dashboard Is Protected", "string", "false", "If /wp-admin folder is password protected then this variable should be set to 'true' so that internal operations of the plugin can work. The username and password should also be set." ),
 	"WFU_DASHBOARD_USERNAME" => array( "Protected Dashboard Username", "string", "", "Username entry for accessing protected /wp-admin folder." ),
 	"WFU_DASHBOARD_PASSWORD" => array( "Protected Dashboard Password", "string", "", "Password entry for accessing protected /wp-admin folder." ),
@@ -306,7 +318,14 @@ $GLOBALS["WFU_GLOBALS"] += array(
 	"WFU_RELAX_CURL_VERIFY_HOST" => array( "Relax cURL Host Verification", "string", "false", "If it is set to 'true' then CURLOPT_SSL_VERIFYHOST will be disabled when executing a cURL POST request. This is required in some cases so that the plugin can reach https://services2.iptanus.com, because on some servers it fails with a file_get_contents warning. It can be 'true' or 'false'." ),
 	"WFU_USE_ALT_IPTANUS_SERVER" => array( "Use Alternative Iptanus Server", "string", "false", "If it is set to 'true' then the alternative Iptanus server will be used. This is a work-around in some cases where the website cannot reach https://services2.iptanus.com. It can be 'true' or 'false'." ),
 	"WFU_ALT_IPTANUS_SERVER" => array( "Alternative Iptanus Server", "string", "https://iptanusservices.appspot.com", "If it is set then this is the URL of the alternative Iptanus server." ),
-	"WFU_ALT_VERSION_SERVER" => array( "Alternative Version Server", "string", "https://iptanusservices.appspot.com/g79xo30q8s", "If the alternative Iptanus server is used and this variable is not empty, then it will be used as the alternative Version Server URL." )
+	"WFU_ALT_VERSION_SERVER" => array( "Alternative Version Server", "string", "https://iptanusservices.appspot.com/g79xo30q8s", "If the alternative Iptanus server is used and this variable is not empty, then it will be used as the alternative Version Server URL." ),
+	"WFU_MINIFY_INLINE_CSS" => array( "Minify Inline CSS Code", "string", "true", "Defines whether the inline CSS code will be minified. It can be 'true' or 'false'." ),
+	"WFU_MINIFY_INLINE_JS" => array( "Minify Inline JS Code", "string", "true", "Defines whether the inline Javascript code will be minified. It can be 'true' or 'false'." ),
+	"WFU_US_DBOPTION_CHECK" => array( "DB Option User State Check Interval", "integer", 7200, "Defines how often (in seconds) the plugin will update user state list, when user state is saved in DB option table." ),
+	"WFU_US_DBOPTION_LIFE" => array( "DB Option User State Life", "integer", 1800, "Defines the maximum time of inactivity of a user state, when user state is saved in DB option table." ),
+	"WFU_PD_VISIBLE_OPLEVELS" => array( "Personal Data Visible Operation Levels", "integer", 3, "Defines how deep administrators can go into personal data operation details. A value of -1 denotes that there is no limit." ),
+	"WFU_PD_VISIBLE_PERLEVELS" => array( "Personal Data Visible Permission Levels", "integer", 2, "Defines how deep administrators can go into personal data permission details. A value of -1 denotes that there is no limit." ),
+	"WFU_PD_VISIBLE_LOGLEVELS" => array( "Personal Data Visible Log Action Levels", "integer", 2, "Defines how deep administrators can go into personal data log action details. A value of -1 denotes that there is no limit." )
 );
 //color definitions
 $GLOBALS["WFU_GLOBALS"] += array(
@@ -410,7 +429,8 @@ function wfu_set_javascript_constants() {
 		"ajax_url" => wfu_ajaxurl(),
 		"wfu_pageexit_prompt" => WFU_PAGEEXIT_PROMPT,
 		"wfu_subdir_typedir" => WFU_SUBDIR_TYPEDIR,
-		"wfu_uploadprogress_mode" => WFU_VAR("WFU_UPLOADPROGRESS_MODE")
+		"wfu_uploadprogress_mode" => WFU_VAR("WFU_UPLOADPROGRESS_MODE"),
+		"wfu_consent_notcompleted" => WFU_WARNING_CONSENT_NOTCOMPLETED
 	);
 	$consts_txt = "";
 	foreach ( $consts as $key => $val )

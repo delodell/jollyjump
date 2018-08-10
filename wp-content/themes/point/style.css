@@ -4,8 +4,8 @@ Theme URI: http://mythemeshop.com/themes/point/
 Author: MyThemeShop
 Author URI: http://mythemeshop.com/
 Description: Point is a fluid responsive and multipurpose WP Theme. Through the advanced options panel, you can choose from multiple site layouts, backgrounds and color schemes, as well as control specific features of the theme. ==>>>> Demo: ==>>>> http://demo.mythemeshop.com/point/ It includes 3 custom widgets, 2 site layouts, an author box and related posts widget, ad management, cross-browser compatibility, RTL Language support and it's translation-ready, all search engine optimized. Support for free themes is provided through the MyThemeShop forums. **Notable features => Fluid responsive layout. | Advanced options panel with ability to upload logo, favicon, customize settings and more. | 3 custom widgets included. | SEO Optimized | 2 site layouts to choose from. | Full width page template included. | Translation-ready. | Cross-browser compatible. | Ad management to control ad display. | Related posts widget. | Author box widget. | Unlimited color schemes. | Unlimited background colors, or upload your own image. | Option to disable or enable responsiveness | Numbered pagination | Trending stories option. | 2 featured post sections. | RTL Language Support | And much more! ==>>>> Support ==>>>> http://community.mythemeshop.com/
-Version: 2.0.3
-Tags: light, custom-menu, custom-header, custom-background, custom-colors, two-columns, right-sidebar, theme-options, threaded-comments, full-width-template, sticky-post, translation-ready, gray, blue, featured-images, theme-options, rtl-language-support
+Version: 2.0.6
+Tags: custom-menu, custom-header, custom-background, custom-colors, two-columns, right-sidebar, theme-options, threaded-comments, full-width-template, sticky-post, translation-ready, featured-images, theme-options, rtl-language-support
 License: GPL
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Text Domain: point
@@ -85,13 +85,6 @@ button[disabled], html input[disabled] { cursor: default }
 button::-moz-focus-inner, input::-moz-focus-inner {
     border: 0;
     padding: 0;
-}
-.button-cta {
-	padding:10px;
-	background-color:#38B7EE;
-	text-align:center;
-	font-size:20px;
-	color:white;
 }
 input { line-height: normal }
 input[type="checkbox"], input[type="radio"] {
@@ -1692,6 +1685,19 @@ input#author, input#email, input#url {
 }
 input#author, input#email, input#url, #comment { transition: all 0.25s ease-in-out }
 .contactform input[type="text"] { width: 380px }
+#commentform .comment-form-cookies-consent label { 
+    float: none;
+    padding: 0;
+    cursor: pointer;
+    line-height: 18px;
+    vertical-align: top;
+}
+#commentform .comment-form-cookies-consent input {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    -webkit-appearance: checkbox;
+}
 #cancel-comment-reply-link {
     float: right;
     line-height: 24px;

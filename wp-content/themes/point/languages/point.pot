@@ -1,26 +1,16 @@
-# Copyright (C) 2015 WP Backup
-# This file is distributed under the same license as the WP Backup package.
+# Copyright (C) 2017 MyThemeShop
+# This file is distributed under the GPL.
 msgid ""
 msgstr ""
-"Project-Id-Version: Point By MyThemeShop\n"
-"Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/my-wp-backup\n"
-"POT-Creation-Date: 2016-04-20 00:39+0530\n"
-"PO-Revision-Date: 2016-04-20 00:39+0530\n"
-"Last-Translator: MyThemeShop <support-team@mythemeshop.com>\n"
-"Language-Team: MyThemeShop <support-team@mythemeshop.com>\n"
-"Language: en\n"
+"Project-Id-Version: Point 2.0.5\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/theme/point\n"
+"POT-Creation-Date: 2017-11-16 13:21:04+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.6.2\n"
-"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;"
-"_n_noop:1,2;_c;_nc:4c,1,2;_x:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2;_ex:1,2c;"
-"esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c\n"
-"X-Poedit-Basepath: ..\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Poedit-SourceCharset: UTF-8\n"
-"X-Poedit-SearchPathExcluded-0: vendor\n"
-"X-Poedit-SearchPath-0: .\n"
+"PO-Revision-Date: 2017-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 
 #: 404.php:15 template-parts/content-none.php:17
 msgid "Error 404 Not Found"
@@ -77,91 +67,6 @@ msgstr ""
 
 #: comments.php:54
 msgid "Website"
-msgstr ""
-
-#: functions.php:51
-msgid "Primary Menu"
-msgstr ""
-
-#: functions.php:52
-msgid "Footer Menu"
-msgstr ""
-
-#: functions.php:82
-msgid "Like Point theme? You will <strong>LOVE Point Pro</strong>!"
-msgstr ""
-
-#: functions.php:82
-msgid "Click here for all the exciting features."
-msgstr ""
-
-#: functions.php:189
-msgid "Sidebar"
-msgstr ""
-
-#: functions.php:350
-msgid "(Edit)"
-msgstr ""
-
-#: functions.php:358
-msgid "Your comment is awaiting moderation."
-msgstr ""
-
-#: functions.php:464
-msgctxt "Droid Sans font: on or off"
-msgid "on"
-msgstr ""
-
-#: header.php:36
-msgid "Now Trending"
-msgstr ""
-
-#: header.php:79
-msgid "Menu"
-msgstr ""
-
-#: index.php:14
-msgid "Latest"
-msgstr ""
-
-#: page.php:14 single.php:39
-msgid "Next"
-msgstr ""
-
-#: page.php:14 single.php:39
-msgid "Previous"
-msgstr ""
-
-#: search.php:13
-msgid "Search Results for:"
-msgstr ""
-
-#: searchform.php:3
-msgid "Search the site"
-msgstr ""
-
-#: sidebar.php:12
-msgid "Search"
-msgstr ""
-
-#: sidebar.php:18
-msgid "Archives"
-msgstr ""
-
-#: sidebar.php:26
-msgid "Meta"
-msgstr ""
-
-#: single.php:49
-msgid "Tags"
-msgstr ""
-
-#: single.php:58
-msgid "Related Posts"
-msgstr ""
-
-#: single.php:84
-msgid "About The Author"
 msgstr ""
 
 #: functions/widget-ad125.php:31
@@ -338,12 +243,55 @@ msgid "Show profile icons."
 msgstr ""
 
 #: functions/widget-social.php:154
-#, php-format
 msgid "%sSocial Profile Icons"
 msgstr ""
 
 #: functions/widget-social.php:172
 msgid "Open links in new window?"
+msgstr ""
+
+#: functions.php:51
+msgid "Primary Menu"
+msgstr ""
+
+#: functions.php:52
+msgid "Footer Menu"
+msgstr ""
+
+#: functions.php:82
+msgid "Like Point theme? You will <strong>LOVE Point Pro</strong>!"
+msgstr ""
+
+#: functions.php:82
+msgid "Click here for all the exciting features."
+msgstr ""
+
+#: functions.php:189
+msgid "Sidebar"
+msgstr ""
+
+#: functions.php:350
+msgid "(Edit)"
+msgstr ""
+
+#: functions.php:358
+msgid "Your comment is awaiting moderation."
+msgstr ""
+
+#. Translators: If there are characters in your language that are not supported
+#. by Open Sans, translate this to 'off'. Do not translate into your own
+#. language.
+#: functions.php:464
+msgctxt "Droid Sans font: on or off"
+msgid "on"
+msgstr ""
+
+#: header.php:36
+msgid "Now Trending"
+msgstr ""
+
+#: header.php:79
+msgid "Menu"
 msgstr ""
 
 #: inc/customizer.php:56
@@ -527,7 +475,6 @@ msgid "Install Plugins"
 msgstr ""
 
 #: inc/plugin-activation.php:335 inc/plugin-activation.php:3844
-#, php-format
 msgid "Installing Plugin: %s"
 msgstr ""
 
@@ -535,22 +482,19 @@ msgstr ""
 msgid "Something went wrong with the plugin API."
 msgstr ""
 
-#: inc/plugin-activation.php:338
-#, php-format
+#: inc/plugin-activation.php:337
 msgid "This theme requires the following plugin: %1$s."
 msgid_plural "This theme requires the following plugins: %1$s."
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/plugin-activation.php:343 inc/plugin-activation.php:3847
-#, php-format
+#: inc/plugin-activation.php:342 inc/plugin-activation.php:3847
 msgid "This theme recommends the following plugin: %1$s."
 msgid_plural "This theme recommends the following plugins: %1$s."
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/plugin-activation.php:348
-#, php-format
+#: inc/plugin-activation.php:347
 msgid ""
 "Sorry, but you do not have the correct permissions to install the %1$s "
 "plugin."
@@ -560,8 +504,7 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/plugin-activation.php:353
-#, php-format
+#: inc/plugin-activation.php:352
 msgid ""
 "The following plugin needs to be updated to its latest version to ensure "
 "maximum compatibility with this theme: %1$s."
@@ -571,15 +514,13 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/plugin-activation.php:358
-#, php-format
+#: inc/plugin-activation.php:357
 msgid "There is an update available for: %1$s."
 msgid_plural "There are updates available for the following plugins: %1$s."
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/plugin-activation.php:363
-#, php-format
+#: inc/plugin-activation.php:362
 msgid ""
 "Sorry, but you do not have the correct permissions to update the %1$s plugin."
 msgid_plural ""
@@ -588,22 +529,19 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/plugin-activation.php:368
-#, php-format
+#: inc/plugin-activation.php:367
 msgid "The following required plugin is currently inactive: %1$s."
 msgid_plural "The following required plugins are currently inactive: %1$s."
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/plugin-activation.php:373 inc/plugin-activation.php:3850
-#, php-format
+#: inc/plugin-activation.php:372 inc/plugin-activation.php:3850
 msgid "The following recommended plugin is currently inactive: %1$s."
 msgid_plural "The following recommended plugins are currently inactive: %1$s."
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/plugin-activation.php:378
-#, php-format
+#: inc/plugin-activation.php:377
 msgid ""
 "Sorry, but you do not have the correct permissions to activate the %1$s "
 "plugin."
@@ -613,19 +551,19 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/plugin-activation.php:383 inc/plugin-activation.php:3854
+#: inc/plugin-activation.php:382 inc/plugin-activation.php:3854
 msgid "Begin installing plugin"
 msgid_plural "Begin installing plugins"
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/plugin-activation.php:388
+#: inc/plugin-activation.php:387
 msgid "Begin updating plugin"
 msgid_plural "Begin updating plugins"
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/plugin-activation.php:393 inc/plugin-activation.php:3855
+#: inc/plugin-activation.php:392 inc/plugin-activation.php:3855
 msgid "Begin activating plugin"
 msgid_plural "Begin activating plugins"
 msgstr[0] ""
@@ -646,24 +584,19 @@ msgstr ""
 
 #: inc/plugin-activation.php:400 inc/plugin-activation.php:2906
 msgid "The following plugin was activated successfully:"
-msgid_plural "The following plugins were activated successfully:"
-msgstr[0] ""
-msgstr[1] ""
+msgstr ""
 
 #: inc/plugin-activation.php:401
-#, php-format
 msgid "No action taken. Plugin %1$s was already active."
 msgstr ""
 
 #: inc/plugin-activation.php:402
-#, php-format
 msgid ""
 "Plugin not activated. A higher version of %s is needed for this theme. "
 "Please update the plugin."
 msgstr ""
 
 #: inc/plugin-activation.php:403
-#, php-format
 msgid "All plugins installed and activated successfully. %1$s"
 msgstr ""
 
@@ -714,6 +647,8 @@ msgctxt "plugin A *and* plugin B"
 msgid "and"
 msgstr ""
 
+#. #-#-#-#-#  point.pot (Point 2.0.5)  #-#-#-#-#
+#. Author of the plugin/theme
 #: inc/plugin-activation.php:1282 inc/plugin-activation.php:3876
 msgid "MyThemeShop"
 msgstr ""
@@ -723,7 +658,6 @@ msgid "Available Separately"
 msgstr ""
 
 #: inc/plugin-activation.php:1923
-#, php-format
 msgctxt "%s = version number"
 msgid "TGMPA v%s"
 msgstr ""
@@ -774,13 +708,11 @@ msgid "Update recommended"
 msgstr ""
 
 #: inc/plugin-activation.php:2276
-#, php-format
 msgctxt "%1$s = install status, %2$s = update status"
 msgid "%1$s, %2$s"
 msgstr ""
 
 #: inc/plugin-activation.php:2321
-#, php-format
 msgctxt "plugins"
 msgid "All <span class=\"count\">(%s)</span>"
 msgid_plural "All <span class=\"count\">(%s)</span>"
@@ -788,33 +720,28 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: inc/plugin-activation.php:2324
-#, php-format
 msgid "To Install <span class=\"count\">(%s)</span>"
 msgid_plural "To Install <span class=\"count\">(%s)</span>"
 msgstr[0] ""
 msgstr[1] ""
 
 #: inc/plugin-activation.php:2327
-#, php-format
 msgid "Update Available <span class=\"count\">(%s)</span>"
 msgid_plural "Update Available <span class=\"count\">(%s)</span>"
 msgstr[0] ""
 msgstr[1] ""
 
 #: inc/plugin-activation.php:2330
-#, php-format
 msgid "To Activate <span class=\"count\">(%s)</span>"
 msgid_plural "To Activate <span class=\"count\">(%s)</span>"
 msgstr[0] ""
 msgstr[1] ""
 
 #: inc/plugin-activation.php:2427
-#, php-format
 msgid "Version: %s"
 msgstr ""
 
 #: inc/plugin-activation.php:2428
-#, php-format
 msgid "Source: %s"
 msgstr ""
 
@@ -840,7 +767,6 @@ msgid "Available version:"
 msgstr ""
 
 #: inc/plugin-activation.php:2500
-#, php-format
 msgid ""
 "No plugins to install, update or activate. <a href=\"%1$s\">Return to the "
 "Dashboard</a>"
@@ -855,19 +781,16 @@ msgid "Description"
 msgstr ""
 
 #: inc/plugin-activation.php:2563
-#, php-format
 msgctxt "%2$s = plugin name in screen reader markup"
 msgid "Install %2$s"
 msgstr ""
 
 #: inc/plugin-activation.php:2567
-#, php-format
 msgctxt "%2$s = plugin name in screen reader markup"
 msgid "Update %2$s"
 msgstr ""
 
 #: inc/plugin-activation.php:2572
-#, php-format
 msgctxt "%2$s = plugin name in screen reader markup"
 msgid "Activate %2$s"
 msgstr ""
@@ -917,17 +840,14 @@ msgid "Plugin activation failed."
 msgstr ""
 
 #: inc/plugin-activation.php:3436
-#, php-format
 msgid "Updating Plugin %1$s (%2$d/%3$d)"
 msgstr ""
 
 #: inc/plugin-activation.php:3438
-#, php-format
 msgid "An error occurred while installing %1$s: <strong>%2$s</strong>."
 msgstr ""
 
 #: inc/plugin-activation.php:3439
-#, php-format
 msgid "The installation of %1$s failed."
 msgstr ""
 
@@ -938,7 +858,6 @@ msgid ""
 msgstr ""
 
 #: inc/plugin-activation.php:3444
-#, php-format
 msgid "%1$s installed and activated successfully."
 msgstr ""
 
@@ -955,7 +874,6 @@ msgid "All installations and activations have been completed."
 msgstr ""
 
 #: inc/plugin-activation.php:3446
-#, php-format
 msgid "Installing and Activating Plugin %1$s (%2$d/%3$d)"
 msgstr ""
 
@@ -966,7 +884,6 @@ msgid ""
 msgstr ""
 
 #: inc/plugin-activation.php:3450
-#, php-format
 msgid "%1$s installed successfully."
 msgstr ""
 
@@ -975,7 +892,6 @@ msgid "All installations have been completed."
 msgstr ""
 
 #: inc/plugin-activation.php:3452
-#, php-format
 msgid "Installing Plugin %1$s (%2$d/%3$d)"
 msgstr ""
 
@@ -1018,7 +934,6 @@ msgid ""
 msgstr ""
 
 #: inc/plugin-activation.php:3858
-#, php-format
 msgid "All plugins installed and activated successfully. %s"
 msgstr ""
 
@@ -1031,7 +946,6 @@ msgid "Recommended Plugins"
 msgstr ""
 
 #: inc/plugin-activation.php:4036
-#, php-format
 msgid "MyThemeShop and third party plugins recommended for %s theme!"
 msgstr ""
 
@@ -1084,24 +998,22 @@ msgid "Newer posts "
 msgstr ""
 
 #: inc/template-tags.php:70
-#, php-format
 msgctxt "post date"
 msgid "Posted on %s"
 msgstr ""
 
 #: inc/template-tags.php:75
-#, php-format
 msgctxt "post author"
 msgid "by %s"
 msgstr ""
 
+#. translators: used between list items, there is a space after the comma
 #: inc/template-tags.php:94
-#, php-format
 msgid "Posted in %1$s"
 msgstr ""
 
+#. translators: used between list items, there is a space after the comma
 #: inc/template-tags.php:100
-#, php-format
 msgid "Tagged %1$s"
 msgstr ""
 
@@ -1115,7 +1027,6 @@ msgstr ""
 
 #. translators: %s: Name of current post
 #: inc/template-tags.php:113
-#, php-format
 msgid "Edit %s"
 msgstr ""
 
@@ -1139,4 +1050,85 @@ msgstr ""
 
 #: inc/welcome-message.php:25
 msgid "Support Forums"
+msgstr ""
+
+#: index.php:14
+msgid "Latest"
+msgstr ""
+
+#: page-fullwidth.php:19 page.php:14 single.php:39
+msgid "Next"
+msgstr ""
+
+#: page-fullwidth.php:19 page.php:14 single.php:39
+msgid "Previous"
+msgstr ""
+
+#: search.php:13
+msgid "Search Results for:"
+msgstr ""
+
+#: searchform.php:3
+msgid "Search the site"
+msgstr ""
+
+#: sidebar.php:12
+msgid "Search"
+msgstr ""
+
+#: sidebar.php:18
+msgid "Archives"
+msgstr ""
+
+#: sidebar.php:26
+msgid "Meta"
+msgstr ""
+
+#: single.php:49
+msgid "Tags"
+msgstr ""
+
+#: single.php:58
+msgid "Related Posts"
+msgstr ""
+
+#: single.php:84
+msgid "About The Author"
+msgstr ""
+
+#. Theme Name of the plugin/theme
+msgid "Point"
+msgstr ""
+
+#. Theme URI of the plugin/theme
+msgid "http://mythemeshop.com/themes/point/"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid ""
+"Point is a fluid responsive and multipurpose WP Theme. Through the advanced "
+"options panel, you can choose from multiple site layouts, backgrounds and "
+"color schemes, as well as control specific features of the theme. ==>>>> "
+"Demo: ==>>>> http://demo.mythemeshop.com/point/ It includes 3 custom "
+"widgets, 2 site layouts, an author box and related posts widget, ad "
+"management, cross-browser compatibility, RTL Language support and it's "
+"translation-ready, all search engine optimized. Support for free themes is "
+"provided through the MyThemeShop forums. **Notable features => Fluid "
+"responsive layout. | Advanced options panel with ability to upload logo, "
+"favicon, customize settings and more. | 3 custom widgets included. | SEO "
+"Optimized | 2 site layouts to choose from. | Full width page template "
+"included. | Translation-ready. | Cross-browser compatible. | Ad management "
+"to control ad display. | Related posts widget. | Author box widget. | "
+"Unlimited color schemes. | Unlimited background colors, or upload your own "
+"image. | Option to disable or enable responsiveness | Numbered pagination | "
+"Trending stories option. | 2 featured post sections. | RTL Language Support "
+"| And much more! ==>>>> Support ==>>>> http://community.mythemeshop.com/"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "http://mythemeshop.com/"
+msgstr ""
+
+#. Template Name of the plugin/theme
+msgid "Full Width"
 msgstr ""

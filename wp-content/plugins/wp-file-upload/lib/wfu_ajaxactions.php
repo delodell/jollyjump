@@ -10,10 +10,10 @@ function wfu_ajax_action_send_email_notification() {
 	$params_index = sanitize_text_field($_POST['params_index']);
 	$session_token = sanitize_text_field($_POST['session_token']);
 
-	$arr = wfu_get_params_fields_from_index($params_index);
+	$arr = wfu_get_params_fields_from_index($params_index, $session_token);
 	//check referer using server sessions to avoid CSRF attacks
 	$sid = $arr['shortcode_id'];
-	if ( $_SESSION["wfu_token_".$sid] != $session_token ) die();
+	if ( WFU_USVAR("wfu_token_".$sid) != $session_token ) die();
 	if ( $user->user_login != $arr['user_login'] ) die();
 
 	$params_str = get_option('wfu_params_'.$arr['unique_id']);
@@ -29,9 +29,9 @@ function wfu_ajax_action_send_email_notification() {
 	//retrieve the list of uploaded files from session
 	$target_path_list = array();
 	$all_files_count = 0;
-	if ( isset($_SESSION["filedata_".$uniqueid]) && is_array($_SESSION["filedata_".$uniqueid]) ) {
-		$all_files_count = count($_SESSION["filedata_".$uniqueid]);
-		foreach ( $_SESSION["filedata_".$uniqueid] as $file ) {
+	if ( WFU_USVAR_exists("filedata_".$uniqueid) && is_array(WFU_USVAR("filedata_".$uniqueid)) ) {
+		$all_files_count = count(WFU_USVAR("filedata_".$uniqueid));
+		foreach ( WFU_USVAR("filedata_".$uniqueid) as $file ) {
 			if ( $file["upload_result"] == "success" || $file["upload_result"] == "warning" )
 				array_push($target_path_list, $file["filepath"]);
 		}
@@ -74,8 +74,8 @@ function wfu_ajax_action_send_email_notification() {
 	foreach ( $userdata_fields as $userdata_key => $userdata_field )
 		$userdata_fields[$userdata_key]["value"] = "";
 	//then retrieve userdata from session if files exist
-	if ( $all_files_count > 0 ) {
-		foreach ( $_SESSION["filedata_".$uniqueid] as $file ) {
+	if ( $all_files_count > 0 && WFU_USVAR_exists("filedata_".$uniqueid) && is_array(WFU_USVAR("filedata_".$uniqueid)) ) {
+		foreach ( WFU_USVAR("filedata_".$uniqueid) as $file ) {
 			if ( isset($file["user_data"]) ) {
 				$userdata_fields = array();
 				foreach ( $file["user_data"] as $userdata_key => $userdata_field )
@@ -127,7 +127,7 @@ function wfu_ajax_action_ask_server() {
 	if ( $session_token == "" ) die();
 	//check referrer using Wordpress nonces and server sessions to avoid CSRF attacks
 	check_ajax_referer( 'wfu-uploader-nonce', 'wfu_uploader_nonce' );
-	if ( $_SESSION["wfu_token_".$sid] != $session_token ) die();
+	if ( WFU_USVAR("wfu_token_".$sid) != $session_token ) die();
 	
 	//prepare parameters for before-upload filters
 	$ret = array( "status" => "", "echo" => "" );
@@ -158,7 +158,7 @@ function wfu_ajax_action_ask_server() {
 			$ret["status"] = "error";
 			$echo_str .= "CBUV[".$changable_data["error_message"]."]";
 		}
-		if ( $changable_data["js_script"] != "" ) $echo_str .= "CBUVJS[".$changable_data["js_script"]."]";
+		if ( $changable_data["js_script"] != "" ) $echo_str .= "CBUVJS[".wfu_plugin_encode_string($changable_data["js_script"])."]";
 	}
 	//then execute internal filters of extensions
 	$ret = apply_filters("_wfu_before_upload", $ret, $attr);
@@ -168,8 +168,8 @@ function wfu_ajax_action_ask_server() {
 	if ( $ret["status"] == "" )	$ret["status"] = "die";
 	//create an internal flag stored in session regarding the status of this
 	//upload, that will be used to verify or not the upload
-	if ( $ret["status"] == "success" ) $_SESSION["wfu_uploadstatus_".$attr["unique_id"]] = 1;
-	else $_SESSION["wfu_uploadstatus_".$attr["unique_id"]] = 0;
+	if ( $ret["status"] == "success" ) WFU_USVAR_store("wfu_uploadstatus_".$attr["unique_id"], 1);
+	else WFU_USVAR_store("wfu_uploadstatus_".$attr["unique_id"], 0);
 	
 	if ( $ret["status"] == "success" || $ret["status"] == "error" )
 		echo "wfu_askserver_".$ret["status"].":".$echo_str;
@@ -188,10 +188,10 @@ function wfu_ajax_action_cancel_upload() {
 	if ( $session_token == "" ) die();
 	//check referrer using Wordpress nonces and server sessions to avoid CSRF attacks
 	check_ajax_referer( 'wfu-uploader-nonce', 'wfu_uploader_nonce' );
-	if ( $_SESSION["wfu_token_".$sid] != $session_token ) die();
+	if ( WFU_USVAR("wfu_token_".$sid) != $session_token ) die();
 	
 	//setting status to 0 denotes cancelling of the upload
-	$_SESSION["wfu_uploadstatus_".$unique_id] = 0;
+	WFU_USVAR_store("wfu_uploadstatus_".$unique_id, 0);
 	
 	die("success");
 }
@@ -213,12 +213,12 @@ function wfu_ajax_action_callback() {
 	if ( $params_index == "" ) die();
 	
 	$user = wp_get_current_user();
-	$arr = wfu_get_params_fields_from_index($params_index);
+	$arr = wfu_get_params_fields_from_index($params_index, $session_token);
 	$sid = $arr['shortcode_id'];
 	//check referrer using server sessions to avoid CSRF attacks
-	if ( $_SESSION["wfu_token_".$sid] != $session_token ) {
+	if ( WFU_USVAR("wfu_token_".$sid) != $session_token ) {
 		$echo_str = "Session failed!<br/><br/>Session Data:<br/>";
-		$echo_str .= print_r(wfu_sanitize($_SESSION), true);
+		$echo_str .= print_r(wfu_sanitize(WFU_USALL()), true);
 		$echo_str .= "<br/><br/>Post Data:<br/>";
 		$echo_str .= print_r(wfu_sanitize($_POST), true);
 		$echo_str .= 'force_errorabort_code';
@@ -251,14 +251,14 @@ function wfu_ajax_action_callback() {
 	//if before upload actions have been executed and they have rejected the 
 	//upload, but for some reason (hack attempt) the upload continued, then
 	//terminate it
-	if ( isset($_SESSION["wfu_uploadstatus_".$unique_id]) && $_SESSION["wfu_uploadstatus_".$unique_id] == 0 ) die('force_errorabort_code');
+	if ( WFU_USVAR_exists("wfu_uploadstatus_".$unique_id) && WFU_USVAR("wfu_uploadstatus_".$unique_id) == 0 ) die('force_errorabort_code');
 	
 	//if upload has finished then perform post upload actions
 	if ( isset($_POST["upload_finished"]) && $_POST["upload_finished"] === "1" ) {
 		$echo_str = "";
 		//execute after upload filters
 		$ret = wfu_execute_after_upload_filters($sid, $unique_id);
-		if ( $ret["js_script"] != "" ) $echo_str = "CBUVJS[".$ret["js_script"]."]";
+		if ( $ret["js_script"] != "" ) $echo_str = "CBUVJS[".wfu_plugin_encode_string($ret["js_script"])."]";
 		die($echo_str);
 	}
 	
@@ -272,14 +272,23 @@ function wfu_ajax_action_callback() {
 	if ( $ret["status"] == "die" ) die($ret["echo"]);
 
 	//if this is the first pass of an upload attempt then perform pre-upload actions
-	if ( !isset($_SESSION['wfu_upload_first_pass_'.$unique_id]) || $_SESSION['wfu_upload_first_pass_'.$unique_id] != 'true' ) {
-		$_SESSION['wfu_upload_first_pass_'.$unique_id] = 'true';
+	if ( !WFU_USVAR_exists('wfu_upload_first_pass_'.$unique_id) || WFU_USVAR('wfu_upload_first_pass_'.$unique_id) != 'true' ) {
+		WFU_USVAR_store('wfu_upload_first_pass_'.$unique_id, 'true');
 	}
 
 	if ( !isset($_POST["subdir_sel_index"]) ) die();
 	$subdir_sel_index = sanitize_text_field( $_POST["subdir_sel_index"] );
 	$params['subdir_selection_index'] = $subdir_sel_index;
-	$_SESSION['wfu_check_refresh_'.$params["uploadid"]] = 'do not process';
+	WFU_USVAR_store('wfu_check_refresh_'.$params["uploadid"], 'do not process');
+	
+	//update consent status of user
+	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
+	$require_consent = ( $plugin_options["personaldata"] == "1" && wfu_check_user_consent($user) == "" && $params["askconsent"] == "true" );
+	if ( $require_consent ) {
+		if ( !isset($_POST['consent_result']) ) die();
+		$consent_result = ( $_POST['consent_result'] == "yes" ? "yes" : ( $_POST['consent_result'] == "no" ? "no" : "" ) );
+		wfu_update_user_consent($user, $consent_result);
+	}
 
 	$wfu_process_file_array = wfu_process_files($params, 'ajax');
 	// extract safe_output from wfu_process_file_array and pass it as separate part of the response text
@@ -308,6 +317,8 @@ function wfu_ajax_action_save_shortcode() {
 	$shortcode_position = wfu_sanitize_int($_POST['shortcode_position']);
 	$shortcode_tag = wfu_sanitize_tag($_POST['shortcode_tag']);
 	$widget_id = sanitize_text_field($_POST['widget_id']);
+
+	$shortcode = wfu_sanitize_shortcode(wfu_plugin_decode_string($shortcode), $shortcode_tag);
 	
 	if ( $post_id == "" && $widget_id == "" ) {
 		die();
@@ -320,7 +331,7 @@ function wfu_ajax_action_save_shortcode() {
 		if ( $post_id != "" && !wfu_check_edit_shortcode($data) ) $echo_str = "wfu_save_shortcode:fail:post_modified";
 		else {
 			if ( $widget_id == "" ) {
-				$new_shortcode = "[".$shortcode_tag." ".wfu_plugin_decode_string($shortcode)."]";
+				$new_shortcode = "[".$shortcode_tag." ".$shortcode."]";
 				if ( wfu_replace_shortcode($data, $new_shortcode) ) {
 					$post = get_post($post_id);
 					$hash = hash('md5', $post->post_content);
@@ -335,7 +346,7 @@ function wfu_ajax_action_save_shortcode() {
 					$widget_sidebar = is_active_widget(false, $widget_id, "wordpress_file_upload_widget");
 					if ( !$widget_sidebar ) $echo_str = "wfu_save_shortcode:fail:post_update_failed";
 					else {
-						$widget_obj->update_external(wfu_plugin_decode_string($shortcode));
+						$widget_obj->update_external($shortcode);
 						$hash = $data['post_hash'];
 						$echo_str = "wfu_save_shortcode:success:".$hash;
 					}
@@ -488,6 +499,8 @@ function wfu_ajax_action_read_subfolders() {
 }
 
 function wfu_ajax_action_download_file_invoker() {
+	global $wfu_user_state_handler;
+
 	$_POST = stripslashes_deep($_POST);
 	$_GET = stripslashes_deep($_GET);
 
@@ -503,13 +516,19 @@ function wfu_ajax_action_download_file_invoker() {
 		die();
 	}
 	
-	$file_code = wfu_sanitize_code($file_code);
+	$file_code = sanitize_text_field($file_code);
 	//if file_code is exportdata, then export of data has been requested and
 	//we need to create a file with export data and recreate file_code
-	if ( $file_code == "exportdata" && current_user_can( 'manage_options' ) ) {
-		$filepath = wfu_export_uploaded_files(null);
+	if ( substr($file_code, 0, 10) == "exportdata" && current_user_can( 'manage_options' ) ) {
+		$params = null;
+		$params_str = substr($file_code, 11);
+		if ( trim($params_str) != "" ) $params = json_decode($params_str, true);
+		$filepath = wfu_export_uploaded_files($params);
 		if ( $filepath === false ) die();
 		$file_code = "exportdata".wfu_safe_store_filepath($filepath);
+		//store filepath in session otherwise it can not be retrieved by
+		//downloader script
+		WFU_USVAR_store_session('wfu_storage_'.substr($file_code, 10), $filepath);
 	}
 	//else get the file path from the safe
 	else {
@@ -539,23 +558,27 @@ function wfu_ajax_action_download_file_invoker() {
 		}
 		//for back-end browser check if user is allowed to perform this action on this file
 		if ( !wfu_current_user_owes_file($filepath) ) die();
+		//store filepath in session otherwise it can not be retrieved by
+		//downloader script
+		WFU_USVAR_store_session('wfu_storage_'.$file_code, wfu_get_filepath_from_safe($file_code));
 	}
 	
 	//generate download unique id to monitor this download
 	$download_id = wfu_create_random_string(16);
-	//store download status of this download
-	$_SESSION['wfu_download_status_'.$download_id] = 'starting';
+	//store download status of this download in session, so that it can be
+	//retrieved by downloader script
+	WFU_USVAR_store_session('wfu_download_status_'.$download_id, 'starting');
 	//generate download ticket which expires in 30sec and store it in session
 	//it will be used as security measure for the downloader script, which runs outside Wordpress environment
-	$_SESSION['wfu_download_ticket_'.$download_id] = time() + 30;
+	WFU_USVAR_store_session('wfu_download_ticket_'.$download_id, time() + 30);
 	//generate download monitor ticket which expires in 30sec and store it in session
 	//it will be used as security measure for the monitor script that will check download status
-	$_SESSION['wfu_download_monitor_ticket_'.$download_id] = time() + 30;
+	WFU_USVAR_store_session('wfu_download_monitor_ticket_'.$download_id, time() + 30);
 	
 	//store translatable strings to session so that they can be used by a script
 	//that runs outside Wordpress environment
-	$_SESSION['wfu_browser_downloadfile_notexist'] = ( isset($_POST['browser']) ? WFU_BROWSER_DOWNLOADFILE_NOTEXIST : 'File does not exist!' );
-	$_SESSION['wfu_browser_downloadfile_failed'] = ( isset($_POST['browser']) ? WFU_BROWSER_DOWNLOADFILE_FAILED : 'Could not download file!' );
+	WFU_USVAR_store_session('wfu_browser_downloadfile_notexist', ( isset($_POST['browser']) ? WFU_BROWSER_DOWNLOADFILE_NOTEXIST : 'File does not exist!' ));
+	WFU_USVAR_store_session('wfu_browser_downloadfile_failed', ( isset($_POST['browser']) ? WFU_BROWSER_DOWNLOADFILE_FAILED : 'Could not download file!' ));
 
 	//this routine returns a dynamically created iframe element, that will call the actual download script;
 	//the actual download script runs outside Wordpress environment in order to ensure that no php warnings
@@ -577,9 +600,9 @@ function wfu_ajax_action_download_file_monitor() {
 	$id = wfu_sanitize_code($id);
 	
 	//ensure that this is not a CSRF attack by checking validity of a security ticket
-	if ( !isset($_SESSION['wfu_download_monitor_ticket_'.$id]) || time() > $_SESSION['wfu_download_monitor_ticket_'.$id] ) die();
+	if ( !WFU_USVAR_exists_session('wfu_download_monitor_ticket_'.$id) || time() > WFU_USVAR_session('wfu_download_monitor_ticket_'.$id) ) die();
 	//destroy monitor ticket so it cannot be used again
-	unset($_SESSION['wfu_download_monitor_ticket_'.$id]);
+	WFU_USVAR_unset_session('wfu_download_monitor_ticket_'.$id);
 	
 	//initiate loop of 30secs to check the download status of the file;
 	//the download status is controlled by the actual download script;
@@ -589,7 +612,7 @@ function wfu_ajax_action_download_file_monitor() {
 	$end_time = time() + 30;
 	$upload_ended = false;
 	while ( time() < $end_time ) {
-		$upload_ended = ( isset($_SESSION['wfu_download_status_'.$id]) ? ( $_SESSION['wfu_download_status_'.$id] == 'downloaded' || $_SESSION['wfu_download_status_'.$id] == 'failed' ? true : false ) : false );
+		$upload_ended = ( WFU_USVAR_exists_session('wfu_download_status_'.$id) ? ( WFU_USVAR_session('wfu_download_status_'.$id) == 'downloaded' || WFU_USVAR_session('wfu_download_status_'.$id) == 'failed' ? true : false ) : false );
 		if ( $upload_ended ) break;
 		usleep(100);
 	}
@@ -601,11 +624,11 @@ function wfu_ajax_action_download_file_monitor() {
 		if ( $filepath === false ) die();
 		$filepath = wfu_path_rel2abs(wfu_flatten_path($filepath));
 		wfu_log_action('download', $filepath, $user->ID, '', 0, 0, '', null);
-		die(apply_filters('_wfu_ajax_action_download_file_monitor', 'wfu_ajax_action_download_file_monitor:'.$_SESSION['wfu_download_status_'.$id].':'));
+		die(apply_filters('_wfu_ajax_action_download_file_monitor', 'wfu_ajax_action_download_file_monitor:'.WFU_USVAR_session('wfu_download_status_'.$id).':'));
 	}
 	else {
 		//regenerate monitor ticket
-		$_SESSION['wfu_download_monitor_ticket_'.$id] = time() + 30;
+		WFU_USVAR_store_session('wfu_download_monitor_ticket_'.$id, time() + 30);
 		die(apply_filters('_wfu_ajax_action_download_file_monitor', 'wfu_ajax_action_download_file_monitor:repeat:'.$id));
 	}
 }
@@ -622,6 +645,23 @@ function wfu_ajax_action_get_historylog_page() {
 	$rows = wfu_view_log($page, true);
 	
 	die(apply_filters('_wfu_ajax_action_get_historylog_page', 'wfu_historylog_page_success:'.wfu_plugin_encode_string($rows)));
+}
+
+function wfu_ajax_action_get_adminbrowser_page() {
+	if ( !isset($_POST['code']) || !isset($_POST['token']) || !isset($_POST['page']) ) die();
+
+	$_POST = stripslashes_deep($_POST);
+	
+	check_ajax_referer( 'wfu-adminbrowser-page', 'token' );
+	if ( !current_user_can( 'manage_options' ) ) die();
+	if ( WFU_VAR("WFU_ADMINBROWSER_TABLE_MAXROWS") <= 0 ) die();
+	
+	$code = wfu_sanitize_code($_POST['code']);
+	$page = wfu_sanitize_int($_POST['page']);
+	//get list of files
+	$rows = wfu_browse_files($code, $page, true);
+	
+	die(apply_filters('_wfu_ajax_action_get_adminbrowser_page', 'wfu_adminbrowser_page_success:'.wfu_plugin_encode_string($rows)));
 }
 
 function wfu_ajax_action_include_file() {
@@ -646,7 +686,9 @@ function wfu_ajax_action_include_file() {
 	$dec_file = wfu_path_rel2abs(wfu_flatten_path($dec_file));
 	$fileid = wfu_log_action('include', $dec_file, $user->ID, '', '', get_current_blog_id(), '', null);
 	
-	if ( $fileid !== false ) die(apply_filters('_wfu_ajax_action_include_file', "wfu_include_file:success:".$fileid));
+	if ( $fileid !== false ) {
+		die(apply_filters('_wfu_ajax_action_include_file', "wfu_include_file:success:".$fileid));
+	}
 	else die(apply_filters('_wfu_ajax_action_include_file', 'wfu_include_file:fail:'));
 }
 
@@ -661,13 +703,37 @@ function wfu_ajax_action_notify_wpfilebase() {
 	$params_index = sanitize_text_field($params_index);
 	$session_token = sanitize_text_field($session_token);
 
-	$arr = wfu_get_params_fields_from_index($params_index);
+	$arr = wfu_get_params_fields_from_index($params_index, $session_token);
 	//check referer using server sessions to avoid CSRF attacks
-	if ( $_SESSION["wfu_token_".$arr['shortcode_id']] != $session_token ) die();
+	if ( WFU_USVAR("wfu_token_".$arr['shortcode_id']) != $session_token ) die();
 
 	do_action('wpfilebase_sync');
 
 	die();
+}
+
+function wfu_ajax_action_pdusers_get_users() {
+	$_POST = stripslashes_deep($_POST);
+	$_GET = stripslashes_deep($_GET);
+
+	$nonce = (isset($_POST['nonce']) ? $_POST['nonce'] : (isset($_GET['nonce']) ? $_GET['nonce'] : ''));
+	$query = (isset($_POST['query']) ? $_POST['query'] : (isset($_GET['query']) ? $_GET['query'] : ''));
+	if ( $nonce == '' || $query == '' ) die();
+
+	if ( !current_user_can( 'manage_options' ) ) die();
+	//security check to avoid CSRF attacks
+	if ( !wp_verify_nonce($nonce, 'wfu_edit_policy') ) die();
+
+	$query = sanitize_text_field($query);
+	$args = array(
+		'search'         => $query,
+		'search_columns' => array( 'user_login', 'display_name' ),
+		'fields'		 => array( 'user_login', 'display_name' ),
+		'number'		 => 100
+	);
+	$users = get_users($args);
+	
+	die("pdusers_get_users:".wfu_encode_array_to_string($users));
 }
 
 ?>

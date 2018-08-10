@@ -9,6 +9,7 @@
  */
 final class WPN_Helper
 {
+
     /**
      * @param $value
      * @return array|string
@@ -28,8 +29,10 @@ final class WPN_Helper
     public static function utf8_encode( $input ){
         if ( is_array( $input ) )    {
             return array_map( array( 'self', 'utf8_encode' ), $input );
-        }else{
+        } elseif ( function_exists( 'utf8_encode' ) ) {
             return utf8_encode( $input );
+        } else {
+            return $input;
         }
     }
 
@@ -40,8 +43,10 @@ final class WPN_Helper
     public static function utf8_decode( $input ){
         if ( is_array( $input ) )    {
             return array_map( array( 'self', 'utf8_decode' ), $input );
-        }else{
+        } elseif ( function_exists( 'utf8_decode' ) ) {
             return utf8_decode( $input );
+        } else {
+            return $input;
         }
     }
     
@@ -256,44 +261,72 @@ final class WPN_Helper
         return $original;
     }
     
-        
     /**
-     * Function to get this installation's TLS version
+     * Function to fetch our cache from the upgrades table (if it exists there).
      * 
-     * Since 3.0
+     * @param $id (int) The form ID.
      * 
-     * @return float OR false
+     * @since 3.3.7
      */
-    public static function get_tls()
-    {
-        $php_ver = phpversion();
-        // If we have a php version lower than 5.6, bail.
-        if( version_compare( $php_ver, '5.6.0', '<' ) ) return false;
-        // Get the user's TLS version.
-
-        // If we have a php version of 7.0 or higher...
-        if( version_compare( $php_ver, '7.0.0', '>=' ) ) {
-            if( ! function_exists( 'fopen' ) ) return false;
-            $meta = stream_get_meta_data( fopen( 'https://ninjaforms.com/', 'r' ) );
-            $tls = $meta[ 'crypto' ][ 'protocol' ];            
-        }
-        // Otherwise (php version between 5.6 and 7.0)...
+    public static function get_nf_cache( $id ) {
+        // See if we have the data in our table already.
+        global $wpdb;
+        $sql = "SELECT cache FROM `{$wpdb->prefix}nf3_upgrades` WHERE id = " . intval( $id );
+        $result = $wpdb->get_results( $sql, 'ARRAY_A' );
+        // If so...
+        if ( ! empty( $result ) ) {
+            // Unserialize the result.
+            $value = WPN_Helper::maybe_unserialize( $result[ 0 ][ 'cache' ] );
+            // Return it.
+            return $value;
+        } // Otherwise... (We don't have the data.)
         else {
-            $ctx = stream_context_create( array( 'ssl' => array(
-                'capture_session_meta' => TRUE
-            ) ) );
-            $html = file_get_contents( 'https://ninjaforms.com/', FALSE, $ctx );
-            $meta = stream_context_get_options( $ctx );
-            $tls = $meta[ 'ssl' ][ 'session_meta' ][ 'protocol' ];
-            unset( $ctx );
+            // Get it from the options table.
+            return get_option( 'nf_form_' . $id );
         }
-        // If we got a TLS version number...
-        if( false !== strpos( $tls, 'TLSv' ) ) {
-            $ver = substr( $tls, strpos( $tls, 'TLSv' ) + 4 );
-            return floatval( $ver );
-        } else {
-            return false;
+    }
+    
+    /**
+     * Function to insert or update our cache in the upgrades table (if it exists).
+     * 
+     * @param $id (int) The form ID.
+     * @param $data (string) The form cache.
+     * 
+     * @since 3.3.7
+     */
+    public static function update_nf_cache( $id, $data ) {
+        // Define our current stage here for use as we run various upgrades.
+        $CURRENT_STAGE = 1;
+        // Serialize our data.
+        $cache = serialize( $data );
+        global $wpdb;
+        // See if we've already got a record.
+        $sql = "SELECT id FROM `{$wpdb->prefix}nf3_upgrades` WHERE id = " . intval( $id );
+        $result = $wpdb->get_results( $sql, 'ARRAY_A' );
+        // If we don't already have the data...
+        if ( empty( $result ) ) {
+            // Insert it.
+	        $sql = $wpdb->prepare( "INSERT INTO `{$wpdb->prefix}nf3_upgrades` (id, cache, stage) VALUES (%d, %s, %s)", intval( $id ), $cache, $CURRENT_STAGE);
+        } // Otherwise... (We do have the data.)
+        else {
+            // Update the existing record.
+	        $sql = $wpdb->prepare( "UPDATE `{$wpdb->prefix}nf3_upgrades` SET cache = %s WHERE id = %d", $cache, intval( $id ) ) ;
         }
+        $wpdb->query( $sql );
+    }
+    
+    /**
+     * Function to delete our cache.
+     * 
+     * @param $id (int) The form ID.
+     * 
+     * @since 3.3.7
+     */
+    public static function delete_nf_cache( $id ) {
+        global $wpdb;
+        $sql = "DELETE FROM `{$wpdb->prefix}nf3_upgrades` WHERE id = " . intval( $id );
+        $wpdb->query( $sql );
+        delete_option( 'nf_form_' . intval( $id ) );
     }
 
     private static function parse_utf8_serialized( $matches )

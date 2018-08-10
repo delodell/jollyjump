@@ -1,8 +1,8 @@
 <?php
-/*
+/**
  * License: GPLv3
  * License URI: https://www.gnu.org/licenses/gpl.txt
- * Copyright 2012-2017 Jean-Sebastien Morisset (https://wpsso.com/)
+ * Copyright 2012-2018 Jean-Sebastien Morisset (https://wpsso.com/)
  */
 
 if ( ! defined( 'ABSPATH' ) || ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
@@ -10,12 +10,10 @@ if ( ! defined( 'ABSPATH' ) || ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 }
 
 $plugin_dir = trailingslashit( dirname( __FILE__ ) );
-$plugin_filepath = $plugin_dir.'wpsso.php';
+$plugin_filepath = $plugin_dir . 'wpsso.php';
 
-require_once $plugin_dir.'lib/config.php';
+require_once $plugin_dir . 'lib/config.php';
 
 WpssoConfig::set_constants( $plugin_filepath );
 WpssoConfig::require_libs( $plugin_filepath );	// includes the register.php class library
 WpssoRegister::network_uninstall();
-
-?>

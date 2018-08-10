@@ -11,9 +11,9 @@ function wfu_download_file() {
 	
 	$ticket = wfu_sanitize_code($ticket);
 	//if download ticket does not exist or is expired die
-	if ( !isset($_SESSION['wfu_download_ticket_'.$ticket]) || time() > $_SESSION['wfu_download_ticket_'.$ticket] ) die();
+	if ( !WFU_USVAR_exists_session('wfu_download_ticket_'.$ticket) || time() > WFU_USVAR_session('wfu_download_ticket_'.$ticket) ) die();
 	//destroy ticket so it cannot be used again
-	unset($_SESSION['wfu_download_ticket_'.$ticket]);
+	WFU_USVAR_unset_session('wfu_download_ticket_'.$ticket);
 	
 	$file_code = wfu_sanitize_code($file_code);
 	//if file_code starts with exportdata, then this is a request for export of
@@ -21,23 +21,25 @@ function wfu_download_file() {
 	//but wfu_export.csv; also set flag to delete file after download operation
 	if ( substr($file_code, 0, 10) == "exportdata" ) {
 		$file_code = substr($file_code, 10);
-		$filepath = wfu_get_filepath_from_safe($file_code);
+		//$filepath = wfu_get_filepath_from_safe($file_code);
+		$filepath = WFU_USVAR_session('wfu_storage_'.$file_code);
 		$disposition_name = "wfu_export.csv";
 		$delete_file = true;
 	}
 	else {
-		$filepath = wfu_get_filepath_from_safe($file_code);
+		//$filepath = wfu_get_filepath_from_safe($file_code);
+		$filepath = WFU_USVAR_session('wfu_storage_'.$file_code);
 		if ( $filepath === false ) die();
 		$filepath = wfu_flatten_path($filepath);
 		if ( substr($filepath, 0, 1) == "/" ) $filepath = substr($filepath, 1);
-		$filepath = ( substr($filepath, 0, 6) == 'ftp://' || substr($filepath, 0, 7) == 'ftps://' || substr($filepath, 0, 7) == 'sftp://' ? $filepath : $_SESSION['wfu_ABSPATH'].$filepath );
+		$filepath = ( substr($filepath, 0, 6) == 'ftp://' || substr($filepath, 0, 7) == 'ftps://' || substr($filepath, 0, 7) == 'sftp://' ? $filepath : WFU_USVAR_session('wfu_ABSPATH').$filepath );
 		$disposition_name = wfu_basename($filepath);
 		$delete_file = false;
 	}
 	//check that file exists
 	if ( !file_exists($filepath) ) {
-		$_SESSION['wfu_download_status_'.$ticket] = 'failed';
-		die('<script language="javascript">alert("'.( isset($_SESSION['wfu_browser_downloadfile_notexist']) ? $_SESSION['wfu_browser_downloadfile_notexist'] : 'File does not exist!' ).'");</script>');
+		WFU_USVAR_store_session('wfu_download_status_'.$ticket, 'failed');
+		die('<script language="javascript">alert("'.( WFU_USVAR_exists_session('wfu_browser_downloadfile_notexist') ? WFU_USVAR_session('wfu_browser_downloadfile_notexist') : 'File does not exist!' ).'");</script>');
 	}
 	//get mime type
 
@@ -70,12 +72,12 @@ function wfu_download_file() {
 	if ( $delete_file ) unset($filepath);
 	
 	if ( !$failed ) {
-		$_SESSION['wfu_download_status_'.$ticket] = 'downloaded';
+		WFU_USVAR_store_session('wfu_download_status_'.$ticket, 'downloaded');
 		die();
 	}
 	else {
-		$_SESSION['wfu_download_status_'.$ticket] = 'failed';
-		die('<script language="javascript">alert("'.( isset($_SESSION['wfu_browser_downloadfile_failed']) ? $_SESSION['wfu_browser_downloadfile_failed'] : 'Could not download file!' ).'");</script>');
+		WFU_USVAR_store_session('wfu_download_status_'.$ticket, 'failed');
+		die('<script language="javascript">alert("'.( WFU_USVAR_exists_session('wfu_browser_downloadfile_failed') ? WFU_USVAR_session('wfu_browser_downloadfile_failed') : 'Could not download file!' ).'");</script>');
 	}
 }
 

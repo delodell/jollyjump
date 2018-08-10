@@ -8,7 +8,7 @@ if ( !current_user_can('edit_pages') && !current_user_can('edit_posts') )
 ?>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>Shortcode Panel</title>
+<title><?php _e('Shortcode Panel', 'wp-shortcode'); ?></title>
 	<meta http-equiv="Content-Type" content="<?php bloginfo('html_type'); ?>; charset=<?php echo get_option('blog_charset'); ?>" />
 	<script language="javascript" type="text/javascript" src="<?php echo get_option('siteurl') ?>/wp-includes/js/tinymce/tiny_mce_popup.js"></script>
 	<script language="javascript" type="text/javascript" src="<?php echo get_option('siteurl') ?>/wp-includes/js/tinymce/utils/mctabs.js"></script>
@@ -30,25 +30,14 @@ if ( !current_user_can('edit_pages') && !current_user_can('edit_posts') )
          <tr>
             <td><label for="mnmshortcode_tag"><?php _e("Select Shortcode", 'wp-shortcode'); ?></label></td>
             <td><select id="mnmshortcode_tag" name="mnmshortcode_tag">
-                <option value="0">Select Shortcode</option>
-				<?php
-					if(is_array($shortcode_tags)) 
-					{
-						$i=1;
+                <option value="0"><?php _e('Select Shortcode', 'wp-shortcode'); ?></option>
+				<?php 
+					if(is_array($shortcodes)) {
+						$i = 1;
 
-						foreach ($shortcode_tags as $mnm_shortcodekey => $short_code_value) 
-						{
-							if( stristr($short_code_value, 'mts_') ) 
-							{
-								$mnm_shortcode_name = str_replace('mts_', '' ,$short_code_value);
-								$mnm_shortcode_names = str_replace('_', ' ' ,$mnm_shortcode_name);
-								$mnm_shortcodenames = ucwords($mnm_shortcode_names);
-                                $shortcode_label = (empty($shortcodes[$mnm_shortcodekey]['label']) ? $mnm_shortcodenames : $shortcodes[$mnm_shortcodekey]['label']);
-								echo '<option value="' . $mnm_shortcodekey . '" >' . $shortcode_label.'</option>' . "\n";
-								echo '</optgroup>'; 
-
-								$i++;
-							}
+						foreach ( $shortcodes as $mnm_shortcodekey => $short_code_value ) {
+							echo '<option value="' . $mnm_shortcodekey . '" >' . (isset($short_code_value['label']) ? $short_code_value['label'] : $mnm_shortcodekey).'</option>' . "\n";
+							$i++;
 						}
 					}
 			?>

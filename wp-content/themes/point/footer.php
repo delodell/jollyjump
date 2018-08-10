@@ -10,14 +10,14 @@
 	$carousel_cats = get_theme_mod('point_carousel_cat');
 ?>
 <footer>
-	<?php if( $carousel_section == 1 && isset($carousel_cats) ) { ?>
+	<?php if( $carousel_section == 1 && !empty($carousel_cats) ) { ?>
 		<div class="carousel">
-			<h3 class="frontTitle"><div class="latest">LATEST ARTICLES</div></h3>
+			<h3 class="frontTitle">
+				<div class="latest">
+					<?php echo get_term_field( 'name', get_term_by( 'slug', $carousel_cats[0], 'category' ) ); ?>
+				</div>
+			</h3>
 			<?php
-				// prevent implode error
-                if (empty($carousel_cats) || !is_array($carousel_cats)) {
-                    $carousel_cats = array('0');
-                }
 				$carousel_cat = implode(",", $carousel_cats);
 				$i = 1; $my_query = new wp_query( 'category_name='.$carousel_cat.'&posts_per_page=6&ignore_sticky_posts=1' );
 				while ($my_query->have_posts()) : $my_query->the_post(); ?>

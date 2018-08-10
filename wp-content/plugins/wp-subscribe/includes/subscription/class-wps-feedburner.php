@@ -21,7 +21,14 @@ class WPS_Subscription_FeedBurner extends WPS_Subscription_Base {
 			<input type="hidden" name="service" value="<?php echo $options['service'] ?>">
 
 			<input type="hidden" name="widget" value="<?php echo isset( $options['widget_id'] ) ? $options['widget_id'] : '0'; ?>">
-
+			<?php if( !empty( $options['consent_text'] ) ) : ?>
+				<div class="wps-consent-wrapper">
+					<label for="consent-field">
+						<input class="consent-field" id="consent-field" type="checkbox" name="consent" required />
+						<?php _e( $options['consent_text'] ) ?>
+					</label>
+				</div>
+			<?php endif; ?>
 			<input class="submit" type="submit" name="submit" value="<?php echo esc_attr( $options['button_text'] ) ?>">
 
 		</form>

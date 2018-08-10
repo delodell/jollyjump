@@ -8,8 +8,8 @@
  *  This is a very powerful function that enables almost all plugin functions to
  *  be redeclared. In order to make a function redeclarable we just put the
  *  following code at the top of its function block:
- *  switch(WFU_FUNCTION_HOOK(__FUNCTION__, func_get_args(), $out)) { case 'X'
- *  : break; case 'R': return $out; break; case 'D': die($out); break; }
+ *  $a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { 
+ *  case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
  *  Then the function can be hooked through the filter wfu_debug-{__FUNCTION__}.
  *  The hook function takes the same parameters as the original function, plus
  *  one, which comes first and determines the behaviour of the hook function.
@@ -54,12 +54,18 @@ function WFU_FUNCTION_HOOK($function, $args, &$out) {
 
 //********************* String Functions ***************************************************************************************************
 
-function wfu_upload_plugin_clean($label) {
-	$clean = sanitize_file_name($label);
+function wfu_upload_plugin_clean($filename) {
+	$clean = sanitize_file_name($filename);
 	if ( WFU_VAR("WFU_SANITIZE_FILENAME_MODE") != "loose" ) {
-		$search = array ( '@[^a-zA-Z0-9._]@' );	 
+		$name = wfu_filename($clean);
+		$ext = wfu_fileext($clean);
+		if ( WFU_VAR("WFU_SANITIZE_FILENAME_DOTS") == "true" ) $name_search = array ( '@[^a-zA-Z0-9_]@' );
+		else $name_search = array ( '@[^a-zA-Z0-9._]@' );
+		$ext_search = array ( '@[^a-zA-Z0-9._]@' );	 
 		$replace = array ( '-' );
-		$clean =  preg_replace($search, $replace, remove_accents($clean));
+		$clean_name =  preg_replace($name_search, $replace, remove_accents($name));
+		$clean_ext =  preg_replace($ext_search, $replace, remove_accents($ext));
+		$clean = $clean_name.".".$clean_ext;
 	}
 
 	return $clean;
@@ -84,7 +90,7 @@ function wfu_upload_plugin_wildcard_to_preg($pattern, $strict = false) {
 }
 
 function wfu_upload_plugin_wildcard_to_mysqlregexp($pattern) {
-	switch(WFU_FUNCTION_HOOK(__FUNCTION__, func_get_args(), $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
 	if ( substr($pattern, 0, 6) == "regex:" ) return str_replace("\\", "\\\\", substr($pattern, 6));
 	else return str_replace("\\", "\\\\", '^'.str_replace(array('\*', '\?', '\[', '\]'), array('.*', '.', '[', ']'), preg_quote($pattern)).'$');
 }
@@ -159,6 +165,14 @@ function wfu_sanitize_int($code) {
 	return preg_replace("/[^0-9+\-]/", "", $code);
 }
 
+function wfu_sanitize_float($code) {
+	return preg_replace("/[^0-9+\-\.,]/", "", $code);
+}
+
+function wfu_sanitize_colors($code) {
+	return preg_replace("/[^A-Fa-f0-9#,]/", "", $code);
+}
+
 function wfu_sanitize_tag($code) {
 	return preg_replace("/[^A-Za-z0-9_]/", "", $code);
 }
@@ -171,6 +185,87 @@ function wfu_sanitize_urls($urls, $separator) {
 	$urls_arr = explode($separator, $urls);
 	foreach( $urls_arr as &$url ) $url = wfu_sanitize_url($url);
 	return implode($separator, $urls_arr);
+}
+
+function wfu_sanitize_shortcode($shortcode, $shortcode_tag) {
+	$attrs = wfu_shortcode_string_to_array($shortcode);
+	$sanitized_attrs = wfu_sanitize_shortcode_array($attrs, $shortcode_tag);
+	//reconstruct sanitized shortcode string from array
+	$sanitized_shortcode = "";
+	foreach ( $sanitized_attrs as $attr => $value )
+		$sanitized_shortcode .= ( $sanitized_shortcode == "" ? "" : " " ).$attr.'="'.$value.'"';
+	
+	return $sanitized_shortcode;
+}
+
+function wfu_sanitize_shortcode_array($attrs, $shortcode_tag) {
+	$sanitized_attrs = array();
+	if ( $shortcode_tag == 'wordpress_file_upload' ) $defs = wfu_attribute_definitions();
+	else $defs = wfu_browser_attribute_definitions();
+	// get validator types for defs
+	$def_validators = array();
+	foreach ( $defs as $def ) $def_validators[$def['attribute']] = $def['validator'];
+	// sanitize each attribute
+	foreach ( $attrs as $attr => $value ) {
+		//first sanitize the attribute name
+		$sanitized = sanitize_text_field($attr);
+		//continue only for attributes that sanitization did not crop any
+		//characters
+		if ( $sanitized == $attr && $attr != "" ) {
+			//flatten attributes that have many occurencies
+			$flat = preg_replace("/^(.*?)[0-9]*$/", "$1", $attr);
+			//get validator type
+			$validator = "text";
+			if ( isset($def_validators[$flat]) ) $validator = $def_validators[$flat];
+			//sanitize value based on validator type
+			$new_value = $value;
+			switch( $validator ) {
+				case "text":
+					$new_value = wp_strip_all_tags($value);
+					break;
+				case "integer":
+					$new_value = wfu_sanitize_int($value);
+					break;
+				case "float":
+					$new_value = wfu_sanitize_float($value);
+					break;
+				case "path":
+					$new_value = wp_strip_all_tags($value);
+					break;
+				case "link":
+					$new_value = wp_strip_all_tags($value);
+					break;
+				case "emailheaders":
+					if ( strpos(strtolower($value), "<script") !== false ) $new_value = "";
+					break;
+				case "emailsubject":
+					if ( strpos(strtolower($value), "<script") !== false ) $new_value = "";
+					break;
+				case "emailbody":
+					if ( strpos(strtolower($value), "<script") !== false ) $new_value = "";
+					break;
+				case "colors":
+					$new_value = wfu_sanitize_colors($value);
+					break;
+				case "css":
+					$new_value = wp_strip_all_tags($value);
+					break;
+				case "datetime":
+					$new_value = wp_strip_all_tags($value);
+					break;
+				case "pattern":
+					if ( substr_count($value, "'") > 0 && substr_count($value, "'") > substr_count($value, "\\'") ) $new_value = "";
+					break;
+				default:
+					$new_value = wp_strip_all_tags($value);
+			}
+			//allow custom filters to change the sanitization result
+			$new_value = apply_filters("_wfu_sanitize_shortcode", $new_value, $attr, $validator, $value);
+			$sanitized_attrs[$attr] = $new_value;
+		}
+	}
+	
+	return $sanitized_attrs;
 }
 
 function wfu_slash( $value ) {
@@ -404,7 +499,39 @@ function wfu_echo_array($arr) {
 	echo '<pre>'.print_r($arr, true).'</pre>';
 }
 
+function wfu_minify_code($lang, $code) {
+	$ret = array( "result" => false, "minified_code" => "" );
+	$php_version = preg_replace("/-.*/", "", phpversion());
+	$unsupported = false;
+	$ret = wfu_compare_versions($php_version, '5.3.0');
+	$unsupported = ( $ret['status'] && $ret['result'] == 'lower' );
+	if ( !$unsupported ) {
+		$path = ABSWPFILEUPLOAD_DIR;
+		include_once $path.'vendor/minifier/minify/src/Minify.php';
+		include_once $path.'vendor/minifier/minify/src/CSS.php';
+		include_once $path.'vendor/minifier/minify/src/JS.php';
+		include_once $path.'vendor/minifier/minify/src/Exception.php';
+		include_once $path.'vendor/minifier/minify/src/Exceptions/BasicException.php';
+		include_once $path.'vendor/minifier/minify/src/Exceptions/FileImportException.php';
+		include_once $path.'vendor/minifier/minify/src/Exceptions/IOException.php';
+		include_once $path.'vendor/minifier/path-converter/src/ConverterInterface.php';
+		include_once $path.'vendor/minifier/path-converter/src/Converter.php';
+		$minifier = null;
+		eval('$minifier = new MatthiasMullie\Minify\\'.strtoupper($lang).'($code);');
+		if ( $minifier !== null ) {
+			$ret["result"] = true;
+			$ret["minified_code"] = $minifier->minify();
+		}
+	}
+	
+	return $ret;
+}
+
 function wfu_css_to_HTML($css) {
+	if ( WFU_VAR("WFU_MINIFY_INLINE_CSS") == "true" ) {
+		$ret = wfu_minify_code("CSS", $css);
+		if ( $ret["result"] ) $css = $ret["minified_code"];
+	}
 	$echo_str = "\n\t".'<style>';
 	$echo_str .= "\n".$css;
 	$echo_str .= "\n\t".'</style>';
@@ -413,11 +540,22 @@ function wfu_css_to_HTML($css) {
 }
 
 function wfu_js_to_HTML($js) {
-	$echo_str = "\n\t".'<script type="text/javascript">';
+	if ( WFU_VAR("WFU_MINIFY_INLINE_JS") == "true" ) {
+		$ret = wfu_minify_code("JS", $js);
+		if ( $ret["result"] ) $js = $ret["minified_code"];
+	}
+	$echo_str = '<script type="text/javascript">';
 	$echo_str .= "\n".$js;
-	$echo_str .= "\n\t".'</script>';
+	$echo_str .= "\n".'</script>';
 
 	return $echo_str;
+}
+
+function wfu_init_run_js_script() {
+//	$script = 'if (typeof wfu_js_decode_obj == "undefined") function wfu_js_decode_obj(obj_str) { var obj = null; if (obj_str == "window") obj = window; else { var match = obj_str.match(new RegExp(\'GlobalData(\\\\.(WFU|WFUB)\\\\[(.*?)\\\\](\\\\.(.*))?)?$\')); if (match) { obj = GlobalData; if (match[3]) obj = obj[match[2]][match[3]]; if (match[5]) obj = obj[match[5]]; } } return obj; }';
+	$script = 'if (typeof wfu_js_decode_obj == "undefined") function wfu_js_decode_obj(obj_str) { var obj = null; if (obj_str == "window") obj = window; else { var dbs = String.fromCharCode(92); var match = obj_str.match(new RegExp(\'GlobalData(\' + dbs + \'.(WFU|WFUB)\' + dbs + \'[(.*?)\' + dbs + \'](\' + dbs + \'.(.*))?)?$\')); if (match) { obj = GlobalData; if (match[3]) obj = obj[match[2]][match[3]]; if (match[5]) obj = obj[match[5]]; } } return obj; }';
+	$script .= "\n".'if (typeof wfu_run_js == "undefined") function wfu_run_js(obj_str, func) { if (typeof GlobalData == "undefined") { if (typeof window.WFU_JS_BANK == "undefined") WFU_JS_BANK = []; WFU_JS_BANK.push({obj_str: obj_str, func: func}) } else { var obj = wfu_js_decode_obj(obj_str); if (obj) obj[func].call(obj); } }';
+	return wfu_js_to_HTML($script);
 }
 
 function wfu_PHP_array_to_JS_object($arr) {
@@ -430,10 +568,48 @@ function wfu_PHP_array_to_JS_object($arr) {
 	return ( $ret == "" ? "{ }" : "{ $ret }" );
 }
 
+//********************* Shortcode Attribute Functions **************************************************************************************
+
+function wfu_insert_category($categories, $before_category, $new_category) {
+	if ( $before_category == "" ) $index = count($categories);
+	else {
+		$index = array_search($before_category, array_keys($categories));
+		if ( $index === false ) $index = count($categories);
+	}
+	
+	return array_merge(array_slice($categories, 0, $index), $new_category, array_slice($categories, $index));
+}
+
+function wfu_insert_attributes($attributes, $in_category, $in_subcategory, $position, $new_attributes) {
+	$index = -1;
+	if ( $in_category == "" ) {
+		if ( $position == "first" ) $index = 0;
+		elseif ( $position == "last" ) $index = count($attributes);
+	}
+	else {
+		foreach ( $attributes as $pos => $attribute ) {
+			$match = ( $attribute["category"] == $in_category );
+			if ( $in_subcategory != "" ) $match = $match && ( $attribute["subcategory"] == $in_subcategory );
+			if ( $match ) {
+				if ( $position == "first" ) {
+					$index = $pos;
+					break;
+				}
+				elseif ( $position == "last" ) {
+					$index = $pos + 1;
+				}
+			}
+		}
+	}
+	if ( $index > -1 ) array_splice($attributes, $index, 0, $new_attributes);
+	
+	return $attributes;
+}
+
 //********************* Plugin Options Functions *******************************************************************************************
 
 function wfu_get_server_environment() {
-	switch(WFU_FUNCTION_HOOK(__FUNCTION__, func_get_args(), $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
 	$php_env = '';
 	if ( PHP_INT_SIZE == 4 ) $php_env = '32bit';
 	elseif ( PHP_INT_SIZE == 8 ) $php_env = '64bit';
@@ -448,62 +624,9 @@ function wfu_get_server_environment() {
 }
 
 function wfu_ajaxurl() {
-	switch(WFU_FUNCTION_HOOK(__FUNCTION__, func_get_args(), $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
 	return ( $plugin_options['admindomain'] == 'siteurl' || $plugin_options['admindomain'] == '' ? site_url("wp-admin/admin-ajax.php") : ( $plugin_options['admindomain'] == 'adminurl' ? admin_url("admin-ajax.php") : home_url("wp-admin/admin-ajax.php") ) );
-}
-
-function wfu_encode_plugin_options($plugin_options) {
-	$encoded_options = 'version='.( isset($plugin_options['version']) ? $plugin_options['version'] : "1.0" ).';';
-	$encoded_options .= 'shortcode='.( isset($plugin_options['shortcode']) ? wfu_plugin_encode_string($plugin_options['shortcode']) : "" ).';';
-	$encoded_options .= 'hashfiles='.( isset($plugin_options['hashfiles']) ? $plugin_options['hashfiles'] : "" ).';';
-	$encoded_options .= 'basedir='.( isset($plugin_options['basedir']) ? wfu_plugin_encode_string($plugin_options['basedir']) : "" ).';';
-	$encoded_options .= 'postmethod='.( isset($plugin_options['postmethod']) ? $plugin_options['postmethod'] : "" ).';';
-	$encoded_options .= 'modsecurity='.( isset($plugin_options['modsecurity']) ? $plugin_options['modsecurity'] : "" ).';';
-	$encoded_options .= 'relaxcss='.( isset($plugin_options['relaxcss']) ? $plugin_options['relaxcss'] : "" ).';';
-	$encoded_options .= 'admindomain='.( isset($plugin_options['admindomain']) ? $plugin_options['admindomain'] : "" ).';';
-	$encoded_options .= 'mediacustom='.( isset($plugin_options['mediacustom']) ? $plugin_options['mediacustom'] : "" ).';';
-	$encoded_options .= 'includeotherfiles='.( isset($plugin_options['includeotherfiles']) ? $plugin_options['includeotherfiles'] : "" ).';';
-	$encoded_options .= 'altserver='.( isset($plugin_options['altserver']) ? $plugin_options['altserver'] : "" ).';';
-	$encoded_options .= 'captcha_sitekey='.( isset($plugin_options['captcha_sitekey']) ? wfu_plugin_encode_string($plugin_options['captcha_sitekey']) : "" ).';';
-	$encoded_options .= 'captcha_secretkey='.( isset($plugin_options['captcha_secretkey']) ? wfu_plugin_encode_string($plugin_options['captcha_secretkey']) : "" ).';';
-	$encoded_options .= 'dropbox_accesstoken='.( isset($plugin_options['dropbox_accesstoken']) ? wfu_plugin_encode_string($plugin_options['dropbox_accesstoken']) : "" ).';';
-	$encoded_options .= 'dropbox_defaultpath='.( isset($plugin_options['dropbox_defaultpath']) ? wfu_plugin_encode_string($plugin_options['dropbox_defaultpath']) : "" ).';';
-	$encoded_options .= 'browser_permissions='.( isset($plugin_options['browser_permissions']) ? wfu_encode_array_to_string($plugin_options['browser_permissions']) : "" );
-	return $encoded_options;
-}
-
-function wfu_decode_plugin_options($encoded_options) {
-	$plugin_options['version'] = "1.0";
-	$plugin_options['shortcode'] = "";
-	$plugin_options['hashfiles'] = "";
-	$plugin_options['basedir'] = "";
-	$plugin_options['postmethod'] = "";
-	$plugin_options['modsecurity'] = "";
-	$plugin_options['relaxcss'] = "";
-	$plugin_options['admindomain'] = "";
-	$plugin_options['mediacustom'] = "";
-	$plugin_options['includeotherfiles'] = "";
-	$plugin_options['altserver'] = "";
-	$plugin_options['captcha_sitekey'] = "";
-	$plugin_options['captcha_secretkey'] = "";
-	$plugin_options['dropbox_accesstoken'] = "";
-	$plugin_options['dropbox_defaultpath'] = "";
-	$plugin_options['browser_permissions'] = "";
-
-	$decoded_array = explode(';', $encoded_options);
-	foreach ($decoded_array as $decoded_item) {
-		if ( trim($decoded_item) != "" ) {
-			list($item_key, $item_value) = explode("=", $decoded_item, 2);
-			if ( $item_key == 'shortcode' || $item_key == 'basedir' || $item_key == 'captcha_sitekey' || $item_key == 'captcha_secretkey' || $item_key == 'dropbox_accesstoken' || $item_key == 'dropbox_defaultpath' )
-				$plugin_options[$item_key] = wfu_plugin_decode_string($item_value);
-			elseif ( $item_key == 'browser_permissions' )
-				$plugin_options[$item_key] = wfu_decode_array_from_string($item_value);
-			else
-				$plugin_options[$item_key] = $item_value;
-		}
-	}
-	return $plugin_options;
 }
 
 function WFU_VAR($varname) {
@@ -519,7 +642,7 @@ function wfu_get_plugin_version() {
 }
 
 function wfu_get_latest_version() {
-	switch(WFU_FUNCTION_HOOK(__FUNCTION__, func_get_args(), $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
 	$postfields = array();
 	$postfields['action'] = 'wfuca_check_latest_version_free';
@@ -606,6 +729,20 @@ function wfu_path_rel2abs($path) {
 	return ( substr($path, 0, 6) == 'ftp://' || substr($path, 0, 7) == 'ftps://' || substr($path, 0, 7) == 'sftp://' ? $path : wfu_abspath().$path );
 }
 
+function wfu_delete_file_execute($filepath, $userid) {
+	$filedata = wfu_get_filedata($filepath);
+	$retid = wfu_log_action('delete', $filepath, $userid, '', 0, 0, '', null);
+	$result = unlink($filepath);
+	if ( !$result ) wfu_revert_log_action($retid);
+	else {
+		//delete linked attachment if exists and it is allowed to be deleted
+		if ( $filedata != null && isset($filedata["media"]) && WFU_VAR("WFU_UPDATE_MEDIA_ON_DELETE") == "true" )
+			wp_delete_attachment( $filedata["media"]["attach_id"] );
+	}
+	
+	return $result;
+}
+
 function wfu_upload_plugin_full_path( $params ) {
 	$path = $params["uploadpath"];
 	if ( $params["accessmethod"] == 'ftp' && $params["ftpinfo"] != '' && $params["useftpdomain"] == "true" ) {
@@ -615,8 +752,8 @@ function wfu_upload_plugin_full_path( $params ) {
 		$pos1 = strpos($ftpdata_flat, ":");
 		$pos2 = strpos($ftpdata_flat, "@");
 		if ( $pos1 && $pos2 && $pos2 > $pos1 ) {
-			$ftp_username = substr($params["ftpinfo"], 0, $pos1);
-			$ftp_password = substr($params["ftpinfo"], $pos1 + 1, $pos2 - $pos1 - 1);
+			$ftp_username = str_replace(array('\:', '\@'), array(':', '@'), substr($params["ftpinfo"], 0, $pos1));
+			$ftp_password = str_replace(array('\:', '\@'), array(':', '@'), substr($params["ftpinfo"], $pos1 + 1, $pos2 - $pos1 - 1));
 			$ftp_host = substr($params["ftpinfo"], $pos2 + 1);
 			$ftp_port = preg_replace("/^[^:]*:?/", "", $ftp_host);
 			$ftp_host_clean = preg_replace("/:.*/", "", $ftp_host);
@@ -696,7 +833,7 @@ function wfu_getTree($dir) {
 	return $tree;
 }
 function wfu_parse_folderlist($subfoldertree) {
-	switch(WFU_FUNCTION_HOOK(__FUNCTION__, func_get_args(), $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
 	$ret['path'] = array();
 	$ret['label'] = array();
 	$ret['level'] = array();
@@ -866,7 +1003,9 @@ function wfu_debug_log($message) {
 
 function wfu_safe_store_filepath($path) {
 	$code = wfu_create_random_string(16);
-	$_SESSION['wfu_filepath_safe_storage'][$code] = $path;
+	$safe_storage = ( WFU_USVAR_exists('wfu_filepath_safe_storage') ? WFU_USVAR('wfu_filepath_safe_storage') : array() );
+	$safe_storage[$code] = $path;
+	WFU_USVAR_store('wfu_filepath_safe_storage', $safe_storage);
 	return $code;
 }
 
@@ -875,8 +1014,10 @@ function wfu_get_filepath_from_safe($code) {
 	$code = wfu_sanitize_code($code);
 	if ( $code == "" ) return false;
 	//return filepath from session variable, if exists
-	if ( !isset($_SESSION['wfu_filepath_safe_storage'][$code]) ) return false;
-	return $_SESSION['wfu_filepath_safe_storage'][$code];
+	if ( !WFU_USVAR_exists('wfu_filepath_safe_storage') ) return false;
+	$safe_storage = WFU_USVAR('wfu_filepath_safe_storage');
+	if ( !isset($safe_storage[$code]) ) return false;
+	return $safe_storage[$code];
 }
 
 function wfu_file_extension_restricted($filename) {
@@ -997,12 +1138,10 @@ function wfu_log_action($action, $filepath, $userid, $uploadid, $pageid, $blogid
 			// calculate file size
 			$filesize = filesize($filepath);
 			// first make obsolete records having the same file path because the old file has been replaced
-			$wpdb->update($table_name1,
-				array( 'date_to' => date('Y-m-d H:i:s') ),
-				array( 'filepath' => $relativepath ),
-				array( '%s'),
-				array( '%s')
-			);
+			$oldrecs = $wpdb->get_results('SELECT * FROM '.$table_name1.' WHERE filepath = \''.$relativepath.'\' AND date_to = 0');
+			if ( $oldrecs ) {
+				foreach ( $oldrecs as $oldrec ) wfu_make_rec_obsolete($oldrec);
+			}
 		}
 		// attempt to create new log record
 		$now_date = date('Y-m-d H:i:s');
@@ -1023,22 +1162,7 @@ function wfu_log_action($action, $filepath, $userid, $uploadid, $pageid, $blogid
 				'date_to' 	=> 0,
 				'action' 	=> $action
 			),
-			array(
-				'%d',
-				'%d',
-				'%d',
-				'%s',
-				'%s',
-				'%s',
-				'%d',
-				'%s',
-				'%d',
-				'%d',
-				'%s',
-				'%s',
-				'%s',
-				'%s'
-			)) !== false ) {
+			array( '%d', '%d', '%d', '%s', '%s', '%s', '%d', '%s', '%d', '%d', '%s', '%s', '%s', '%s' )) !== false ) {
 			$retid = $wpdb->insert_id;
 			// if new log record has been created, also create user data records
 			if ( $userdata != null && $uploadid != '' ) {
@@ -1054,15 +1178,7 @@ function wfu_log_action($action, $filepath, $userid, $uploadid, $pageid, $blogid
 								'date_from' 	=> $now_date,
 								'date_to' 	=> 0
 							),
-							array(
-								'%s',
-								'%s',
-								'%d',
-								'%s',
-								'%s',
-								'%s'
-							)
-						);
+							array( '%s', '%s', '%d', '%s', '%s', '%s' ));
 				}
 			}
 		}
@@ -1102,9 +1218,10 @@ function wfu_log_action($action, $filepath, $userid, $uploadid, $pageid, $blogid
 					'date_from' 	=> $now_date,
 					'date_to' 	=> 0,
 					'action' 	=> 'rename',
-					'linkedto' 	=> $filerec->idlog
+					'linkedto' 	=> $filerec->idlog,
+					'filedata' 	=> $filerec->filedata
 				),
-				array( '%d', '%d', '%d', '%s', '%s', '%s', '%d', '%s', '%d', '%d', '%s', '%s', '%s', '%s', '%d' ) ) !== false )
+				array( '%d', '%d', '%d', '%s', '%s', '%s', '%d', '%s', '%d', '%d', '%s', '%s', '%s', '%s', '%d', '%s' ) ) !== false )
 				$retid = $wpdb->insert_id;
 		}
 	}
@@ -1138,9 +1255,10 @@ function wfu_log_action($action, $filepath, $userid, $uploadid, $pageid, $blogid
 					'date_from' 	=> $now_date,
 					'date_to' 	=> $now_date,
 					'action' 	=> 'delete',
-					'linkedto' 	=> $filerec->idlog
+					'linkedto' 	=> $filerec->idlog,
+					'filedata' 	=> $filerec->filedata
 				),
-				array( '%d', '%d', '%d', '%s', '%s', '%s', '%d', '%s', '%d', '%d', '%s', '%s', '%s', '%s', '%d' )) != false )
+				array( '%d', '%d', '%d', '%s', '%s', '%s', '%d', '%s', '%d', '%d', '%s', '%s', '%s', '%s', '%d', '%s' )) != false )
 				$retid = $wpdb->insert_id;
 		}
 	}
@@ -1174,9 +1292,10 @@ function wfu_log_action($action, $filepath, $userid, $uploadid, $pageid, $blogid
 					'date_from' 	=> $now_date,
 					'date_to' 	=> 0,
 					'action' 	=> 'download',
-					'linkedto' 	=> $filerec->idlog
+					'linkedto' 	=> $filerec->idlog,
+					'filedata' 	=> $filerec->filedata
 				),
-				array( '%d', '%d', '%d', '%s', '%s', '%s', '%d', '%s', '%d', '%d', '%s', '%s', '%s', '%s', '%d' )) != false )
+				array( '%d', '%d', '%d', '%s', '%s', '%s', '%d', '%s', '%d', '%d', '%s', '%s', '%s', '%s', '%d', '%s' )) != false )
 				$retid = $wpdb->insert_id;
 		}
 	}
@@ -1211,9 +1330,10 @@ function wfu_log_action($action, $filepath, $userid, $uploadid, $pageid, $blogid
 					'date_from' 	=> $now_date,
 					'date_to' 	=> 0,
 					'action' 	=> 'modify',
-					'linkedto' 	=> $filerec->idlog
+					'linkedto' 	=> $filerec->idlog,
+					'filedata' 	=> $filerec->filedata
 				),
-				array( '%d', '%d', '%d', '%s', '%s', '%s', '%d', '%s', '%d', '%d', '%s', '%s', '%s', '%s', '%d' )) != false )
+				array( '%d', '%d', '%d', '%s', '%s', '%s', '%d', '%s', '%d', '%d', '%s', '%s', '%s', '%s', '%d', '%s' )) != false )
 				$retid = $wpdb->insert_id;
 		}
 	}
@@ -1248,9 +1368,10 @@ function wfu_log_action($action, $filepath, $userid, $uploadid, $pageid, $blogid
 					'date_from' 	=> $now_date,
 					'date_to' 	=> 0,
 					'action' 	=> 'changeuser',
-					'linkedto' 	=> $filerec->idlog
+					'linkedto' 	=> $filerec->idlog,
+					'filedata' 	=> $filerec->filedata
 				),
-				array( '%d', '%d', '%d', '%s', '%s', '%s', '%d', '%s', '%d', '%d', '%s', '%s', '%s', '%s', '%d' )) != false )
+				array( '%d', '%d', '%d', '%s', '%s', '%s', '%d', '%s', '%d', '%d', '%s', '%s', '%s', '%s', '%d', '%s' )) != false )
 				$retid = $wpdb->insert_id;
 		}
 	}
@@ -1309,6 +1430,7 @@ function wfu_revert_log_action($idlog) {
 
 //find user by its id and return a non-empty username
 function wfu_get_username_by_id($id) {
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
 	$user = get_user_by('id', $id);
 	if ( $user == false && $id > 0 ) $username = 'unknown';
 	elseif ( $user == false && $id == -999 ) $username = 'system';
@@ -1356,6 +1478,102 @@ function wfu_get_file_rec_from_id($idlog) {
 	return $filerec;
 }
 
+function wfu_get_userdata_from_id($idlog) {
+	global $wpdb;
+	$table_name2 = $wpdb->prefix . "wfu_userdata";
+
+	$userdata = array();
+	$filerec = wfu_get_file_rec_from_id($idlog);
+	if ( $filerec != null && $filerec->uploadid != '' ) {
+		$filerec->userdata = $wpdb->get_results('SELECT * FROM '.$table_name2.' WHERE uploadid = \''.$filerec->uploadid.'\' AND date_to = 0 ORDER BY propkey');
+		foreach ( $filerec->userdata as $item ) {
+			$arrayitem = array(
+				"property"	=> $item->property,
+				"value"		=> $item->propvalue
+			);
+			array_push($userdata, $arrayitem);
+		}
+	}
+	
+	return $userdata;
+}
+
+function wfu_get_latest_rec_from_id($idlog) {
+	global $wpdb;
+	$table_name1 = $wpdb->prefix . "wfu_log";
+	$filerec = $wpdb->get_row('SELECT * FROM '.$table_name1.' WHERE idlog = '.$idlog);
+	while ( $filerec != null && $filerec->date_to != "0000-00-00 00:00:00" )
+		$filerec = $wpdb->get_row('SELECT * FROM '.$table_name1.' WHERE linkedto = '.$filerec->idlog);
+	
+	return $filerec;
+}
+
+/**
+ *  gets the filedata property from file record in database
+ *  
+ *  This function returns the filedata property of the corresponding record of
+ *  the file in the database holding data about its transfer to a service
+ *  account like Dropbox, provided that this record is still valid. If the
+ *  record does not exist or exists but it is absolete, then the function
+ *  returns null, otherwise it returns an array.
+ *  
+ *  The [$service]["filepath"] item of the array is set to the final $filepath
+ *  of the file, in case that the original filename was renamed.
+ *  
+ *  @param int $idlog file id of the file
+ *  @param bool $is_new it is true if the function is called during addition of
+ *         a new file
+ *  @return mixed
+ */
+function wfu_get_latest_filedata_from_id($idlog, $is_new = false) {
+	//get latest database record of file, if it is still valid
+	$filerec = wfu_get_latest_rec_from_id($idlog);
+	//return null if the record does not exist or it is obsolete
+	if ( $filerec == null ) return null;
+
+	return wfu_get_filedata_from_rec($filerec, $is_new, true, false);
+}
+
+function wfu_get_filedata($filepath, $include_general_data = false) {
+	$filerec = wfu_get_file_rec($filepath, false);
+	if ( $filerec == null ) return null;
+
+	return wfu_get_filedata_from_rec($filerec, true, false, $include_general_data);
+}
+
+function wfu_get_filedata_from_rec($filerec, $is_new = false, $update_transfer = false, $include_general_data = false) {
+	//return filedata, if it does not exist and we do not want to create a new
+	//filedata structure return null, otherwise return an empty array
+	if ( !isset($filerec->filedata) || is_null($filerec->filedata) ) $filedata = ( $is_new ? array() : null );
+	else {
+		$filedata = wfu_decode_array_from_string($filerec->filedata);
+		if ( !is_array($filedata) ) $filedata = ( $is_new ? array() : null );
+	}
+	if ( !is_null($filedata) ) {
+		//update filepath property in filedata of "transfer" type, if service
+		//records exist
+		if ( $update_transfer ) {
+			foreach ( $filedata as $key => $data )
+				if ( !isset($data["type"]) || $data["type"] == "transfer" )
+					$filedata[$key]["filepath"] = $filerec->filepath;
+		}
+		//add idlog in filedata if $include_general_data is true
+		if ( $include_general_data )
+			$filedata["general"] = array(
+				"type"	=> "data",
+				"idlog"	=> $filerec->idlog
+			);
+	}
+	
+	return $filedata;
+}
+
+function wfu_save_filedata_from_id($idlog, $filedata) {
+	global $wpdb;
+	$table_name1 = $wpdb->prefix . "wfu_log";
+	return $wpdb->update($table_name1, array( 'filedata' => wfu_encode_array_to_string($filedata) ), array( 'idlog' => $idlog ), array( '%s' ), array( '%d' ));
+}
+
 //get userdata from uploadid
 function wfu_get_userdata_from_uploadid($uploadid) {
 	global $wpdb;
@@ -1388,9 +1606,23 @@ function wfu_reassign_hashes() {
 	}
 }
 
+function wfu_make_rec_obsolete($filerec) {
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	global $wpdb;
+	$table_name1 = $wpdb->prefix . "wfu_log";
+	$filedata = wfu_get_filedata_from_rec($filerec, true);
+	//update db record accordingly
+	$wpdb->update($table_name1,
+		array( 'date_to' => date('Y-m-d H:i:s'), 'filedata' => wfu_encode_array_to_string($filedata) ),
+		array( 'idlog' => $filerec->idlog ),
+		array( '%s', '%s' ),
+		array( '%d' )
+	);
+}
+
 //update database to reflect the current status of files
 function wfu_sync_database() {
-	switch(WFU_FUNCTION_HOOK(__FUNCTION__, func_get_args(), $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
 	global $wpdb;
 	$table_name1 = $wpdb->prefix . "wfu_log";
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
@@ -1412,14 +1644,7 @@ function wfu_sync_database() {
 			}
 		}
 		if ( $obsolete ) {
-			$now_date = date('Y-m-d H:i:s');
-			//make previous record obsolete
-			$wpdb->update($table_name1,
-				array( 'date_to' => $now_date ),
-				array( 'idlog' => $filerec->idlog ),
-				array( '%s' ),
-				array( '%d' )
-			);
+			wfu_make_rec_obsolete($filerec);
 			$obsolete_count ++;
 		}
 	}
@@ -1453,14 +1678,7 @@ function wfu_get_recs_of_user($userid) {
 			}
 		}
 		if ( $obsolete ) {
-			$now_date = date('Y-m-d H:i:s');
-			//make previous record obsolete
-			$wpdb->update($table_name1,
-				array( 'date_to' => $now_date ),
-				array( 'idlog' => $filerec->idlog ),
-				array( '%s' ),
-				array( '%d' )
-			);
+			wfu_make_rec_obsolete($filerec);
 		}
 		else {
 			$filerec->userdata = null;
@@ -1474,7 +1692,7 @@ function wfu_get_recs_of_user($userid) {
 }
 
 function wfu_get_filtered_recs($filter) {
-	switch(WFU_FUNCTION_HOOK(__FUNCTION__, func_get_args(), $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
 	global $wpdb;
 	$table_name1 = $wpdb->prefix . "wfu_log";
 	$table_name2 = $wpdb->prefix . "wfu_userdata";
@@ -1547,6 +1765,9 @@ function wfu_get_filtered_recs($filter) {
 		array_push($queries, $query);
 	}
 	
+	//allow filters to modify the queries
+	$queries = apply_filters("_wfu_filtered_recs_queries", $queries, $filter);
+	
 	$filerecs = $wpdb->get_results('SELECT * FROM '.$table_name1.' WHERE '.implode(' AND ', $queries));
 	$out = array();
 	foreach( $filerecs as $filerec ) {
@@ -1564,14 +1785,7 @@ function wfu_get_filtered_recs($filter) {
 			}
 		}
 		if ( $obsolete ) {
-			$now_date = date('Y-m-d H:i:s');
-			//make previous record obsolete
-			$wpdb->update($table_name1,
-				array( 'date_to' => $now_date ),
-				array( 'idlog' => $filerec->idlog ),
-				array( '%s' ),
-				array( '%d' )
-			);
+			wfu_make_rec_obsolete($filerec);
 		}
 		else {
 			$filerec->userdata = null;
@@ -1594,30 +1808,43 @@ function wfu_get_option($option, $default) {
 	$table_name1 = $wpdb->prefix . "options";
 	$val = $wpdb->get_var($wpdb->prepare("SELECT option_value FROM $table_name1 WHERE option_name = %s", $option));
 	if ( $val === null && $default !== false ) $val = $default;
-	elseif ( is_array($default) ) $val = wfu_decode_array_from_string($val);
+	elseif ( $val !== null ) $val = wfu_decode_array_from_string($val);
 	return $val;
 }
 
 function wfu_update_option($option, $value) {
 	global $wpdb;
 	$table_name1 = $wpdb->prefix . "options";
-	if ( is_array($value) ) $value = wfu_encode_array_to_string($value);
+	$value = wfu_encode_array_to_string($value);
 	$wpdb->query($wpdb->prepare("INSERT INTO $table_name1 (option_name, option_value) VALUES (%s, %s) ON DUPLICATE KEY UPDATE option_value = VALUES(option_value)", $option, $value));
 }
 
+function wfu_delete_option($option) {
+	global $wpdb;
+	$table_name1 = $wpdb->prefix . "options";
+	$val = $wpdb->get_var($wpdb->prepare("SELECT option_value FROM $table_name1 WHERE option_name = %s", $option));
+	$wpdb->query($wpdb->prepare("DELETE FROM $table_name1 WHERE option_name = %s", $option));
+}
+
 function wfu_export_uploaded_files($params) {
-	switch(WFU_FUNCTION_HOOK(__FUNCTION__, func_get_args(), $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
 	global $wpdb;
 	$table_name1 = $wpdb->prefix . "wfu_log";
 	$table_name2 = $wpdb->prefix . "wfu_userdata";
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
 	$sep = WFU_VAR("WFU_EXPORT_DATA_SEPARATOR");
 	$sep2 = WFU_VAR("WFU_EXPORT_USERDATA_SEPARATOR");
+	$includeall = isset($params["username"]);
 
 	$contents = "";
 	$header = 'Name'.$sep.'Path'.$sep.'Upload User'.$sep.'Upload Time'.$sep.'Size'.$sep.'Page ID'.$sep.'Blog ID'.$sep.'Shortcode ID'.$sep.'Upload ID'.$sep.'User Data';
 	$contents = $header;
-	$filerecs = $wpdb->get_results('SELECT * FROM '.$table_name1.' WHERE action <> \'other\' AND date_to = 0');
+	if ( $includeall ) {
+		$user = get_user_by('login', $params["username"]);
+		$userid = $user->ID;
+		$filerecs = $wpdb->get_results('SELECT * FROM '.$table_name1.' WHERE uploaduserid = '.$userid);
+	}
+	else $filerecs = $wpdb->get_results('SELECT * FROM '.$table_name1.' WHERE action <> \'other\' AND date_to = 0');
 	foreach( $filerecs as $filerec ) {
 		if ( $filerec->action == 'datasubmit' ) $obsolete = false;
 		else {
@@ -1636,7 +1863,7 @@ function wfu_export_uploaded_files($params) {
 			}
 		}
 		//export file data if file is not obsolete
-		if ( !$obsolete ) {
+		if ( !$obsolete || $includeall ) {
 			$username = wfu_get_username_by_id($filerec->uploaduserid);
 			$filerec->userdata = $wpdb->get_results('SELECT * FROM '.$table_name2.' WHERE uploadid = \''.$filerec->uploadid.'\' AND date_to = 0 ORDER BY propkey');
 			$line = ( $filerec->action == 'datasubmit' ? 'datasubmit' : wfu_basename($filerec->filepath) );
@@ -1747,24 +1974,42 @@ function wfu_generate_current_params_index($shortcode_id, $user_login) {
 	return $cur_index_rand;
 }
 
-function wfu_get_params_fields_from_index($params_index) {
+function wfu_get_params_fields_from_index($params_index, $session_token = "") {
 	$fields = array();
 	$index_str = get_option('wfu_params_index');
 	$index = explode("&&", $index_str);
 	$index_match = preg_grep("/^".$params_index."/", $index);
-	if ( count($index_match) == 1 )
+	if ( count($index_match) >= 1 )
 		foreach ( $index_match as $key => $value )
 			if ( $value == "" ) unset($index_match[$key]);
 	if ( count($index_match) > 0 ) {
-		reset($index_match);
-		list($fields['unique_id'], $fields['page_id'], $fields['shortcode_id'], $fields['user_login']) = explode("||", current($index_match));
+		if ( $session_token == "" ) {
+			reset($index_match);
+			list($fields['unique_id'], $fields['page_id'], $fields['shortcode_id'], $fields['user_login']) = explode("||", current($index_match));
+		}
+		//some times $params_index corresponds to 2 or more sets of params, so
+		//we need to check session token in order to find the correct one
+		else {
+			$found = false;
+			foreach ( $index_match as $value ) {
+				list($fields['unique_id'], $fields['page_id'], $fields['shortcode_id'], $fields['user_login']) = explode("||", $value);
+				$sid = $fields['shortcode_id'];
+				if ( WFU_USVAR_exists("wfu_token_".$sid) && WFU_USVAR("wfu_token_".$sid) == $session_token ) {
+					$found = true;
+					break;
+				}
+			}
+			if ( !$found ) $fields = array();
+		}
 	}
 	return $fields; 
 }
 
 function wfu_safe_store_shortcode_data($data) {
 	$code = wfu_create_random_string(16);
-	$_SESSION['wfu_shortcode_data_safe_storage'][$code] = $data;
+	$safe_storage = ( WFU_USVAR_exists('wfu_shortcode_data_safe_storage') ? WFU_USVAR('wfu_shortcode_data_safe_storage') : array() );
+	$safe_storage[$code] = $data;
+	WFU_USVAR_store('wfu_shortcode_data_safe_storage', $safe_storage);
 	return $code;
 }
 
@@ -1773,8 +2018,10 @@ function wfu_get_shortcode_data_from_safe($code) {
 	$code = wfu_sanitize_code($code);
 	if ( $code == "" ) return '';
 	//return shortcode data from session variable, if exists
-	if ( !isset($_SESSION['wfu_shortcode_data_safe_storage'][$code]) ) return '';
-	return $_SESSION['wfu_shortcode_data_safe_storage'][$code];
+	if ( !WFU_USVAR_exists('wfu_shortcode_data_safe_storage') ) return '';
+	$safe_storage = WFU_USVAR('wfu_shortcode_data_safe_storage');
+	if ( !isset($safe_storage[$code]) ) return '';
+	return $safe_storage[$code];
 }
 
 function wfu_clear_shortcode_data_from_safe($code) {
@@ -1782,8 +2029,11 @@ function wfu_clear_shortcode_data_from_safe($code) {
 	$code = wfu_sanitize_code($code);
 	if ( $code == "" ) return;
 	//clear shortcode data from session variable, if exists
-	if ( !isset($_SESSION['wfu_shortcode_data_safe_storage'][$code]) ) return;
-	unset($_SESSION['wfu_shortcode_data_safe_storage'][$code]);
+	if ( !WFU_USVAR_exists('wfu_shortcode_data_safe_storage') ) return;
+	$safe_storage = WFU_USVAR('wfu_shortcode_data_safe_storage');
+	if ( !isset($safe_storage[$code]) ) return;
+	unset($safe_storage[$code]);
+	WFU_USVAR_store('wfu_shortcode_data_safe_storage', $safe_storage);
 }
 
 function wfu_decode_dimensions($dimensions_str) {
@@ -1827,41 +2077,41 @@ function wfu_placements_remove_item($placements, $item) {
 //********************* Plugin Design Functions ********************************************************************************************
 
 function wfu_get_uploader_template($templatename = "") {
-	switch(WFU_FUNCTION_HOOK(__FUNCTION__, func_get_args(), $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
 	if ($templatename != "") {
 		$classname = "WFU_UploaderTemplate_$templatename";
 		if ( class_exists($classname) )
-			return $classname::get_instance();
+			return call_user_func(array($classname, 'get_instance'));
 		$filepath = ABSWPFILEUPLOAD_DIR."templates/uploader-$templatename.php";
 		if ( file_exists($filepath) ) {
 			include_once $filepath;
 			$classname = "WFU_UploaderTemplate_$templatename";
 			if ( class_exists($classname) )
-				return $classname::get_instance();
+				return call_user_func(array($classname, 'get_instance'));
 		}
 	}
 	return WFU_Original_Template::get_instance();
 }
 
 function wfu_get_browser_template($templatename = "") {
-	switch(WFU_FUNCTION_HOOK(__FUNCTION__, func_get_args(), $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
 	if ($templatename != "") {
 		$classname = "WFU_BrowserTemplate_$templatename";
 		if ( class_exists($classname) )
-			return $classname::get_instance();
+			return call_user_func(array($classname, 'get_instance'));
 		$filepath = ABSWPFILEUPLOAD_DIR."templates/browser-$templatename.php";
 		if ( file_exists($filepath) ) {
 			include_once $filepath;
 			$classname = "WFU_BrowserTemplate_$templatename";
 			if ( class_exists($classname) )
-				return $classname::get_instance();
+				return call_user_func(array($classname, 'get_instance'));
 		}
 	}
 	return WFU_Original_Template::get_instance();
 }
 
 function wfu_add_div() {
-	switch(WFU_FUNCTION_HOOK(__FUNCTION__, func_get_args(), $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
 	$items_count = func_num_args();
 	if ( $items_count == 0 ) return "";
 	$items_raw = func_get_args();
@@ -1915,12 +2165,25 @@ function wfu_read_template_output($blockname, $data) {
 function wfu_template_to_HTML($blockname, $params, $additional_params, $occurrence_index) {
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
 	$block = call_user_func("wfu_prepare_".$blockname."_block", $params, $additional_params, $occurrence_index);
+	if ( isset($params["uploadid"]) ) {
+		$ID = $params["uploadid"];
+		$WF = "WFU";
+	}
+	else {
+		$ID = $params["browserid"];
+		$WF = "WFUB";
+	}
 	$css = $block["css"];
-	$js = $block["js"];
+	if ( $block["js"] != "" ) {
+		$js = 'var '.$WF.'_JS_'.$ID.'_'.$blockname.' = function() {';
+		$js .= "\n".$block["js"];
+		$js .= "\n".'}';
+		$js .= "\n".'wfu_run_js("window", "'.$WF.'_JS_'.$ID.'_'.$blockname.'");';
+	}
 	//relax css rules if this option is enabled
 	if ( $plugin_options['relaxcss'] == '1' ) $css = preg_replace('#.*?/\*relax\*/\s*#', '', $css);
 	$echo_str = wfu_css_to_HTML($css);
-	$echo_str .= wfu_js_to_HTML($js);
+	$echo_str .= "\n".wfu_js_to_HTML($js);
 	$k = 1;
 	while ( isset($block["line".$k]) ) {
 		if ( $block["line".$k] != "" ) $echo_str .= "\n".$block["line".$k];
@@ -1939,7 +2202,7 @@ function wfu_extract_css_js_from_components($section_array, &$css, &$js) {
 }
 
 function wfu_add_loading_overlay($dlp, $code) {
-	switch(WFU_FUNCTION_HOOK(__FUNCTION__, func_get_args(), $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
 	$echo_str = $dlp.'<div id="wfu_'.$code.'_overlay" style="margin:0; padding: 0; width:100%; height:100%; position:absolute; left:0; top:0; border:none; background:none; display:none;">';
 	$echo_str .= $dlp."\t".'<div style="margin:0; padding: 0; width:100%; height:100%; position:absolute; left:0; top:0; border:none; background-color:rgba(255,255,255,0.8); z-index:1;""></div>';
 	$echo_str .= $dlp."\t".'<table style="margin:0; padding: 0; table-layout:fixed; width:100%; height:100%; position:absolute; left:0; top:0; border:none; background:none; z-index:2;"><tbody><tr><td align="center" style="border:none;">';
@@ -1951,19 +2214,19 @@ function wfu_add_loading_overlay($dlp, $code) {
 }
 
 function wfu_add_pagination_header($dlp, $code, $curpage, $pages, $nonce = false) {
-	switch(WFU_FUNCTION_HOOK(__FUNCTION__, func_get_args(), $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
 	if ($nonce === false) $nonce = wp_create_nonce( 'wfu-'.$code.'-page' );
 	$echo_str = $dlp.'<div style="float:right;">';
 	$echo_str .= $dlp."\t".'<label id="wfu_'.$code.'_first_disabled" style="margin:0 4px; font-weight:bold; opacity:0.5; cursor:default; display:'.( $curpage == 1 ? 'inline' : 'none' ).';">&#60;&#60;</label>';
 	$echo_str .= $dlp."\t".'<label id="wfu_'.$code.'_prev_disabled" style="margin:0 4px; font-weight:bold; opacity:0.5; cursor:default; display:'.( $curpage == 1 ? 'inline' : 'none' ).';">&#60;</label>';
 	$echo_str .= $dlp."\t".'<a id="wfu_'.$code.'_first" href="javascript:wfu_goto_'.$code.'_page(\''.$nonce.'\', \'first\');" style="margin:0 4px; font-weight:bold; display:'.( $curpage == 1 ? 'none' : 'inline' ).';">&#60;&#60;</a>';
 	$echo_str .= $dlp."\t".'<a id="wfu_'.$code.'_prev" href="javascript:wfu_goto_'.$code.'_page(\''.$nonce.'\', \'prev\');" style="margin:0 4px; font-weight:bold; display:'.( $curpage == 1 ? 'none' : 'inline' ).';">&#60;</a>';
-	$echo_str .= $dlp."\t".'<label style="margin:0 0 0 4px; cursor:default;">Page</label>';
+	$echo_str .= $dlp."\t".'<label style="margin:0 0 0 4px; cursor:default;">'.WFU_PAGINATION_PAGE.'</label>';
 	$echo_str .= $dlp."\t".'<select id="wfu_'.$code.'_pages" style="margin:0 4px;" onchange="wfu_goto_'.$code.'_page(\''.$nonce.'\', \'sel\');">';
 	for ( $i = 1; $i <= $pages; $i++ )
 		$echo_str .= $dlp."\t\t".'<option value="'.$i.'"'.( $i == $curpage ? ' selected="selected"' : '' ).'>'.$i.'</option>';
 	$echo_str .= $dlp."\t".'</select>';
-	$echo_str .= $dlp."\t".'<label style="margin:0 4px 0 0; cursor:default;">of '.$pages.'</label>';
+	$echo_str .= $dlp."\t".'<label style="margin:0 4px 0 0; cursor:default;">'.WFU_PAGINATION_OF.$pages.'</label>';
 	$echo_str .= $dlp."\t".'<label id="wfu_'.$code.'_next_disabled" style="margin:0 4px; font-weight:bold; opacity:0.5; cursor:default; display:'.( $curpage == $pages ? 'inline' : 'none' ).';">&#62;</label>';
 	$echo_str .= $dlp."\t".'<label id="wfu_'.$code.'_last_disabled" style="margin:0 4px; font-weight:bold; opacity:0.5; cursor:default; display:'.( $curpage == $pages ? 'inline' : 'none' ).';">&#62;&#62;</label>';
 	$echo_str .= $dlp."\t".'<a id="wfu_'.$code.'_next" href="javascript:wfu_goto_'.$code.'_page(\''.$nonce.'\', \'next\');" style="margin:0 4px; font-weight:bold; display:'.( $curpage == $pages ? 'none' : 'inline' ).';">&#62;</a>';
@@ -1974,7 +2237,7 @@ function wfu_add_pagination_header($dlp, $code, $curpage, $pages, $nonce = false
 }
 
 function wfu_add_bulkactions_header($dlp, $code, $actions) {
-	switch(WFU_FUNCTION_HOOK(__FUNCTION__, func_get_args(), $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
 	$echo_str = $dlp.'<div style="float:left;">';
 	$echo_str .= $dlp."\t".'<select id="wfu_'.$code.'_bulkactions">';
 	$echo_str .= $dlp."\t\t".'<option value="" selected="selected">'.( substr($code, 0, 8) == "browser_" ? WFU_BROWSER_BULKACTION_TITLE : "Bulk Actions").'</option>';
@@ -1999,9 +2262,13 @@ function wfu_prepare_message_colors($template) {
 //********************* Email Functions ****************************************************************************************************
 
 function wfu_send_notification_email($user, $uploaded_file_paths, $userdata_fields, $params) {
-	switch(WFU_FUNCTION_HOOK(__FUNCTION__, func_get_args(), $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
 	global $blog_id;
+	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
 	
+	//get consent status
+	$consent_revoked = ( $plugin_options["personaldata"] == "1" && wfu_check_user_consent($user) == "0" );
+	$not_store_files = ( $params["personaldatatypes"] == "userdata and files" );
 	//create necessary variables
 	$only_filename_list = "";
 	$target_path_list = "";
@@ -2067,13 +2334,17 @@ function wfu_send_notification_email($user, $uploaded_file_paths, $userdata_fiel
 		else {
 			$notify_sent = wp_mail($notifyrecipients, $notifysubject, $notifymessage, $notifyheaders); 
 		}
+		//delete files if it is required by consent policy
+		if ( $consent_revoked && $not_store_files ) {
+			foreach ( $uploaded_file_paths as $file ) unlink($file);
+		}
 		return ( $notify_sent ? "" : WFU_WARNING_NOTIFY_NOTSENT_UNKNOWNERROR );
 	}
 	else return $ret_data['error_message'];
 }
 
 function wfu_notify_admin($subject, $message) {
-	switch(WFU_FUNCTION_HOOK(__FUNCTION__, func_get_args(), $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
 	$admin_email = get_option("admin_email");
 	if ( $admin_email === false ) return;
 	wp_mail($admin_email, $subject, $message);
@@ -2083,7 +2354,7 @@ function wfu_notify_admin($subject, $message) {
 
 // function wfu_process_media_insert contribution from Aaron Olin with some corrections regarding the upload path
 function wfu_process_media_insert($file_path, $userdata_fields, $page_id){
-	switch(WFU_FUNCTION_HOOK(__FUNCTION__, func_get_args(), $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
 	$wp_upload_dir = wp_upload_dir();
 	$filetype = wp_check_filetype( wfu_basename( $file_path ), null );
 
@@ -2104,6 +2375,15 @@ function wfu_process_media_insert($file_path, $userdata_fields, $page_id){
 	foreach ( $userdata_fields as $userdata_field )
 		$attach_data["WFU User Data"][$userdata_field["label"]] = $userdata_field["value"];
 	$update_attach = wp_update_attachment_metadata( $attach_id, $attach_data );
+	// link attachment with file in plugin's database
+	$filedata = wfu_get_filedata($file_path, true);
+	if ( $filedata != null ) {
+		$filedata["media"] = array(
+			"type"		=> "data",
+			"attach_id"	=> $attach_id
+		);
+		wfu_save_filedata_from_id($filedata["general"]["idlog"], $filedata);
+	}
 
 	return $attach_id;	
 }
@@ -2195,6 +2475,141 @@ function wfu_parse_userdata_attribute($value){
 	return $fields;	
 }
 
+//********************* User State Functions ****************************************************************************************************
+
+function WFU_USVAR_exists($var) {
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	global $wfu_user_state_handler;
+	if ( $wfu_user_state_handler == "dboption" ) return WFU_USVAR_exists_dboption($var);
+	else return WFU_USVAR_exists_session($var);
+}
+
+function WFU_USVAR($var) {
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	global $wfu_user_state_handler;
+	if ( $wfu_user_state_handler == "dboption" ) return WFU_USVAR_dboption($var);
+	else return WFU_USVAR_session($var);
+}
+
+function WFU_USALL() {
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	global $wfu_user_state_handler;
+	if ( $wfu_user_state_handler == "dboption" ) return WFU_USALL_dboption();
+	else return WFU_USALL_session();
+}
+
+function WFU_USVAR_store($var, $value) {
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	global $wfu_user_state_handler;
+	if ( $wfu_user_state_handler == "dboption" ) WFU_USVAR_store_dboption($var, $value);
+	else WFU_USVAR_store_session($var, $value);
+}
+
+function WFU_USVAR_unset($var) {
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	global $wfu_user_state_handler;
+	if ( $wfu_user_state_handler == "dboption" ) WFU_USVAR_unset_dboption($var);
+	else WFU_USVAR_unset_session($var);
+}
+
+function WFU_USVAR_exists_session($var) {
+	return isset($_SESSION[$var]);
+}
+
+function WFU_USVAR_session($var) {
+	return $_SESSION[$var];
+}
+
+function WFU_USALL_session() {
+	return $_SESSION;
+}
+
+function WFU_USVAR_store_session($var, $value) {
+	$_SESSION[$var] = $value;
+}
+
+function WFU_USVAR_unset_session($var) {
+	unset($_SESSION[$var]);
+}
+
+function wfu_get_safe_session_id() {
+	return preg_replace("/[^a-z0-9_]/", "", strtolower(session_id()));
+}
+
+function wfu_get_US_dboption_data($id, $default = false) {
+	if ( $id == "" ) return false;
+	return wfu_get_option("wfu_userstate_".$id, $default);
+}
+
+function wfu_update_US_dboption_time($id) {
+	$list = wfu_get_option("wfu_userstate_list", array());
+	$list[$id] = time();
+	wfu_update_option("wfu_userstate_list", $list);
+}
+
+function WFU_USVAR_exists_dboption($var) {
+	$id = wfu_get_safe_session_id();
+	$data = wfu_get_US_dboption_data($id);
+	if ( $data === false ) return false;
+	wfu_update_US_dboption_time($id);
+	return isset($data[$var]);
+}
+
+function WFU_USVAR_dboption($var) {
+	$id = wfu_get_safe_session_id();
+	$data = wfu_get_US_dboption_data($id);
+	if ( $data === false ) return "";
+	wfu_update_US_dboption_time($id);
+	return $data[$var];
+}
+
+function WFU_USALL_dboption() {
+	$id = wfu_get_safe_session_id();
+	$data = wfu_get_US_dboption_data($id);
+	if ( $data === false ) return array();
+	wfu_update_US_dboption_time($id);
+	return $data;
+}
+
+function WFU_USVAR_store_dboption($var, $value) {
+	$id = wfu_get_safe_session_id();
+	$data = wfu_get_US_dboption_data($id, array());
+	if ( $data === false ) return;
+	$data[$var] = $value;
+	wfu_update_option("wfu_userstate_".$id, $data);
+	wfu_update_US_dboption_time($id);
+	wfu_update_US_dboption_list();
+}
+
+function WFU_USVAR_unset_dboption($var) {
+	$id = wfu_get_safe_session_id();
+	$data = wfu_get_US_dboption_data($id);
+	if ( $data === false ) return;
+	unset($data[$var]);
+	wfu_update_option("wfu_userstate_".$id, $data);
+	wfu_update_US_dboption_time($id);
+}
+
+function wfu_update_US_dboption_list() {
+	$last_check_interval = time() - wfu_get_option("wfu_userstate_list_last_check", 0);
+	$limit = WFU_VAR("WFU_US_DBOPTION_CHECK");
+	if ( $last_check_interval < $limit ) return;
+	
+	$list = wfu_get_option("wfu_userstate_list", array());
+	$changed = false;
+	$limit = WFU_VAR("WFU_US_DBOPTION_LIFE");
+	foreach ( $list as $id => $time ) {
+		$interval = time() - $time;
+		if ( $interval > $limit ) {
+			$changed = true;
+			unset($list[$id]);
+			wfu_delete_option("wfu_userstate_".$id);
+		}
+	}
+	if ( $changed ) wfu_update_option("wfu_userstate_list", $list);
+	wfu_update_option("wfu_userstate_list_last_check", time());
+}
+
 //********************* Javascript Related Functions ****************************************************************************************************
 
 // function wfu_inject_js_code generates html code for injecting js code and then erase the trace
@@ -2205,11 +2620,124 @@ function wfu_inject_js_code($code){
 	return $html;	
 }
 
+//********************* Consent Functions ****************************************************************************************************
+
+function wfu_check_user_consent($user) {
+	//returns empty string if user has not completed consent question yet, "1"
+	//if user has given consent, "0" otherwise
+	$result = "";
+	if ( $user->ID > 0 ) {
+		//check in user meta for consent
+		$data = get_the_author_meta( 'WFU_Consent_Data', $user->ID );
+		if ( $data && isset($data["consent_status"]) )
+			$result = $data["consent_status"];
+	}
+	else {
+		//check in user state for consent
+		if ( WFU_USVAR_exists('WFU_Consent_Data') ) {
+			$data = WFU_USVAR('WFU_Consent_Data');
+			if ( isset($data["consent_status"]) )
+				$result = $data["consent_status"];
+		}
+	}
+	
+	return $result;
+}
+
+function wfu_update_user_consent($user, $consent_result) {
+	if ( $user->ID > 0 ) {
+		//check in user meta for consent
+		$data = get_the_author_meta( 'WFU_Consent_Data', $user->ID );
+		if ( !$data ) $data = array();
+		$data["consent_status"] = ( $consent_result == "yes" ? "1" : ( $consent_result == "no" ? "0" : "" ) );
+		update_user_meta( $user->ID, 'WFU_Consent_Data', $data );
+	}
+	else {
+		//check in user state for consent
+		if ( WFU_USVAR_exists('WFU_Consent_Data') ) $data = WFU_USVAR('WFU_Consent_Data');
+		else $data = array();
+		$data["consent_status"] = ( $consent_result == "yes" ? "1" : ( $consent_result == "no" ? "0" : "" ) );
+		WFU_USVAR_store( 'WFU_Consent_Data', $data );
+	}
+}
+
+function wfu_show_consent_profile_fields($user) {
+	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
+	if ( $plugin_options["personaldata"] != "1" ) return;
+	
+	$data = get_the_author_meta( 'WFU_Consent_Data', $user->ID );
+	if ( !$data ) $data = array();
+	if ( !isset($data["consent_status"]) ) $data["consent_status"] = "";
+	$status = $data["consent_status"];
+	
+	$echo_str = "\n\t".'<h3>'.esc_html__( 'Wordpress File Upload Consent Status', 'wp-file-upload' ).'</h3>';
+	$echo_str .= "\n\t".'<table class="form-table">';
+	$echo_str .= "\n\t\t".'<tr>';
+	$echo_str .= "\n\t\t\t".'<th><label>'.esc_html__( 'Consent Status', 'wp-file-upload' ).'</label></th>';
+	$echo_str .= "\n\t\t\t".'<td>';
+	$echo_str .= "\n\t\t\t\t".'<label style="font-weight: bold;">'.( $status == "1" ? esc_html__( 'You have given your consent to store personal data.', 'wp-file-upload' ) : ( $status == "0" ? esc_html__( 'You have denied to store personal data.', 'wp-file-upload' ) : esc_html__( 'You have not answered to consent yet.', 'wp-file-upload' ) ) ).'</label>';
+	$echo_str .= "\n\t\t\t".'</td>';
+	$echo_str .= "\n\t\t".'</tr>';
+	$echo_str .= "\n\t\t".'<tr>';
+	$echo_str .= "\n\t\t\t".'<th></th>';
+	$echo_str .= "\n\t\t\t".'<td>';
+	$echo_str .= "\n\t\t\t\t".'<label>'.esc_html__( 'Change status to', 'wp-file-upload' ).'</label>';
+	$echo_str .= "\n\t\t\t\t".'<select name="consent_status">';
+	$echo_str .= "\n\t\t\t\t\t".'<option value="-1" selected="selected">'.esc_html__( 'No change', 'wp-file-upload' ).'</option>';
+	if ( $status == "1" ) {
+		$echo_str .= "\n\t\t\t\t\t".'<option value="0">'.esc_html__( 'Revoke Consent', 'wp-file-upload' ).'</option>';
+		$echo_str .= "\n\t\t\t\t\t".'<option value="">'.esc_html__( 'Clear Consent', 'wp-file-upload' ).'</option>';
+	}
+	elseif ( $status == "0" ) {
+		$echo_str .= "\n\t\t\t\t\t".'<option value="1">'.esc_html__( 'Give Consent', 'wp-file-upload' ).'</option>';
+		$echo_str .= "\n\t\t\t\t\t".'<option value="">'.esc_html__( 'Clear Consent', 'wp-file-upload' ).'</option>';
+	}
+	if ( $status == "" ) {
+		$echo_str .= "\n\t\t\t\t\t".'<option value="0">'.esc_html__( 'Revoke Consent', 'wp-file-upload' ).'</option>';
+		$echo_str .= "\n\t\t\t\t\t".'<option value="1">'.esc_html__( 'Give Consent', 'wp-file-upload' ).'</option>';
+	}
+	$echo_str .= "\n\t\t\t\t".'</select>';
+	$echo_str .= "\n\t\t\t".'</td>';
+	$echo_str .= "\n\t\t".'</tr>';
+	/*
+	if ( current_user_can( 'manage_options' ) ) {
+		$echo_str .= "\n\t\t".'<tr>';
+		$echo_str .= "\n\t\t\t".'<th><label>'.esc_html__( 'Personal Data Operations', 'wp-file-upload' ).'</label></th>';
+		$echo_str .= "\n\t\t\t".'<td>';
+		$echo_str .= "\n\t\t\t\t".'<input id="wfu_download_file_nonce" type="hidden" value="'.wp_create_nonce('wfu_download_file_invoker').'" />';
+		$echo_str .= "\n\t\t\t\t".'<button type="button" class="button" onclick="wfu_download_file(\'exportdata\', 1);">'.esc_html__( 'Export User Data', 'wp-file-upload' ).'</button>';
+		$echo_str .= "\n\t\t\t".'</td>';
+		$echo_str .= "\n\t\t".'</tr>';
+	}*/
+	$echo_str .= "\n\t".'</table>';
+	
+	echo $echo_str;
+}
+
+function wfu_update_consent_profile_fields( $user_id ) {
+	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
+	if ( $plugin_options["personaldata"] != "1" ) return false;
+
+	if ( ! current_user_can( 'edit_user', $user_id ) ) {
+		return false;
+	}
+
+	$status = $_POST['consent_status'];
+	if ( $status == '1' || $status == '0' || $status == '' ) {
+		$data = get_the_author_meta( 'WFU_Consent_Data', $user_id );
+		if ( !$data ) $data = array();
+		$data["consent_status"] = $status;
+		update_user_meta( $user_id, 'WFU_Consent_Data', $data );
+	}
+}
+
 //********************* Browser Functions ****************************************************************************************************
 
 function wfu_safe_store_browser_params($params) {
 	$code = wfu_create_random_string(16);
-	$_SESSION['wfu_browser_actions_safe_storage'][$code] = $params;
+	$safe_storage = ( WFU_USVAR_exists('wfu_browser_actions_safe_storage') ? WFU_USVAR('wfu_browser_actions_safe_storage') : array() );
+	$safe_storage[$code] = $params;
+	WFU_USVAR_store('wfu_browser_actions_safe_storage', $safe_storage);
 	return $code;
 }
 
@@ -2218,14 +2746,16 @@ function wfu_get_browser_params_from_safe($code) {
 	$code = wfu_sanitize_code($code);
 	if ( $code == "" ) return false;
 	//return params from session variable, if exists
-	if ( !isset($_SESSION['wfu_browser_actions_safe_storage'][$code]) ) return false;
-	return $_SESSION['wfu_browser_actions_safe_storage'][$code];
+	if ( !WFU_USVAR_exists('wfu_browser_actions_safe_storage') ) return false;
+	$safe_storage = WFU_USVAR('wfu_browser_actions_safe_storage');
+	if ( !isset($safe_storage[$code]) ) return false;
+	return $safe_storage[$code];
 }
 
 //********************* POST/GET Requests Functions ****************************************************************************************************
 
 function wfu_decode_socket_response($response) {
-	switch(WFU_FUNCTION_HOOK(__FUNCTION__, func_get_args(), $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
 	$ret = "";
 	if (0 === strpos($response, 'HTTP/1.1 200 OK')) {
 		$parts = preg_split("#\n\s*\n#Uis", $response);
@@ -2249,7 +2779,7 @@ function wfu_decode_socket_response($response) {
 }
 
 function wfu_post_request($url, $params, $verifypeer = false, $internal_request = false, $timeout = 0) {
-	switch(WFU_FUNCTION_HOOK(__FUNCTION__, func_get_args(), $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
 	if ( isset($plugin_options['postmethod']) && $plugin_options['postmethod'] == 'curl' ) {
 		// POST request using CURL

@@ -1,10 +1,10 @@
-=== WP Tab Widget ===
+﻿=== WP Tab Widget ===
 Contributors: mythemeshop
 Creator's website link: http://mythemeshop.com/
 Tags: tabs, tab widget, recent posts tab, tabs widget, ajax tabs, ajax widget.
-Requires at least: 3.0.1
-Tested up to: 4.8
-Stable tag: 1.2.7
+Requires at least: 4.0
+Tested up to: 4.9.5
+Stable tag: 1.2.10
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -59,10 +59,10 @@ Support link:<br>
 
 MyThemeShop is a premium WordPress theme provider and we develop premium plugins in our free time and distribute them for free to give back to the community. Though we take a lot of care while developing anything, we might have missed something useful/important. Please help us make it better by submitting the bug/suggestions/feedback on GitHub.
 
-GitHub link: <a href="https://github.com/MyThemeShop/WP-Tab-Widget-by-MyThemeShop">https://github.com/MyThemeShop/WP-Tab-Widget-by-MyThemeShop</a>
+GitHub link: <a href="https://github.com/MyThemeShopTeam/WP-Tab-Widget">https://github.com/MyThemeShopTeam/WP-Tab-Widget</a>
 
 = Feedback =
-If you like this plugin, then please leave us a good rating and review.<br> Consider following us on <a rel="author" href="https://plus.google.com/+Mythemeshop/">Google+</a>, <a href="https://twitter.com/MyThemeShopTeam">Twitter</a>, and <a href="https://www.facebook.com/MyThemeShop">Facebook</a> 
+If you like this plugin, then please leave us a good rating and review.<br> Consider following us on <a rel="author" href="https://plus.google.com/+Mythemeshop/">Google+</a>, <a href="https://twitter.com/MyThemeShopTeam">Twitter</a>, and <a href="https://www.facebook.com/MyThemeShop">Facebook</a>
 
 == Installation ==
 
@@ -101,40 +101,52 @@ add_filter( 'wpt_sampling_rate', 'wpt_my_sampling_rate' );
 
 == Changelog ==
 
-= 1.2.7 =
-* Added new `wpt_sampling_rate` filter. See the FAQ section on how this works.
+= 1.2.10 [June 30, 2018] =
+* Changed admin notices
+* Fixed deprecated notice
 
-= 1.2.6 =
+= 1.2.9 [June 29, 2018] =
+* Updated admin notices
+
+= 1.2.8 (Apr 20, 2018) =
+* Fixed compatibility with PHP 7
+* Checked compatibility with WordPress v4.9.5
+* Improved Code
+
+= 1.2.7 (Feb 03, 2017) =
+* Added new wpt_sampling_rate filter. See the FAQ section on how this works.
+
+= 1.2.6 (Jan 28, 2017) =
 * Updated view counter function
 
-= 1.2.5 =
+= 1.2.5 (Apr 06, 2016) =
 * Added missing Pro version image
 
-= 1.2.4 =
-* Replaced "comm" CSS class with "comments-number" on comment count in Recent tab
-* Added "Show Some Love" option
+= 1.2.4 (Mar 27, 2016) =
+* Replaced “comm” CSS class with “comments-number” on comment count in Recent tab
+* Added “Show Some Love” option
 
-= 1.2.3 =
-* Fixed issue where tab content couldn't be loaded on servers with non UTF8 character encoding
+= 1.2.3 (Mar 22, 2016) =
+* Fixed issue where tab content couldn’t be loaded on servers with non UTF8 character encoding
 * List only comments from default comment type in Comments tab
 * Prevent conflict with Pro version
 * Added Notification & Banner for Pro Version
 
-= 1.2.2 =
+= 1.2.2 (Aug 21, 2015) =
 * Changed text domain to make plugin compatible with WordPress Language Packs
 
-= 1.2.1 =
+= 1.2.1 (Aug 19, 2015) =
 * Switched to PHP 5 style constructor method for the widget class
 
-= 1.2 =
+= 1.2 (Oct 15, 2014) =
 * Added Title Length option
 * Fixed post view count compatibility with themes
 
-= 1.1 =
-* Popular posts will be decided by number of views.
-* Added loading effect.
-* Fixed small bugs.
-* Performance improvement.
+= 1.1 (Oct 1, 2014) =
+* Popular posts will be decided by number of views
+* Added loading effect
+* Fixed small bugs
+* Performance improvement
 
-= 1.0 =
-* Official plugin release.
+= 1.0 (Mar 24, 2014) =
+* Plugin released

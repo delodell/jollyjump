@@ -1,8 +1,8 @@
 <?php
-/*
+/**
  * License: GPLv3
  * License URI: https://www.gnu.org/licenses/gpl.txt
- * Copyright 2012-2017 Jean-Sebastien Morisset (https://wpsso.com/)
+ * Copyright 2012-2018 Jean-Sebastien Morisset (https://surniaulula.com/)
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -1281,7 +1281,7 @@ if ( ! class_exists( 'SucomCountryCodes' ) ) {
 						self::$codes[$key][$arr[$key]] = $name;
 					}
 				}
-				if ( ! isset( self::$codes[$key] ) ) {	// just in case
+				if ( ! isset( self::$codes[$key] ) ) {	// Just in case.
 					self::$codes[$key] = false;
 				}
 			}
@@ -1291,4 +1291,3 @@ if ( ! class_exists( 'SucomCountryCodes' ) ) {
 	}
 }
 
-?>

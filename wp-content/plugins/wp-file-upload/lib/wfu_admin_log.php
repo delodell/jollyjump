@@ -1,7 +1,7 @@
 <?php
 
 function wfu_view_log($page = 1, $only_table_rows = false) {
-	switch(WFU_FUNCTION_HOOK(__FUNCTION__, func_get_args(), $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
 	global $wpdb;
 	$siteurl = site_url();
 	$table_name1 = $wpdb->prefix . "wfu_log";
@@ -79,7 +79,7 @@ function wfu_view_log($page = 1, $only_table_rows = false) {
 				}
 			}
 			if ( $remarks != '' ) {
-				$remarks = "\n\t\t\t\t\t\t".'<select multiple="multiple" style="width:100%; height:40px; background:none; font-size:small;">'.$remarks;
+				$remarks = "\n\t\t\t\t\t\t".'<select multiple="multiple" style="width:100%; height:40px; background:none; font-size:small; overflow:scroll;">'.$remarks;
 				$remarks .= "\n\t\t\t\t\t\t".'</select>';
 			}
 		}
@@ -111,9 +111,10 @@ function wfu_view_log($page = 1, $only_table_rows = false) {
 				$lid = 0;
 				if ( $filerec->action == 'upload' || $filerec->action == 'include' ) $lid = $filerec->idlog;
 				elseif ( $filerec->linkedto > 0 ) $lid = $filerec->linkedto;
-				if ( $lid > 0 ) {
+				if ( $lid > 0 && file_exists(wfu_path_rel2abs($filerec->filepath)) ) {
 					if ( !isset($filecodes[$lid]) ) $filecodes[$lid] = wfu_safe_store_filepath($filerec->filepath);
-					$echo_str .= "\n\t\t\t\t\t\t".'<a class="row-title" href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_details&file='.$filecodes[$lid].'" title="View and edit file details" style="font-weight:normal;">'.$filerec->filepath.'</a>';
+					$logpagecode = wfu_safe_store_browser_params('view_log&tag='.$page);
+					$echo_str .= "\n\t\t\t\t\t\t".'<a class="row-title" href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_details&file='.$filecodes[$lid].'&invoker='.$logpagecode.'" title="View and edit file details" style="font-weight:normal;">'.$filerec->filepath.'</a>';
 				}
 				else $echo_str .= "\n\t\t\t\t\t\t".'<span>'.$filerec->filepath.'</span>';
 			}

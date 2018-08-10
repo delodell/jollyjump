@@ -195,4 +195,18 @@ Author URI: http://mythemeshop.com/
 		e.preventDefault();
 	});
 
+	jQuery(document).on('click', '.wpsubscribe-dismiss-notice', function(e){
+		e.preventDefault();
+		jQuery(this).parent().remove();
+		jQuery.ajax({
+			type: "POST",
+			url: ajaxurl,
+			data: {
+				action: 'mts_dismiss_wpsubscribe_notice',
+				dismiss: jQuery(this).data('ignore')
+			}
+		});
+		return false;
+	});
+
 }( jQuery ) );

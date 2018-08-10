@@ -1,3 +1,36 @@
+v2.0.6 (May 23, 2018)
+-----------------------------
+- Added GDPR compliant comment form
+ 
+Files Updated:
+- style.css
+- css/rtl.css
+- functions.php
+- comments.php
+
+
+v2.0.5 (Nov 16, 2017)
+-----------------------------
+- Fix footer carousel issues
+- Updated pot
+
+Files Updated:
+- footer.php
+- functions.php
+- languages/point.pot
+- style.css
+
+v2.0.4 (Nov 03, 2017)
+-----------------------------
+- Fixed toggle issue with the mobile navmenu
+- Fixed footer carousel showing category slug instead of name
+
+Files Updated:
+- style.css
+- functions.php
+- footer.php
+- js/customscripts.js
+
 v2.0.3 (Apr 29th, 2016)
 -----------------------------
 - Added full-width page template

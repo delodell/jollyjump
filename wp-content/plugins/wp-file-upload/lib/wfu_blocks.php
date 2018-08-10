@@ -1,5 +1,23 @@
 <?php
 
+/* Prepare the uploadform generic element */
+function wfu_prepare_base_block($params, $additional_params, $occurrence_index) {
+	//prepare data for template
+	$data["ID"] = $params["uploadid"];
+	$data["responsive"] = ( $params["fitmode"] == "responsive" );
+	$data["testmode"] = ( $params["testmode"] == "true" );
+	$data["params"] = $params;
+	
+	$base_item["title"] = '';
+	$base_item["hidden"] = false;
+	$base_item["width"] = "";
+	$base_item["object"] = "GlobalData.WFU[".$data["ID"]."].base";
+	//read html output from template
+	$base_item += wfu_read_template_output("base", $data);
+
+	return $base_item;
+}
+
 /* Prepare the visual editor button */
 function wfu_prepare_visualeditorbutton_block($params, $additional_params, $occurrence_index) {
 	if ( isset($params["uploadid"]) ) {
@@ -40,8 +58,8 @@ function wfu_prepare_visualeditorbutton_block($params, $additional_params, $occu
 function wfu_prepare_subfolders_block($params, $additional_params, $occurrence_index) {
 	//prepare data for template
 	$data["ID"] = $params["uploadid"];
-	$data["width"] = $additional_params['widths']['subfolders'];
-	$data["height"] = $additional_params['heights']['subfolders'];
+	$data["widths"] = $additional_params['widths'];
+	$data["heights"] = $additional_params['heights'];
 	$data["responsive"] = ( $params["fitmode"] == "responsive" );
 	$data["testmode"] = ( $params["testmode"] == "true" );
 	$data["show_uploadfolder"] = ( $params["showtargetfolder"] == "true" );
@@ -57,7 +75,6 @@ function wfu_prepare_subfolders_block($params, $additional_params, $occurrence_i
 	if ( $data["show_subfolders"] && !$data["testmode"] ) {
 		if ( substr($params["subfoldertree"], 0, 4) == "auto" ) {
 			$upload_directory = wfu_upload_plugin_full_path($params);
-			wfu_debug_log($upload_directory."\n");
 			$dirtree = wfu_getTree($upload_directory);
 			foreach ( $dirtree as &$dir ) $dir = '*'.$dir;
 			$params["subfoldertree"] = implode(',', $dirtree);
@@ -135,6 +152,7 @@ function wfu_prepare_textbox_block($params, $additional_params, $occurrence_inde
 	$data["testmode"] = ( $params["testmode"] == "true" );
 	$data["index"] = $occurrence_index;
 	$data["params"] = $params;
+	
 
 	$textbox_item["title"] = 'wordpress_file_upload_textbox_'.$data["ID"];
 	$textbox_item["hidden"] = false;
@@ -174,6 +192,9 @@ function wfu_prepare_uploadform_block($params, $additional_params, $occurrence_i
 		array( "id" => "uploadedfile_".$data["ID"]."_name", "name" => "uploadedfile_".$data["ID"]."_name", "value" => wfu_plugin_encode_string("dummy.txt") ),
 		array( "id" => "uploadedfile_".$data["ID"]."_size", "name" => "uploadedfile_".$data["ID"]."_size", "value" => "0" ),
 		array( "id" => "adminerrorcodes_".$data["ID"], "name" => "adminerrorcodes_".$data["ID"], "value" => "" )
+	);
+	if ( $additional_params["require_consent"] ) array_push( $data["hidden_elements"], 
+		array( "id" => "consentresult_".$data["ID"], "name" => "consentresult_".$data["ID"], "value" => "" )
 	);
 	foreach ($params["userdata_fields"] as $userdata_key => $userdata_field)
 		array_push($data["hidden_elements"], array( "id" => "hiddeninput_".$data["ID"]."_userdata_".$userdata_key, "name" => "hiddeninput_".$data["ID"]."_userdata_".$userdata_key, "value" => "" ));
@@ -494,7 +515,7 @@ function wfu_prepare_userdata_block($params, $additional_params, $occurrence_ind
 	$userdata_init = "";
 	$userdata_init .= "\n".'GlobalData.WFU['.$data["ID"].'].userdata._init'.$init_index.' = GlobalData.WFU['.$data["ID"].'].userdata.init;';
 	$userdata_init .= "\n".'GlobalData.WFU['.$data["ID"].'].userdata.init = function() {';
-	$userdata_init .= "\n\t".'this._init'.$init_index.'();';
+	$userdata_init .= "\n\t".'GlobalData.WFU['.$data["ID"].'].userdata._init'.$init_index.'();';
 	$userdata_init .= "\n\t".'var WFU = GlobalData.WFU['.$data["ID"].'];';
 	if ( $init_index == 0 ) {
 		$userdata_init .= "\n\t".'if (typeof WFU.userdata.init_count == "undefined") {';
@@ -557,6 +578,40 @@ function wfu_prepare_userdata_block($params, $additional_params, $occurrence_ind
 	}
 
 	return $userdata_item;
+}
+
+/* Prepare the consent question block */
+function wfu_prepare_consent_block($params, $additional_params, $occurrence_index) {
+	//prepare data for template
+	$data["ID"] = $params["uploadid"];
+	$data["width"] = $additional_params['widths']['consent'];
+	$data["height"] = $additional_params['heights']['consent'];
+	$data["responsive"] = ( $params["fitmode"] == "responsive" );
+	$data["testmode"] = ( $params["testmode"] == "true" );
+	$data["index"] = $occurrence_index;
+	$data["format"] = $params["consentformat"];
+	$data["preselected"] = ( $params["consentformat"] == "checkbox" && $params["consentpreselect"] == "true" );
+	$data["question"] = preg_replace("/:(\w*):/", "<a href=\"".$params["consentdisclaimer"]."\">$1</a>", $params["consentquestion"]);
+	$data["params"] = $params;
+
+	$consent_item["title"] = 'wordpress_file_upload_consent_'.$data["ID"];
+	$consent_item["hidden"] = ( $params["consentformat"] == "prompt" );
+	$consent_item["width"] = "";
+	$consent_item["object"] = "GlobalData.WFU[".$data["ID"]."].consent";
+	//for responsive plugin adjust container and container's parent widths if a % width has been defined
+	if ( $data["responsive"] && strlen($data["width"]) > 1 && substr($data["width"], -1, 1) == "%" ) $consent_item["width"] = $data["width"];
+	//read html output from template
+	$consent_item += wfu_read_template_output("consent", $data);
+	//initialize consent object properties
+	$consent_item["js"] = "GlobalData.WFU[".$data["ID"]."].consent = { ".
+		"consentCompleted: function() { return false; }, ".
+		"attachActions: function(completeaction) {}, ".
+		"update: function(action) {} ".
+	"};\n\n".$consent_item["js"];
+	//append javascript variable that checks if consent exists or not
+	$consent_item["js"] .= "\n\nGlobalData.WFU[".$data["ID"]."].consent_exist = true;";
+
+	return $consent_item;
 }
 
 ?>

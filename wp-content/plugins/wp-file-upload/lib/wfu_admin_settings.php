@@ -1,4 +1,66 @@
 <?php
+
+function wfu_settings_definitions() {
+	$settings = array(
+		"version" => array("number", "1.0"),
+		"shortcode" => array("string", ""),
+		"hashfiles" => array("number", ""),
+		"basedir" => array("string", ""),
+		"personaldata" => array("number", ""),
+		"postmethod" => array("number", ""),
+		"modsecurity" => array("number", ""),
+		"userstatehandler" => array("number", ""),
+		"relaxcss" => array("number", ""),
+		"admindomain" => array("number", ""),
+		"mediacustom" => array("number", ""),
+		"createthumbnails" => array("number", ""),
+		"includeotherfiles" => array("number", ""),
+		"altserver" => array("number", ""),
+		"captcha_sitekey" => array("string", ""),
+		"captcha_secretkey" => array("string", ""),
+		"browser_permissions" => array("array", "")
+	);
+	$settings = apply_filters("_wfu_settings_definitions", $settings);
+	
+	return $settings;
+}
+
+
+function wfu_encode_plugin_options($plugin_options) {
+	$settings = wfu_settings_definitions();
+	$encoded_options = array();
+	foreach ( $settings as $setting => $data ) {
+		$encoded = $setting."=";
+		if ( !isset($plugin_options[$setting]) ) $encoded .= $data[1];
+		elseif ( $data[0] == "string" ) $encoded .= wfu_plugin_encode_string($plugin_options[$setting]);
+		elseif ( $data[0] == "array" ) $encoded .= wfu_encode_array_to_string($plugin_options[$setting]);
+		else $encoded .= $plugin_options[$setting];
+		array_push($encoded_options, $encoded);
+	}
+	
+	return implode(";", $encoded_options);
+}
+
+function wfu_decode_plugin_options($encoded_options) {
+	$settings = wfu_settings_definitions();
+	foreach ( $settings as $setting => $data )
+		$plugin_options[$setting] = $data[1];
+
+	$decoded_array = explode(';', $encoded_options);
+	foreach ($decoded_array as $decoded_item) {
+		if ( trim($decoded_item) != "" ) {
+			list($item_key, $item_value) = explode("=", $decoded_item, 2);
+			if ( isset($settings[$item_key]) ) {
+				if ( $settings[$item_key][0] == "string" ) $plugin_options[$item_key] = wfu_plugin_decode_string($item_value);
+				elseif ( $settings[$item_key][0] == "array" ) $plugin_options[$item_key] = wfu_decode_array_from_string($item_value);
+				else $plugin_options[$item_key] = $item_value;
+			}
+		}
+	}
+
+	return $plugin_options;
+}
+
 function wfu_manage_settings($message = '') {
 	if ( !current_user_can( 'manage_options' ) ) return;
 
@@ -19,6 +81,13 @@ function wfu_manage_settings($message = '') {
 	$echo_str .= "\n\t\t\t\t".'<tbody>';
 	$echo_str .= "\n\t\t\t\t\t".'<tr>';
 	$echo_str .= "\n\t\t\t\t\t\t".'<th scope="row">';
+	$echo_str .= "\n\t\t\t\t\t\t\t".'<h3>General Settings</h3>';
+	$echo_str .= "\n\t\t\t\t\t\t".'</th>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<td>';
+	$echo_str .= "\n\t\t\t\t\t\t".'</td>';
+	$echo_str .= "\n\t\t\t\t\t".'</tr>';
+	$echo_str .= "\n\t\t\t\t\t".'<tr>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<th scope="row">';
 	$echo_str .= "\n\t\t\t\t\t\t\t".'<label for="wfu_hashfiles">Hash Files</label>';
 	$echo_str .= "\n\t\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t\t".'<td>';
@@ -37,6 +106,15 @@ function wfu_manage_settings($message = '') {
 	$echo_str .= "\n\t\t\t\t\t".'</tr>';
 	$echo_str .= "\n\t\t\t\t\t".'<tr>';
 	$echo_str .= "\n\t\t\t\t\t\t".'<th scope="row">';
+	$echo_str .= "\n\t\t\t\t\t\t\t".'<label for="wfu_personaldata">Personal Data</label>';
+	$echo_str .= "\n\t\t\t\t\t\t".'</th>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<td>';
+	$echo_str .= "\n\t\t\t\t\t\t\t".'<input name="wfu_personaldata" id="wfu_personaldata" type="checkbox"'.($plugin_options['personaldata'] == '1' ? ' checked="checked"' : '' ).' style="width:auto;" /> Enable this option if your website is subject to EU GDPR regulation and you want to define how to handle personal data';
+	$echo_str .= "\n\t\t\t\t\t\t\t".'<p style="cursor: text; font-size:9px; padding: 0px; margin: 0px; width: 95%; color: #AAAAAA;">Current value: <strong>'.($plugin_options['personaldata'] == '1' ? 'Yes' : 'No' ).'</strong></p>';
+	$echo_str .= "\n\t\t\t\t\t\t".'</td>';
+	$echo_str .= "\n\t\t\t\t\t".'</tr>';
+	$echo_str .= "\n\t\t\t\t\t".'<tr>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<th scope="row">';
 	$echo_str .= "\n\t\t\t\t\t\t\t".'<label for="wfu_postmethod">Post Method</label>';
 	$echo_str .= "\n\t\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t\t".'<td>';
@@ -46,6 +124,18 @@ function wfu_manage_settings($message = '') {
 	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<option value="socket"'.( $plugin_options['postmethod'] == 'socket' ? ' selected="selected"' : '' ).'>Using Sockets</option>';
 	$echo_str .= "\n\t\t\t\t\t\t\t".'</select>';
 	$echo_str .= "\n\t\t\t\t\t\t\t".'<p style="cursor: text; font-size:9px; padding: 0px; margin: 0px; width: 95%; color: #AAAAAA;">Current value: <strong>'.( $plugin_options['postmethod'] == 'fopen' || $plugin_options['postmethod'] == '' ? 'Using fopen' : ( $plugin_options['postmethod'] == 'curl' ? 'Using cURL' : 'Using Sockets' ) ).'</strong></p>';
+	$echo_str .= "\n\t\t\t\t\t\t".'</td>';
+	$echo_str .= "\n\t\t\t\t\t".'</tr>';
+	$echo_str .= "\n\t\t\t\t\t".'<tr>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<th scope="row">';
+	$echo_str .= "\n\t\t\t\t\t\t\t".'<label for="wfu_userstatehandler">User State Handler</label>';
+	$echo_str .= "\n\t\t\t\t\t\t".'</th>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<td>';
+	$echo_str .= "\n\t\t\t\t\t\t\t".'<select name="wfu_userstatehandler" id="wfu_userstatehandler" value="'.$plugin_options['userstatehandler'].'">';
+	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<option value="session"'.( $plugin_options['userstatehandler'] == 'session' || $plugin_options['userstatehandler'] == '' ? ' selected="selected"' : '' ).'>Session (default)</option>';
+	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<option value="dboption"'.( $plugin_options['userstatehandler'] == 'dboption' ? ' selected="selected"' : '' ).'>DB Option</option>';
+	$echo_str .= "\n\t\t\t\t\t\t\t".'</select>';
+	$echo_str .= "\n\t\t\t\t\t\t\t".'<p style="cursor: text; font-size:9px; padding: 0px; margin: 0px; width: 95%; color: #AAAAAA;">Current value: <strong>'.( $plugin_options['userstatehandler'] == 'session' || $plugin_options['userstatehandler'] == '' ? 'Session' : ( $plugin_options['userstatehandler'] == 'dboption' ? 'DB Option' : 'Session' ) ).'</strong></p>';
 	$echo_str .= "\n\t\t\t\t\t\t".'</td>';
 	$echo_str .= "\n\t\t\t\t\t".'</tr>';
 	$echo_str .= "\n\t\t\t\t\t".'<tr>';
@@ -79,6 +169,7 @@ function wfu_manage_settings($message = '') {
 	$echo_str .= "\n\t\t\t\t\t\t\t".'<p style="cursor: text; font-size:9px; padding: 0px; margin: 0px; width: 95%; color: #AAAAAA;">Current value: <strong>'.($plugin_options['mediacustom'] == '1' ? 'Yes' : 'No' ).'</strong></p>';
 	$echo_str .= "\n\t\t\t\t\t\t".'</td>';
 	$echo_str .= "\n\t\t\t\t\t".'</tr>';
+	$echo_str .= "\n\t\t\t\t\t".'<tr>';
 	$echo_str .= "\n\t\t\t\t\t\t".'<th scope="row">';
 	$echo_str .= "\n\t\t\t\t\t\t\t".'<label for="wfu_includeotherfiles">Include Other Files in Plugin\'s Database</label>';
 	$echo_str .= "\n\t\t\t\t\t\t".'</th>';
@@ -117,19 +208,22 @@ function wfu_update_settings() {
 
 //	$enabled = ( isset($_POST['wfu_enabled']) ? ( $_POST['wfu_enabled'] == "on" ? 1 : 0 ) : 0 ); 
 	$hashfiles = ( isset($_POST['wfu_hashfiles']) ? ( $_POST['wfu_hashfiles'] == "on" ? 1 : 0 ) : 0 );
+	$personaldata = ( isset($_POST['wfu_personaldata']) ? ( $_POST['wfu_personaldata'] == "on" ? 1 : 0 ) : 0 );
 	$relaxcss = ( isset($_POST['wfu_relaxcss']) ? ( $_POST['wfu_relaxcss'] == "on" ? 1 : 0 ) : 0 ); 
 	$mediacustom = ( isset($_POST['wfu_mediacustom']) ? ( $_POST['wfu_mediacustom'] == "on" ? 1 : 0 ) : 0 ); 
 	$includeotherfiles = ( isset($_POST['wfu_includeotherfiles']) ? ( $_POST['wfu_includeotherfiles'] == "on" ? 1 : 0 ) : 0 ); 
 	$altserver = ( isset($_POST['wfu_altserver']) ? ( $_POST['wfu_altserver'] == "on" ? 1 : 0 ) : 0 ); 
-	if ( isset($_POST['wfu_basedir']) && isset($_POST['wfu_postmethod']) && isset($_POST['wfu_admindomain']) && isset($_POST['submitform']) ) {
+	if ( isset($_POST['wfu_basedir']) && isset($_POST['wfu_postmethod']) && isset($_POST['wfu_userstatehandler']) && isset($_POST['wfu_admindomain']) && isset($_POST['submitform']) ) {
 		if ( $_POST['submitform'] == "Update" ) {
 			$new_plugin_options['version'] = '1.0';
 			$new_plugin_options['shortcode'] = $plugin_options['shortcode'];
 			$new_plugin_options['hashfiles'] = $hashfiles;
-			$new_plugin_options['basedir'] = $_POST['wfu_basedir'];
-			$new_plugin_options['postmethod'] = $_POST['wfu_postmethod'];
+			$new_plugin_options['basedir'] = sanitize_text_field($_POST['wfu_basedir']);
+			$new_plugin_options['personaldata'] = $personaldata;
+			$new_plugin_options['postmethod'] = sanitize_text_field($_POST['wfu_postmethod']);
+			$new_plugin_options['userstatehandler'] = sanitize_text_field($_POST['wfu_userstatehandler']);
 			$new_plugin_options['relaxcss'] = $relaxcss;
-			$new_plugin_options['admindomain'] = $_POST['wfu_admindomain'];
+			$new_plugin_options['admindomain'] = sanitize_text_field($_POST['wfu_admindomain']);
 			$new_plugin_options['mediacustom'] = $mediacustom;
 			$new_plugin_options['includeotherfiles'] = $includeotherfiles;
 			$new_plugin_options['altserver'] = $altserver;

@@ -27,14 +27,12 @@ jQuery(document).ready(function($){
         }
     });
 }).on('click', function(event) {
-
-    var $target = jQuery(event.target);
-    if ( ( $target.hasClass("fa") && $target.parent().hasClass("toggle-caret") ) ||  $target.hasClass("toggle-caret") ) {// allow clicking on menu toggles
-        return;
+    $target = jQuery(event.target);
+    if ( ! $target.closest('.mobile-menu-wrapper') || $target.is('#mobile-menu-overlay') ) {
+        jQuery('body').removeClass('mobile-menu-active');
+        jQuery('html').removeClass('noscroll');
+        jQuery('#mobile-menu-overlay').fadeOut();
     }
-    jQuery('body').removeClass('mobile-menu-active');
-    jQuery('html').removeClass('noscroll');
-    jQuery('#mobile-menu-overlay').fadeOut();
 });
 
 /*----------------------------------------------------

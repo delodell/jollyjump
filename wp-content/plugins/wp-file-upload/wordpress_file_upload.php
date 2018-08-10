@@ -4,14 +4,14 @@ if( !session_id() ) { session_start(); }
 /*
 Plugin URI: http://www.iptanus.com/support/wordpress-file-upload
 Description: Simple interface to upload files from a page.
-Version: 4.0.1
+Version: 4.6.2
 Author: Nickolas Bossinas
 Author URI: http://www.iptanus.com
 */
 
 /*
 Wordpress File Upload (Wordpress Plugin)
-Copyright (C) 2010-2015 Nickolas Bossinas
+Copyright (C) 2010-2018 Nickolas Bossinas
 Contact me at http://www.iptanus.com
 
 This program is free software: you can redistribute it and/or modify
@@ -56,6 +56,7 @@ if ( !is_admin() ) {
 add_action('admin_init', 'wordpress_file_upload_admin_init');
 add_action('admin_menu', 'wordpress_file_upload_add_admin_pages');
 register_activation_hook(__FILE__,'wordpress_file_upload_install');
+register_deactivation_hook(__FILE__,'wordpress_file_upload_uninstall');
 add_action('plugins_loaded', 'wordpress_file_upload_update_db_check');
 //ajax actions
 add_action('wp_ajax_wfu_ajax_action', 'wfu_ajax_action_callback');
@@ -77,12 +78,23 @@ add_action('wp_ajax_wfu_ajax_action_download_file_monitor', 'wfu_ajax_action_dow
 add_action('wp_ajax_nopriv_wfu_ajax_action_download_file_monitor', 'wfu_ajax_action_download_file_monitor');
 add_action('wp_ajax_wfu_ajax_action_edit_shortcode', 'wfu_ajax_action_edit_shortcode');
 add_action('wp_ajax_wfu_ajax_action_get_historylog_page', 'wfu_ajax_action_get_historylog_page');
+add_action('wp_ajax_wfu_ajax_action_get_adminbrowser_page', 'wfu_ajax_action_get_adminbrowser_page');
 add_action('wp_ajax_wfu_ajax_action_include_file', 'wfu_ajax_action_include_file');
 add_action('wp_ajax_wfu_ajax_action_update_envar', 'wfu_ajax_action_update_envar');
 add_action('wp_ajax_wfu_ajax_action_transfer_command', 'wfu_ajax_action_transfer_command');
+add_action('wp_ajax_wfu_ajax_action_pdusers_get_users', 'wfu_ajax_action_pdusers_get_users');
+add_action( 'show_user_profile', 'wfu_show_consent_profile_fields' );
+add_action( 'edit_user_profile', 'wfu_show_consent_profile_fields' );
+add_action( 'personal_options_update', 'wfu_update_consent_profile_fields' );
+add_action( 'edit_user_profile_update', 'wfu_update_consent_profile_fields' );
 wfu_include_lib();
-//add abspath for use by downloader
-$_SESSION['wfu_ABSPATH'] = wfu_abspath();
+//store the User State handler in a global variable for easy access by the
+//plugin's routines
+$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
+$wfu_user_state_handler = $plugin_options['userstatehandler'];
+//add abspath in session for use by downloader; exclude internal ajax requests
+if ( !isset($_POST["action"]) || ( $_POST["action"] != "wfu_ajax_action_wfu_call_async" && $_POST["action"] != "wfu_ajax_action_load_hook_code" ) )
+	WFU_USVAR_store_session('wfu_ABSPATH', wfu_abspath());
 //widget
 add_action( 'widgets_init', 'register_wfu_widget' );
 //Media editor custom properties
@@ -96,7 +108,7 @@ function register_wfu_widget() {
 }
 
 function wfu_enqueue_frontpage_scripts() {
-	switch(WFU_FUNCTION_HOOK(__FUNCTION__, func_get_args(), $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
 	$relaxcss = false;
 	if ( isset($plugin_options['relaxcss']) ) $relaxcss = ( $plugin_options['relaxcss'] == '1' );
@@ -107,35 +119,43 @@ function wfu_enqueue_frontpage_scripts() {
 	if ( isset($ret_data['return_value']) ) return $ret_data['return_value'];
 
 	if ( $relaxcss ) {
-		wp_enqueue_style('wordpress-file-upload-style', WPFILEUPLOAD_DIR.'css/wordpress_file_upload_style_relaxed.css',false,'1.0','all');
-		wp_enqueue_style('wordpress-file-upload-style-safe', WPFILEUPLOAD_DIR.'css/wordpress_file_upload_style_safe_relaxed.css',false,'1.0','all');
+		wp_enqueue_style('wordpress-file-upload-style', WPFILEUPLOAD_DIR.'css/wordpress_file_upload_style_relaxed.css');
+		wp_enqueue_style('wordpress-file-upload-style-safe', WPFILEUPLOAD_DIR.'css/wordpress_file_upload_style_safe_relaxed.css');
 	}
 	else {
-		wp_enqueue_style('wordpress-file-upload-style', WPFILEUPLOAD_DIR.'css/wordpress_file_upload_style.css',false,'1.0','all');
-		wp_enqueue_style('wordpress-file-upload-style-safe', WPFILEUPLOAD_DIR.'css/wordpress_file_upload_style_safe.css',false,'1.0','all');
+		wp_enqueue_style('wordpress-file-upload-style', WPFILEUPLOAD_DIR.'css/wordpress_file_upload_style.css');
+		wp_enqueue_style('wordpress-file-upload-style-safe', WPFILEUPLOAD_DIR.'css/wordpress_file_upload_style_safe.css');
 	}
-	if ( !isset($ret_data["correct_NextGenGallery_incompatibility"]) || $ret_data["correct_NextGenGallery_incompatibility"] != "true" )
-		wp_enqueue_style('jquery-ui-css', '//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css');
-	wp_enqueue_style('jquery-ui-timepicker-addon-css', WPFILEUPLOAD_DIR.'vendor/datetimepicker/jquery-ui-timepicker-addon.min.css',false,'1.0','all');
-	wp_enqueue_script('json_class', WPFILEUPLOAD_DIR.'js/json2.js');
+	//do not load JQuery UI css if $ret_data denotes incompatibility issues
+	if ( ( !isset($ret_data["correct_NextGenGallery_incompatibility"]) || $ret_data["correct_NextGenGallery_incompatibility"] != "true" ) &&
+		( !isset($ret_data["correct_JQueryUI_incompatibility"]) || $ret_data["correct_JQueryUI_incompatibility"] != "true" ) )
+		wp_enqueue_style('jquery-ui-css', WPFILEUPLOAD_DIR.'vendor/jquery/jquery-ui.min.css');
+	//do not load timepicker css if $ret_data exclude_timepicker flag is true
+	if ( !isset($ret_data["exclude_timepicker"]) || $ret_data["exclude_timepicker"] != "true" )
+		wp_enqueue_style('jquery-ui-timepicker-addon-css', WPFILEUPLOAD_DIR.'vendor/jquery/jquery-ui-timepicker-addon.min.css');
+	wp_enqueue_script('json2');
 	wp_enqueue_script('wordpress_file_upload_script', WPFILEUPLOAD_DIR.'js/wordpress_file_upload_functions.js');
-	wp_enqueue_script('jquery-ui-slider', false, array(), false, true);
-	wp_enqueue_script('jquery-ui-datepicker', false, array(), false, true);
-	wp_enqueue_script('jquery-ui-timepicker-addon-js', WPFILEUPLOAD_DIR.'vendor/datetimepicker/jquery-ui-timepicker-addon.min.js', array(), false, true);
+	//do not load timepicker js if $ret_data exclude_timepicker flag is true
+	if ( !isset($ret_data["exclude_timepicker"]) || $ret_data["exclude_timepicker"] != "true" ) {
+		wp_enqueue_script('jquery-ui-slider');
+		wp_enqueue_script('jquery-ui-timepicker-addon-js', WPFILEUPLOAD_DIR.'vendor/jquery/jquery-ui-timepicker-addon.min.js', array("jquery-ui-datepicker"));
+	}
 }
 
 function wfu_include_lib() {
-	if ( $handle = opendir(plugin_dir_path( __FILE__ )."lib/") ) {
+	$dir = plugin_dir_path( __FILE__ )."lib/";
+	if ( $handle = opendir($dir) ) {
 		$blacklist = array('.', '..');
 		while ( false !== ($file = readdir($handle)) )
 			if ( !in_array($file, $blacklist) && substr($file, 0, 1) != "_" )
-				include_once plugin_dir_path( __FILE__ )."lib/".$file;
+				include_once $dir.$file;
 		closedir($handle);
 	}
 	if ( $handle = opendir(plugin_dir_path( __FILE__ )) ) {
 		closedir($handle);
 	}
 }
+
 
 /* exit if we are in admin pages (in case of ajax call) */
 if ( is_admin() ) return;
@@ -165,19 +185,22 @@ function wordpress_file_upload_browser_handler($incomingfrompost) {
 }
 
 function wordpress_file_upload_function($incomingfromhandler) {
-	switch(WFU_FUNCTION_HOOK(__FUNCTION__, func_get_args(), $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
 	global $post;
 	global $blog_id;
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
 	$shortcode_tag = 'wordpress_file_upload';
 	$params = wfu_plugin_parse_array($incomingfromhandler);
+	//sanitize params
+	$params = wfu_sanitize_shortcode_array($params, $shortcode_tag);
 	$sid = $params["uploadid"];
 	// store current page and blog id in params array
 	$params["pageid"] = $post->ID;
 	$params["blogid"] = $blog_id;
 	
-	if ( !isset($_SESSION['wfu_token_'.$sid]) || $_SESSION['wfu_token_'.$sid] == "" )
-		$_SESSION['wfu_token_'.$sid] = uniqid(mt_rand(), TRUE);
+	$token_sid = 'wfu_token_'.$sid;
+	if ( !WFU_USVAR_exists($token_sid) || WFU_USVAR($token_sid) == "" )
+		WFU_USVAR_store($token_sid, uniqid(mt_rand(), TRUE));
 	//store the server environment (32 or 64bit) for use when checking file size limits
 	$params["php_env"] = wfu_get_server_environment();
 
@@ -188,6 +211,7 @@ function wordpress_file_upload_function($incomingfromhandler) {
 	$additional_params = array( );
 	$additional_params['widths'] = $widths;
 	$additional_params['heights'] = $heights;
+	$additional_params["require_consent"] = ( $plugin_options["personaldata"] == "1" && wfu_check_user_consent($user) == "" && $params["askconsent"] == "true" );
 
 	$uploadedfile = 'uploadedfile_'.$sid;
 	$hiddeninput = 'hiddeninput_'.$sid;
@@ -198,9 +222,12 @@ function wordpress_file_upload_function($incomingfromhandler) {
 	$init_params["shortcode_id"] = $sid;
 	$init_params["shortcode_tag"] = $shortcode_tag;
 	$init_params["container_id"] = $shortcode_tag.'_block_'.$sid;
-	$init_params["session"] = $_SESSION['wfu_token_'.$sid];
+	$init_params["session"] = WFU_USVAR($token_sid);
 	$init_params["testmode"] = ( $params["testmode"] == "true" );
 	$init_params["widgetid"] = $params["widgetid"];
+	$init_params["require_consent"] = $additional_params["require_consent"];
+	$init_params["consent_format"] = $params["consentformat"];
+	$init_params["consent_question"] = preg_replace("/:(\w):/", "<a href=\"".$params["consentdisclaimer"]."\">$1</a>", $params["consentquestion"]);
 	//add allow no file flag
 	$init_params["allownofile"] = ( $params["allownofile"] == "true" );
 	//add params related to visual editor button
@@ -215,7 +242,7 @@ function wordpress_file_upload_function($incomingfromhandler) {
 		$uploadrole = trim($uploadrole);
 	}
 	$plugin_upload_user_role = wfu_get_user_role($user, $uploadroles);		
-	if ( $plugin_upload_user_role == 'nomatch' ) return;
+	if ( $plugin_upload_user_role == 'nomatch' ) return apply_filters("_wfu_file_upload_hide_output", "");
 
 	//activate debug mode only for admins
 	if ( $plugin_upload_user_role != 'administrator' ) $params["debugmode"] = "false";
@@ -302,16 +329,20 @@ function wordpress_file_upload_function($incomingfromhandler) {
 	$uploadertemplate = wfu_get_uploader_template($params["uploadertemplate"]);
 	/* Compose the html code for the plugin */
 	$wordpress_file_upload_output = "";
+	$wordpress_file_upload_output .= wfu_init_run_js_script();
 	$plugin_style = "";
 	if ( $widths["plugin"] != "" ) $plugin_style .= 'width: '.$widths["plugin"].'; ';
 	if ( $heights["plugin"] != "" ) $plugin_style .= 'height: '.$heights["plugin"].'; ';
 	if ( $plugin_style != "" ) $plugin_style = ' style="'.$plugin_style.'"';
-	$wordpress_file_upload_output .= '<div id="'.$init_params["container_id"].'" class="file_div_clean'.( $params["fitmode"] == "responsive" ? '_responsive_container' : '' ).' wfu_container"'.$plugin_style.'>';
-	$wordpress_file_upload_output .= "\n".'<!-- Using template '.$uploadertemplate::$name.' -->';
+	$wordpress_file_upload_output .= "\n".'<div id="'.$init_params["container_id"].'" class="file_div_clean'.( $params["fitmode"] == "responsive" ? '_responsive_container' : '' ).' wfu_container"'.$plugin_style.'>';
+	$wordpress_file_upload_output .= "\n".'<!-- Using template '.call_user_func(array($uploadertemplate, 'get_name')).' -->';
 	//read indexed component definitions
 	$component_output = "";
 	$css = "";
 	$js = "";
+	/* Add generic uploadform code to output from template */
+	$wordpress_file_upload_output .= wfu_template_to_HTML("base", $params, array(), 0);
+	/* Continue with uploadform elements */
 	$components = wfu_component_definitions();
 	$components_indexed = array();
 	foreach ( $components as $component ) {
@@ -335,6 +366,7 @@ function wordpress_file_upload_function($incomingfromhandler) {
 				elseif ( $item_in_section == "progressbar" ) array_push($section_array, wfu_prepare_progressbar_block($params, $additional_params, $occurrence_index));
 				elseif ( $item_in_section == "message" ) array_push($section_array, wfu_prepare_message_block($params, $additional_params, $occurrence_index));
 				elseif ( $item_in_section == "userdata" && $params["userdata"] == "true" ) array_push($section_array, wfu_prepare_userdata_block($params, $additional_params, $occurrence_index));
+				elseif ( $item_in_section == "consent" && $additional_params["require_consent"] ) array_push($section_array, wfu_prepare_consent_block($params, $additional_params, $occurrence_index));
 				elseif ( $item_in_section == "webcam" && $params["webcam"] == "true" ) array_push($section_array, wfu_prepare_webcam_block($params, $additional_params, $occurrence_index));
 			}
 		}
@@ -345,6 +377,12 @@ function wordpress_file_upload_function($incomingfromhandler) {
 	if ( $params["userdata"] == "true" && strpos($params["placements"], "userdata") === false ) {
 		$section_array = array( $params );
 		array_push($section_array, wfu_prepare_userdata_block($params, $additional_params, 0));
+		wfu_extract_css_js_from_components($section_array, $css, $js);
+		$component_output .= call_user_func_array("wfu_add_div", $section_array);
+	}
+	if ( $additional_params["require_consent"] && strpos($params["placements"], "consent") === false ) {
+		$section_array = array( $params );
+		array_push($section_array, wfu_prepare_consent_block($params, $additional_params, 0));
 		wfu_extract_css_js_from_components($section_array, $css, $js);
 		$component_output .= call_user_func_array("wfu_add_div", $section_array);
 	}
@@ -359,6 +397,7 @@ function wordpress_file_upload_function($incomingfromhandler) {
 	//set some more parameters for the initialization script
 	$init_params["is_formupload"] = ( $params['forceclassic'] == "true" );
 	$init_params["singlebutton"] = ( $params["singlebutton"] == "true" );
+	$init_params["resetmode"] = $params["resetmode"];
 
 	//output css styling rules
 	if ( $css != "" ) {
@@ -369,8 +408,12 @@ function wordpress_file_upload_function($incomingfromhandler) {
 	//output javascript code
 	if ( $js != "" ) {
 		//add initialization of the object of the upload form
-		$js = 'GlobalData.WFU['.$sid.'] = '.wfu_PHP_array_to_JS_object($init_params).'; GlobalData.WFU.n.push('.$sid.');'."\n".$js;
-		$wordpress_file_upload_output .= wfu_js_to_HTML($js);
+		$wfu_js = 'var WFU_JS_'.$sid.' = function() {';
+		$wfu_js .= "\n".'GlobalData.WFU['.$sid.'] = '.wfu_PHP_array_to_JS_object($init_params).'; GlobalData.WFU.n.push('.$sid.');';
+		$wfu_js .= "\n".$js;
+		$wfu_js .= "\n".'}';
+		$wfu_js .= "\n".'wfu_run_js("window", "WFU_JS_'.$sid.'");';
+		$wordpress_file_upload_output .= "\n".wfu_js_to_HTML($wfu_js);
 	}
 	//add visual editor overlay if the current user is administrator
 	if ( current_user_can( 'manage_options' ) ) {
@@ -382,7 +425,9 @@ function wordpress_file_upload_function($incomingfromhandler) {
 	/* Pass constants to javascript and run plugin post-load actions */
 	$consts = wfu_set_javascript_constants();
 	$handler = 'function() { wfu_Initialize_Consts("'.$consts.'"); wfu_Load_Code_Connectors('.$sid.'); wfu_plugin_load_action('.$sid.'); }';
-	$wordpress_file_upload_output .= "\n\t".'<script type="text/javascript">if(window.addEventListener) { window.addEventListener("load", '.$handler.', false); } else if(window.attachEvent) { window.attachEvent("onload", '.$handler.'); } else { window["onload"] = '.$handler.'; }</script>';
+	$wfu_js = 'if (typeof wfu_addLoadHandler == "undefined") function wfu_addLoadHandler(handler) { if(window.addEventListener) { window.addEventListener("load", handler, false); } else if(window.attachEvent) { window.attachEvent("onload", handler); } else { window["onload"] = handler; } }';
+	$wfu_js .= "\n".'wfu_addLoadHandler('.$handler.');';
+	$wordpress_file_upload_output .= "\n".wfu_js_to_HTML($wfu_js);
 	$wordpress_file_upload_output .= '</div>';
 //	$wordpress_file_upload_output .= '<div>';
 //	$wordpress_file_upload_output .= wfu_test_admin();
@@ -391,14 +436,15 @@ function wordpress_file_upload_function($incomingfromhandler) {
 //	The plugin uses sessions in order to detect if the page was loaded due to file upload or
 //	because the user pressed the Refresh button (or F5) of the page.
 //	In the second case we do not want to perform any file upload, so we abort the rest of the script.
-	if ( !isset($_SESSION['wfu_check_refresh_'.$sid]) || $_SESSION['wfu_check_refresh_'.$sid] != "form button pressed" ) {
-		$_SESSION['wfu_check_refresh_'.$sid] = 'do not process';
+	$check_refresh_sid = 'wfu_check_refresh_'.$sid;
+	if ( !WFU_USVAR_exists($check_refresh_sid) || WFU_USVAR($check_refresh_sid) != "form button pressed" ) {
+		WFU_USVAR_store($check_refresh_sid, 'do not process');
 		$wordpress_file_upload_output .= wfu_post_plugin_actions($params);
-		$wordpress_file_upload_output = apply_filters("_wfu_file_upload_output", $wordpress_file_upload_output);
+		$wordpress_file_upload_output = apply_filters("_wfu_file_upload_output", $wordpress_file_upload_output, $params);
 		return $wordpress_file_upload_output."\n";
 	}
-	$_SESSION['wfu_check_refresh_'.$sid] = 'do not process';
-	$params["upload_start_time"] = $_SESSION['wfu_start_time_'.$sid];
+	WFU_USVAR_store($check_refresh_sid, 'do not process');
+	$params["upload_start_time"] = WFU_USVAR('wfu_start_time_'.$sid);
 
 //	The plugin uses two ways to upload the file:
 //		- The first one uses classic functionality of an HTML form (highest compatibility with browsers but few capabilities).
@@ -410,7 +456,7 @@ function wordpress_file_upload_function($incomingfromhandler) {
 
 	if ( $params['forceclassic'] != "true" ) {
 		$wordpress_file_upload_output .= wfu_post_plugin_actions($params);
-		$wordpress_file_upload_output = apply_filters("_wfu_file_upload_output", $wordpress_file_upload_output);
+		$wordpress_file_upload_output = apply_filters("_wfu_file_upload_output", $wordpress_file_upload_output, $params);
 		return $wordpress_file_upload_output."\n";
 	}
 
@@ -442,12 +488,19 @@ function wordpress_file_upload_function($incomingfromhandler) {
 		
 		//in case that that the upload has been cancelled then proceed
 		//accordingly to notify the user
-		if ( isset($_SESSION["wfu_uploadstatus_".$unique_id]) && $_SESSION["wfu_uploadstatus_".$unique_id] == 0 ) {
+		$uploadstatus_id = "wfu_uploadstatus_".$unique_id;
+		if ( WFU_USVAR_exists($uploadstatus_id) && WFU_USVAR($uploadstatus_id) == 0 ) {
 			$safe_output = "17;".WFU_VAR("WFU_DEFAULTMESSAGECOLORS").";0";
 			$wfu_process_file_array_str = " ";
 			$js_script_enc = "";
 		}
 		else {
+			//update consent status of user
+			if ( $additional_params["require_consent"] ) {
+				if ( !isset($_POST['consent_result']) ) die();
+				$consent_result = ( $_POST['consent_result'] == "yes" ? "yes" : ( $_POST['consent_result'] == "no" ? "no" : "" ) );
+				wfu_update_user_consent($user, $consent_result);
+			}
 			$wfu_process_file_array = wfu_process_files($params, 'no_ajax');
 			$safe_output = $wfu_process_file_array["general"]['safe_output'];
 			unset($wfu_process_file_array["general"]['safe_output']);
@@ -461,11 +514,12 @@ function wordpress_file_upload_function($incomingfromhandler) {
 		}
 
 		$ProcessUploadComplete_functiondef = 'function(){wfu_ProcessUploadComplete('.$sid.', 1, "'.$wfu_process_file_array_str.'", "no-ajax", "'.$safe_output.'", [false, null, false], "fileupload", "'.$js_script_enc.'");}';
-		$wordpress_file_upload_output .= '<script type="text/javascript">window.onload='.$ProcessUploadComplete_functiondef.'</script>';
+		$wfu_js = 'wfu_addLoadHandler('.$ProcessUploadComplete_functiondef.');';
+		$wordpress_file_upload_output .= "\n".wfu_js_to_HTML($wfu_js);
 	}
 	
 	$wordpress_file_upload_output .= wfu_post_plugin_actions($params);
-	$wordpress_file_upload_output = apply_filters("_wfu_file_upload_output", $wordpress_file_upload_output);
+	$wordpress_file_upload_output = apply_filters("_wfu_file_upload_output", $wordpress_file_upload_output, $params);
 	return $wordpress_file_upload_output."\n";
 }
 
@@ -480,7 +534,7 @@ function wfu_post_plugin_actions($params) {
 }
 
 function wfu_get_subfolders_paths($params) {
-	switch(WFU_FUNCTION_HOOK(__FUNCTION__, func_get_args(), $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
 	$subfolder_paths = array ( );
 	if ( $params["askforsubfolders"] == "true" && $params["testmode"] != "true" ) {
 		array_push($subfolder_paths, "");
@@ -525,8 +579,8 @@ function wfu_classic_before_upload_handler($ret, $attr) {
 	}
 	if ( $ret["status"] != "error" ) {
 		$ret["status"] = "success";
-		$_SESSION['wfu_check_refresh_'.$sid] = 'form button pressed';
-		$_SESSION['wfu_start_time_'.$sid] = $start_time;
+		WFU_USVAR_store('wfu_check_refresh_'.$sid, 'form button pressed');
+		WFU_USVAR_store('wfu_start_time_'.$sid, $start_time);
 	}
 	return $ret;
 }
@@ -535,7 +589,8 @@ function wfu_execute_after_upload_filters($sid, $unique_id) {
 	//apply internal filters from extensions
 	$ret = array( "echo" => "" );
 	$files = array();
-	if ( isset($_SESSION["filedata_".$unique_id]) ) $files = $_SESSION["filedata_".$unique_id];
+	$filedata_id = "filedata_".$unique_id;
+	if ( WFU_USVAR_exists($filedata_id) ) $files = WFU_USVAR($filedata_id);
 	$attr = array( "sid" => $sid, "unique_id" => $unique_id, "files" => $files );
 	$ret = apply_filters("_wfu_after_upload", $ret, $attr);
 	//then apply any custom filters created by admin

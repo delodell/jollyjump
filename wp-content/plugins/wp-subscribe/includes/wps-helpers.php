@@ -35,7 +35,7 @@ function wps_the_form( $options = null ) {
 		<div class="wp-subscribe-popup-form-wrapper">
 	<?php endif; ?>
 
-		<div id="wp-subscribe" class="wp-subscribe-wrap wp-subscribe wp-subscribe-<?php echo $wp_subscribe_forms ?>" data-thanks_page="<?php echo absint( $options['thanks_page'] ) ?>" data-thanks_page_url="<?php echo esc_url( $options['thanks_page_url'] ) ?>" data-thanks_page_new_window="0">
+		<div id="wp-subscribe" class="wp-subscribe-wrap wp-subscribe wp-subscribe-<?php echo $wp_subscribe_forms ?>" data-thanks_page="<?php echo absint( isset( $options['thanks_page'] ) ? $options['thanks_page'] : 0 ) ?>" data-thanks_page_url="<?php echo isset( $options['thanks_page_url'] ) ? esc_url( $options['thanks_page_url'] ) : '' ?>" data-thanks_page_new_window="0">
 
 			<h4 class="title"><?php echo wp_kses_post( $options['title'] )?></h4>
 
@@ -58,7 +58,14 @@ function wps_the_form( $options = null ) {
 				<input type="hidden" name="service" value="<?php echo $options['service'] ?>">
 
 				<input type="hidden" name="widget" value="<?php echo isset( $options['widget_id'] ) ? $options['widget_id'] : '0'; ?>">
-
+				<?php if( !empty( $options['consent_text'] ) ) : ?>
+					<div class="wps-consent-wrapper">
+						<label for="consent-field">
+							<input class="consent-field" id="consent-field" type="checkbox" name="consent" required>
+							<?php _e( $options['consent_text'] ) ?>
+						</label>
+					</div>
+				<?php endif; ?>
 				<input class="submit" type="submit" name="submit" value="<?php echo esc_attr( $options['button_text'] ) ?>">
 
 			</form>
@@ -67,7 +74,7 @@ function wps_the_form( $options = null ) {
 
 			<div class="wp-subscribe-loader">
 				<svg version="1.1" id="loader-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0" y="0" width="40px" height="40px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve">
-					<path fill="<?php echo $options['title_color'] ?>" d="M43.935,25.145c0-10.318-8.364-18.683-18.683-18.683c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615c8.072,0,14.615,6.543,14.615,14.615H43.935z">
+					<path fill="#ffffff" d="M43.935,25.145c0-10.318-8.364-18.683-18.683-18.683c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615c8.072,0,14.615,6.543,14.615,14.615H43.935z">
 						<animateTransform attributeType="xml" attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="0.6s" repeatCount="indefinite"/>
 					</path>
 				</svg>
