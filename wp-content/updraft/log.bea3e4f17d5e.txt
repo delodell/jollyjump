@@ -1,0 +1,174 @@
+0000.001 (0) Opened log file at time: Sat, 11 Aug 2018 22:21:19 +0000 on http://localhost:8888/jollyjump.org
+0000.003 (0) UpdraftPlus WordPress backup plugin (https://updraftplus.com): 1.14.12 WP: 4.9.8 PHP: 7.2.7 (apache2handler, Darwin Michaels-MacBook-Pro.local 17.7.0 Darwin Kernel Version 17.7.0: Thu Jun 21 22:53:14 PDT 2018; root:xnu-4570.71.2~1/RELEASE_X86_64 x86_64) MySQL: 5.7.21 WPLANG: en_US Server: Apache/2.2.34 (Unix) mod_wsgi/3.5 Python/2.7.13 PHP/7.2.7 mod_ssl/2.2.34 OpenSSL/1.0.2o DAV/2 mod_fastcgi/mod_fastcgi-SNAP-0910052141 mod_perl/2.0.9 Perl/v5.24.0 safe_mode: 0 max_execution_time: 900 memory_limit: 256M (used: 36.2M | 8.3M) multisite: N openssl: OpenSSL 1.0.2o  27 Mar 2018 mcrypt: N LANG:  ZipArchive::addFile: Y
+0000.004 (0) Free space on disk containing Updraft's temporary directory: 138539.8 MB
+0000.006 (0) Tasks: Backup files:  (schedule: weekly) Backup DB: 1 (schedule: daily)
+0000.007 (0) Processed schedules. Tasks now: Backup files:  Backup DB: 1
+0000.015 (0) Requesting semaphore lock (d) (apparently via scheduler: last_scheduled_action_called_at=1533997285, seconds_ago=28794)
+0000.018 (0) Set semaphore last lock (d) time to 2018-08-11 22:21:19
+0000.019 (0) Semaphore lock (d) complete
+0000.022 (0) Backup run: resumption=0, nonce=bea3e4f17d5e, begun at=1534026079 (0s ago), job type=backup
+0000.024 (0) Scheduling a resumption (1) after 300 seconds (1534026379) in case this run gets aborted
+0000.040 (0) This backup run is not intended for files - skipping
+0000.040 (0) Beginning creation of database dump (WordPress DB)
+0000.060 (0) Table wp_options: Total expected rows (approximate): 1204
+0000.244 (0) Table wp_options: Total rows added: 1200 in 0.18 seconds
+0000.245 (0) Table wp_options: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_options.table.gz - 304.5 KB)
+0000.250 (0) Table wp_users: Total expected rows (approximate): 4
+0000.253 (0) Table wp_users: Total rows added: 4 in 0.00 seconds
+0000.254 (0) Table wp_users: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_users.table.gz - 0.9 KB)
+0000.258 (0) Table wp_usermeta: Total expected rows (approximate): 166
+0000.262 (0) Table wp_usermeta: Total rows added: 166 in 0.00 seconds
+0000.265 (0) Table wp_usermeta: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_usermeta.table.gz - 3.8 KB)
+0000.268 (0) Table wp_commentmeta: Total expected rows (approximate): 20
+0000.272 (0) Table wp_commentmeta: Total rows added: 20 in 0.00 seconds
+0000.274 (0) Table wp_commentmeta: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_commentmeta.table.gz - 0.5 KB)
+0000.278 (0) Table wp_comments: Total expected rows (approximate): 1135
+0000.662 (0) Table wp_comments: Total rows added: 1135 in 0.38 seconds
+0000.665 (0) Table wp_comments: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_comments.table.gz - 892.7 KB)
+0000.669 (0) Table wp_links: Total expected rows (approximate): 7
+0000.674 (0) Table wp_links: Total rows added: 7 in 0.00 seconds
+0000.678 (0) Table wp_links: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_links.table.gz - 0.6 KB)
+0000.693 (0) Table wp_postmeta: Total expected rows (approximate): 2696
+0000.863 (0) Table wp_postmeta: Total rows added: 2696 in 0.17 seconds
+0000.867 (0) Table wp_postmeta: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_postmeta.table.gz - 68.9 KB)
+0000.873 (0) Table wp_posts: Total expected rows (approximate): 1614
+0002.066 (0) Table wp_posts: Total rows added: 1614 in 1.19 seconds
+0002.068 (0) Table wp_posts: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_posts.table.gz - 558.8 KB)
+0002.072 (0) Table wp_term_relationships: Total expected rows (approximate): 168
+0002.075 (0) Table wp_term_relationships: Total rows added: 168 in 0.00 seconds
+0002.077 (0) Table wp_term_relationships: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_term_relationships.table.gz - 0.9 KB)
+0002.081 (0) Table wp_term_taxonomy: Total expected rows (approximate): 27
+0002.084 (0) Table wp_term_taxonomy: Total rows added: 27 in 0.00 seconds
+0002.085 (0) Table wp_term_taxonomy: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_term_taxonomy.table.gz - 0.6 KB)
+0002.089 (0) Table wp_termmeta: Total expected rows (approximate): 15
+0002.092 (0) Table wp_termmeta: Total rows added: 15 in 0.00 seconds
+0002.093 (0) Table wp_termmeta: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_termmeta.table.gz - 0.7 KB)
+0002.098 (0) Table wp_terms: Total expected rows (approximate): 27
+0002.100 (0) Table wp_terms: Total rows added: 27 in 0.00 seconds
+0002.101 (0) Table wp_terms: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_terms.table.gz - 0.7 KB)
+0002.105 (0) Table wp_mts_wp_reviews: Total expected rows (approximate): 0
+0002.107 (0) Table wp_mts_wp_reviews: Total rows added: 0 in 0.00 seconds
+0002.108 (0) Table wp_mts_wp_reviews: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_mts_wp_reviews.table.gz - 0.3 KB)
+0002.112 (0) Table wp_nf3_action_meta: Total expected rows (approximate): 134
+0002.117 (0) Table wp_nf3_action_meta: Total rows added: 134 in 0.00 seconds
+0002.118 (0) Table wp_nf3_action_meta: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_nf3_action_meta.table.gz - 1.9 KB)
+0002.123 (0) Table wp_nf3_actions: Total expected rows (approximate): 14
+0002.128 (0) Table wp_nf3_actions: Total rows added: 14 in 0.00 seconds
+0002.129 (0) Table wp_nf3_actions: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_nf3_actions.table.gz - 0.6 KB)
+0002.133 (0) Table wp_nf3_field_meta: Total expected rows (approximate): 0
+0002.135 (0) Table wp_nf3_field_meta: Total rows added: 0 in 0.00 seconds
+0002.136 (0) Table wp_nf3_field_meta: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_nf3_field_meta.table.gz - 0.3 KB)
+0002.142 (0) Table wp_nf3_fields: Total expected rows (approximate): 0
+0002.144 (0) Table wp_nf3_fields: Total rows added: 0 in 0.00 seconds
+0002.145 (0) Table wp_nf3_fields: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_nf3_fields.table.gz - 0.4 KB)
+0002.155 (0) Table wp_nf3_form_meta: Total expected rows (approximate): 60
+0002.161 (0) Table wp_nf3_form_meta: Total rows added: 60 in 0.00 seconds
+0002.164 (0) Table wp_nf3_form_meta: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_nf3_form_meta.table.gz - 1.1 KB)
+0002.172 (0) Table wp_nf3_forms: Total expected rows (approximate): 4
+0002.189 (0) Table wp_nf3_forms: Total rows added: 4 in 0.00 seconds
+0002.191 (0) Table wp_nf3_forms: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_nf3_forms.table.gz - 0.5 KB)
+0002.198 (0) Table wp_nf3_object_meta: Total expected rows (approximate): 0
+0002.201 (0) Table wp_nf3_object_meta: Total rows added: 0 in 0.00 seconds
+0002.204 (0) Table wp_nf3_object_meta: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_nf3_object_meta.table.gz - 0.3 KB)
+0002.212 (0) Table wp_nf3_objects: Total expected rows (approximate): 0
+0002.216 (0) Table wp_nf3_objects: Total rows added: 0 in 0.00 seconds
+0002.223 (0) Table wp_nf3_objects: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_nf3_objects.table.gz - 0.4 KB)
+0002.233 (0) Table wp_nf3_relationships: Total expected rows (approximate): 0
+0002.235 (0) Table wp_nf3_relationships: Total rows added: 0 in 0.00 seconds
+0002.237 (0) Table wp_nf3_relationships: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_nf3_relationships.table.gz - 0.4 KB)
+0002.245 (0) Table wp_nf_objectmeta: Total expected rows (approximate): 270
+0002.257 (0) Table wp_nf_objectmeta: Total rows added: 270 in 0.01 seconds
+0002.259 (0) Table wp_nf_objectmeta: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_nf_objectmeta.table.gz - 3.4 KB)
+0002.264 (0) Table wp_nf_objects: Total expected rows (approximate): 17
+0002.267 (0) Table wp_nf_objects: Total rows added: 17 in 0.00 seconds
+0002.268 (0) Table wp_nf_objects: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_nf_objects.table.gz - 0.4 KB)
+0002.272 (0) Table wp_nf_relationships: Total expected rows (approximate): 11
+0002.277 (0) Table wp_nf_relationships: Total rows added: 11 in 0.00 seconds
+0002.279 (0) Table wp_nf_relationships: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_nf_relationships.table.gz - 0.4 KB)
+0002.287 (0) Table wp_ninja_forms_fav_fields: Total expected rows (approximate): 17
+0002.290 (0) Table wp_ninja_forms_fav_fields: Total rows added: 17 in 0.00 seconds
+0002.291 (0) Table wp_ninja_forms_fav_fields: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_ninja_forms_fav_fields.table.gz - 2.6 KB)
+0002.296 (0) Table wp_ninja_forms_fields: Total expected rows (approximate): 55
+0002.302 (0) Table wp_ninja_forms_fields: Total rows added: 55 in 0.01 seconds
+0002.304 (0) Table wp_ninja_forms_fields: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_ninja_forms_fields.table.gz - 3.1 KB)
+0002.309 (0) Table wp_wfu_dbxqueue: Total expected rows (approximate): 0
+0002.311 (0) Table wp_wfu_dbxqueue: Total rows added: 0 in 0.00 seconds
+0002.312 (0) Table wp_wfu_dbxqueue: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_wfu_dbxqueue.table.gz - 0.3 KB)
+0002.316 (0) Table wp_wfu_log: Total expected rows (approximate): 6
+0002.320 (0) Table wp_wfu_log: Total rows added: 6 in 0.00 seconds
+0002.321 (0) Table wp_wfu_log: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_wfu_log.table.gz - 0.9 KB)
+0002.325 (0) Table wp_wfu_userdata: Total expected rows (approximate): 6
+0002.328 (0) Table wp_wfu_userdata: Total rows added: 6 in 0.00 seconds
+0002.329 (0) Table wp_wfu_userdata: finishing file (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_wfu_userdata.table.gz - 0.6 KB)
+0002.332 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_options.table.gz (1/30): adding to final database dump
+0002.509 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_users.table.gz (2/30): adding to final database dump
+0002.510 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_usermeta.table.gz (3/30): adding to final database dump
+0002.514 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_commentmeta.table.gz (4/30): adding to final database dump
+0002.515 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_comments.table.gz (5/30): adding to final database dump
+0003.010 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_links.table.gz (6/30): adding to final database dump
+0003.014 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_postmeta.table.gz (7/30): adding to final database dump
+0003.065 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_posts.table.gz (8/30): adding to final database dump
+0003.482 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_term_relationships.table.gz (9/30): adding to final database dump
+0003.483 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_term_taxonomy.table.gz (10/30): adding to final database dump
+0003.484 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_termmeta.table.gz (11/30): adding to final database dump
+0003.485 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_terms.table.gz (12/30): adding to final database dump
+0003.487 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_mts_wp_reviews.table.gz (13/30): adding to final database dump
+0003.488 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_nf3_action_meta.table.gz (14/30): adding to final database dump
+0003.489 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_nf3_actions.table.gz (15/30): adding to final database dump
+0003.490 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_nf3_field_meta.table.gz (16/30): adding to final database dump
+0003.491 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_nf3_fields.table.gz (17/30): adding to final database dump
+0003.492 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_nf3_form_meta.table.gz (18/30): adding to final database dump
+0003.493 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_nf3_forms.table.gz (19/30): adding to final database dump
+0003.494 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_nf3_object_meta.table.gz (20/30): adding to final database dump
+0003.495 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_nf3_objects.table.gz (21/30): adding to final database dump
+0003.497 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_nf3_relationships.table.gz (22/30): adding to final database dump
+0003.499 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_nf_objectmeta.table.gz (23/30): adding to final database dump
+0003.501 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_nf_objects.table.gz (24/30): adding to final database dump
+0003.502 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_nf_relationships.table.gz (25/30): adding to final database dump
+0003.503 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_ninja_forms_fav_fields.table.gz (26/30): adding to final database dump
+0003.506 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_ninja_forms_fields.table.gz (27/30): adding to final database dump
+0003.508 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_wfu_dbxqueue.table.gz (28/30): adding to final database dump
+0003.509 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_wfu_log.table.gz (29/30): adding to final database dump
+0003.510 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db-table-wp_wfu_userdata.table.gz (30/30): adding to final database dump
+0003.511 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db.gz: finished writing out complete database file (1832 KB)
+0003.575 (0) Total database tables backed up: 30 (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db.gz, size: 1887486, sha256)
+0003.582 (0) backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db.gz: db: This file has not yet been successfully uploaded: will queue
+0003.583 (0) Saving backup history. Total backup size: 1.8 MB
+0003.586 (0) Requesting upload of the files that have not yet been successfully uploaded (1)
+0003.588 (0) Cloud backup selection (1/1): dropbox with instance (1/1) (last)
+0003.589 (0) Beginning dispatch of backup to remote (dropbox) (instance identifier s-fc3b57c9be61989ad2c4fe435465b496)
+0003.590 (0) Dropbox: begin cloud upload (using API version 2 with OAuth v2 token)
+0003.606 (0) Dropbox: access gained; setting chunk size to: 1024 KB
+0004.026 (0) Dropbox quota usage: used=24217.5 MB, total=1050880 MB, available=1026662.5 MB
+0004.027 (0) Dropbox: Attempt to upload: backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db.gz to: backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db.gz
+0005.569 (0) Dropbox chunked upload: 55.6 % uploaded (AAAAAAAAOmPXwYFlU6uoLQ, 1048576, 3584 KB)
+0007.045 (0) Dropbox chunked upload: 100 % uploaded (AAAAAAAAOmPXwYFlU6uoLQ, 1887486, 3584 KB)
+0009.528 (0) Recording as successfully uploaded: backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db.gz (f1a0d6d382968adb4cf391741ad91449)
+0009.533 (0) Deleting local file: backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db.gz: skipped: user has unchecked updraft_delete_local option
+0009.534 (0) Dropbox: File upload success (backup_2018-08-11-2221_The_Jump_Blog_bea3e4f17d5e-db.gz): 1843 KB in 5s (334 KB/s)
+0009.538 (0) Retain: beginning examination of existing backup sets; user setting: retain_files=1, retain_db=1
+0009.539 (0) Number of backup sets in history: 3; groups (db): 1
+0009.540 (0) Examining (for databases) backup set with group_id=0, nonce=bea3e4f17d5e, datestamp=1534026079 (Aug 11 2018 22:21:19)
+0009.540 (0) This backup set is the backup set just made, so will not be deleted.
+0009.540 (0) Examining (for databases) backup set with group_id=0, nonce=c08ba2bc18ee, datestamp=1533997285 (Aug 11 2018 14:21:25)
+0009.540 (0) 1533997285: db: this set includes a database (backup_2018-08-11-1421_The_Jump_Blog_c08ba2bc18ee-db.gz); db count is now 1
+0009.541 (0) 1533997285: db: over retain limit (1); will delete this database
+0009.541 (0) Delete file: backup_2018-08-11-1421_The_Jump_Blog_c08ba2bc18ee-db.gz, service=dropbox
+0009.541 (0) Deleting local copy (backup_2018-08-11-1421_The_Jump_Blog_c08ba2bc18ee-db.gz)
+0009.544 (0) Dropbox: request deletion: backup_2018-08-11-1421_The_Jump_Blog_c08ba2bc18ee-db.gz
+0010.151 (0) Dropbox: delete succeeded
+0010.153 (0) This backup set is now empty; will remove from history
+0010.153 (0) Deleting log file (log.c08ba2bc18ee.txt)
+0010.154 (0) Examining (for databases) backup set with group_id=0, nonce=bc94b5661081, datestamp=1533773693 (Aug 09 2018 00:14:53)
+0010.154 (0) Number of backup sets in history: 2; groups (files): 1
+0010.155 (0) Examining (for files) backup set with nonce=bea3e4f17d5e, datestamp=1534026079 (Aug 11 2018 22:21:19)
+0010.155 (0) This backup set remains non-empty (f=0/d=1); will retain in history
+0010.156 (0) Examining (for files) backup set with nonce=bc94b5661081, datestamp=1533773693 (Aug 09 2018 00:14:53)
+0010.156 (0) This backup set remains non-empty (f=1/d=0); will retain in history
+0010.156 (0) Retain: saving new backup history (sets now: 2) and finishing retain operation
+0010.159 (0) Resume backup (bea3e4f17d5e, 0): finish run
+0010.161 (0) Decremented the semaphore (d) by 1
+0010.162 (0) Semaphore (d) unlocked
+0010.163 (0) There were no errors in the uploads, so the 'resume' event (1) is being unscheduled
+0010.166 (0) No email will/can be sent - the user has not configured an email address.
+0010.167 (0) The backup apparently succeeded and is now complete
