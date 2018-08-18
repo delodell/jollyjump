@@ -13,6 +13,42 @@
 <link rel="profile" href="http://gmpg.org/xfn/11">
 <link rel="pingback" href="<?php bloginfo( 'pingback_url' ); ?>">
 <?php wp_head(); ?>
+
+<!-- ############# ga code ############# -->
+<script>
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results == null ? null : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+var source = getParameterByName('utm_source');
+var medium = getParameterByName('utm_medium');
+var campaign = getParameterByName('utm_campaign');
+var content = getParameterByName('utm_content');
+ 
+if(source == 'dynamic') {
+source = document.referrer;
+}
+</script>
+
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-109241653-1', 'auto');
+ga('set', {
+'campaignSource': source,
+'campaignMedium': medium,
+'campaignName': campaign,
+'campaignContent': content
+});
+ga('send', 'pageview');
+</script>
+<!-- ############# end ga code ############# -->
+
 </head>
 
 <body id="blog" <?php body_class(); ?>>
