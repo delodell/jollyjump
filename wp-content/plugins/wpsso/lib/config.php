@@ -17,8 +17,8 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 			'lca'    => 'wpsso',	// Main plugin lowercase acronym (deprecated on 2017/11/18).
 			'plugin' => array(
 				'wpsso' => array(			// Plugin acronym.
-					'version'     => '4.9.4',	// Plugin version.
-					'opt_version' => '587',		// Increment when changing default option values.
+					'version'     => '4.10.0',	// Plugin version.
+					'opt_version' => '594',		// Increment when changing default option values.
 					'short'       => 'WPSSO Core',	// Short plugin name.
 					'name'        => 'WPSSO Core [Main Plugin]',
 					'desc'        => 'WPSSO Core gives social sites and search engines better information about your content, business and authors, with complete meta tags and Schema markup for social sharing, Google Knowledge Graph / Rich Card SEO, Pinterest Rich Pins, Twitter Cards and more.',
@@ -790,8 +790,8 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'schema_type_for_person'       => 'person',
 					'schema_type_for_place'        => 'place',
 					'schema_type_for_product'      => 'product',
-					'schema_type_for_recipe'       => 'recipe',
-					'schema_type_for_review'       => 'review',
+					'schema_type_for_recipe'       => 'recipe',		// For WP Ultimate Recipe
+					'schema_type_for_review'       => 'review',		// For WP Product Review
 					'schema_type_for_tribe_events' => 'event',
 					'schema_type_for_webpage'      => 'webpage',
 					'schema_type_for_website'      => 'website',
@@ -804,7 +804,28 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'instgram_publisher_url'       => '',			// (localized)
 					'linkedin_publisher_url'       => '',			// (localized)
 					'myspace_publisher_url'        => '',			// (localized)
-					'og_post_type'                 => 'article',
+					/**
+					 * Standard WordPress types.
+					 */
+					'og_type_for_tax_category'     => 'website',
+					'og_type_for_tax_post_tag'     => 'website',
+					'og_type_for_archive_page'     => 'website',	// Date-based archives.
+					'og_type_for_attachment'       => 'website',
+					'og_type_for_home_index'       => 'website',
+					'og_type_for_home_page'        => 'website',
+					'og_type_for_page'             => 'article',
+					'og_type_for_post'             => 'article',
+					'og_type_for_post_archive'     => 'website',		// Post type archive page.
+					'og_type_for_search_page'      => 'website',
+					'og_type_for_user_page'        => 'website',
+					/**
+					 * Custom post types.
+					 */
+					'og_type_for_article'          => 'article',
+					'og_type_for_download'         => 'product',		// For Easy Digital Downloads.
+					'og_type_for_place'            => 'place',
+					'og_type_for_product'          => 'product',
+					'og_type_for_website'          => 'website',
 					'og_art_section'               => 'none',
 					'og_img_width'                 => 600,
 					'og_img_height'                => 315,
@@ -925,22 +946,45 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'add_meta_property_place:region'                           => 1,
 					'add_meta_property_place:postal_code'                      => 1,
 					'add_meta_property_place:country_name'                     => 1,
+					'add_meta_property_product:age_group'                      => 1,
 					'add_meta_property_product:availability'                   => 1,
 					'add_meta_property_product:brand'                          => 1,
 					'add_meta_property_product:category'                       => 1,
 					'add_meta_property_product:color'                          => 1,
 					'add_meta_property_product:condition'                      => 1,
+					'add_meta_property_product:ean'                            => 1,
+					'add_meta_property_product:expiration_time'                => 1,
+					'add_meta_property_product:is_product_shareable'           => 1,
+					'add_meta_property_product:isbn'                           => 1,
 					'add_meta_property_product:material'                       => 1,
+					'add_meta_property_product:mfr_part_no'                    => 1,
 					'add_meta_property_product:original_price:amount'          => 1,
 					'add_meta_property_product:original_price:currency'        => 1,
+					'add_meta_property_product:pattern'                        => 1,
+					'add_meta_property_product:plural_title'                   => 1,
+					'add_meta_property_product:pretax_price:amount'            => 1,
+					'add_meta_property_product:pretax_price:currency'          => 1,
 					'add_meta_property_product:price:amount'                   => 1,
 					'add_meta_property_product:price:currency'                 => 1,
 					'add_meta_property_product:sale_price:amount'              => 1,
 					'add_meta_property_product:sale_price:currency'            => 1,
+					'add_meta_property_product:product_link'                   => 1,
+					'add_meta_property_product:purchase_limit'                 => 1,
+					'add_meta_property_product:retailer'                       => 1,
+					'add_meta_property_product:retailer_category'              => 1,
+					'add_meta_property_product:retailer_part_no'               => 1,
+					'add_meta_property_product:retailer_title'                 => 1,
+					'add_meta_property_product:sale_price:amount'              => 1,
+					'add_meta_property_product:sale_price:currency'            => 1,
 					'add_meta_property_product:sale_price_dates:start'         => 1,
 					'add_meta_property_product:sale_price_dates:end'           => 1,
+					'add_meta_property_product:shipping_cost:amount'           => 1,
+					'add_meta_property_product:shipping_cost:currency'         => 1,
+					'add_meta_property_product:shipping_weight:value'          => 1,
+					'add_meta_property_product:shipping_weight:units'          => 1,
 					'add_meta_property_product:size'                           => 1,
 					'add_meta_property_product:target_gender'                  => 1,
+					'add_meta_property_product:upc'                            => 1,
 					'add_meta_property_product:weight:value'                   => 1,
 					'add_meta_property_product:weight:units'                   => 1,
 					'add_meta_property_profile:first_name'                     => 1,
@@ -1081,6 +1125,10 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'plugin_schema_type_col_post'   => 1,
 					'plugin_schema_type_col_term'   => 0,
 					'plugin_schema_type_col_user'   => 0,
+					'plugin_og_type_col_media'      => 0,
+					'plugin_og_type_col_post'       => 0,
+					'plugin_og_type_col_term'       => 0,
+					'plugin_og_type_col_user'       => 0,
 					'plugin_og_img_col_media'       => 0,
 					'plugin_og_img_col_post'        => 1,
 					'plugin_og_img_col_term'        => 1,
@@ -1400,7 +1448,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 			'wp' => array(
 				'label'       => 'WordPress',
 				'min_version' => '3.8',		// Hard limit - deactivate the plugin when activating.
-				'rec_version' => '4.9.6',	// Soft limit - issue warning if lower version found.
+				'rec_version' => '4.9.8',	// Soft limit - issue warning if lower version found.
 				'version_url' => 'https://codex.wordpress.org/Supported_Versions?nocache=1',
 				'tb_iframe'   => array(		// Thickbox iframe.
 					'width'  => 772,	// Url query argument.
@@ -1533,23 +1581,34 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 				'columns' => array(
 					'schema_type' => array(
 						'header'   => 'SSO Schema',
+						'mt_name'  => 'schema:type:id',
 						'meta_key' => '_wpsso_head_info_schema_type',
 						'orderby'  => 'meta_value',
-						'width'    => '130px',	// 120 + 10 for the sorting arrow
+						'width'    => '125px',	// 115 + 10 for the sorting arrow
+						'height'   => 'auto',
+					),
+					'og_type' => array(
+						'header'   => 'SSO Type',
+						'mt_name'  => 'og:type',
+						'meta_key' => '_wpsso_head_info_og_type',
+						'orderby'  => 'meta_value',
+						'width'    => '100px',	// 90 + 10 for the sorting arrow
 						'height'   => 'auto',
 					),
 					'og_img' => array(
 						'header'   => 'SSO Image',
+						'mt_name'  => 'og:image',
 						'meta_key' => '_wpsso_head_info_og_img_thumb',
-						'orderby'  => false,	// do not offer column sorting
+						'orderby'  => false,	// Do not offer column sorting.
 						'width'    => '75px',
 						'height'   => '40px',
 					),
 					'og_desc' => array(
 						'header'   => 'SSO Desc',
+						'mt_name'  => 'og:description',
 						'meta_key' => '_wpsso_head_info_og_desc',
-						'orderby'  => false,	// do not offer column sorting
-						'width'    => '12%',
+						'orderby'  => false,	// Do not offer column sorting.
+						'width'    => '160px',
 						'height'   => 'auto',
 					),
 				),

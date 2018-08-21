@@ -22,7 +22,7 @@ You can use it to capture screenshots or video from your webcam and upload it to
 
 You can even use it as a simple contact (or any other type of) form to submit data without including a file.
 
-The plugin includes a file browser to access and manage the uploaded files from the Dashboard (only for admins currently).
+The plugin displays the list of uploaded files in a separate top-level menu in Dashboard and includes a file browser to access and manage the uploaded files (only for admins currently).
 
 Several filters and actions before and after file upload enable extension of its capabilities.
 
@@ -46,11 +46,13 @@ The characteristics of the plugin are:
 * It supports filters and actions before and after file upload.
 * It contains a visual editor for customizing the plugin easily without any knowledge of shortcodes or programming
 * It supports logging of upload events or management of files, which can be viewed by admins through the Dashboard.
-* It includes a file browser in the Dashboard, from where admins can view the uploaded files and manage them.
+* It includes an Uploaded Files top-level menu item in the Dashboard, from where admins can view the uploaded files.
+* It includes a file browser in the Dashboard, from where admins can manage the files.
 * It supports multilingual characters and localization.
 
 The plugin is translated in the following languages:
 
+* Portuguese, kindly provided by Rui Alao
 * German
 * French, kindly provided by Thomas Bastide of http://www.omicronn.fr/ and improved by other contributors
 * Serbian, kindly provided by Andrijana Nikolic of http://webhostinggeeks.com/
@@ -146,6 +148,14 @@ There is an option in plugin's settings in Dashboard to relax the CSS rules, so 
 8. A screenshot of the file browser.
 
 == Changelog ==
+
+= 4.7.0 =
+* added Uploaded Files top-level Dashboard menu item, showing all the uploaded files and highlighting the new ones
+* added Portuguese translation from Rui Alao
+* checked and verified compatibility with Gutenberg
+* plugin initialization actions moved to plugins_loaded filter
+* fixed bug clearing userdata fields when Select File is pressed
+* File Browser and View Log tables modified to become more responsive especially for small screens
 
 = 4.6.2 =
 * corrected consent_status warning when updating user profile and Personal Data is off
@@ -769,6 +779,9 @@ Added the option to allow anyone to upload files, by setting the attribute uploa
 Initial version.
 
 == Upgrade Notice ==
+
+= 4.7.0 =
+Significant update to introduce some new features and improvements and fix some bugs.
 
 = 4.6.2 =
 Minor update to fix some bugs and introduce some code improvements.

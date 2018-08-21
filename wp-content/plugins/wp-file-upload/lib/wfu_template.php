@@ -1480,6 +1480,21 @@ this.reset = function() {
 }
 
 /**
+ *  resets the dummy form
+ *  
+ *  The dummy form is a second form element created only for acting as the form
+ *  element of userdata fields. This way userdata fields autofill attribute can
+ *  work normally. When userdata fields need to be cleared, the dummy form needs
+ *  to be reset as well, so that any autofill styling (like yellow background in
+ *  input elements) is cleared.
+ *  
+ *  @return void
+ */
+this.resetDummy = function() {
+	document.getElementById("dummy_$ID").reset();
+}
+
+/**
  *  submits the upload form
  *  
  *  This function runs when the upload starts, in order to submit the files
@@ -1553,6 +1568,7 @@ this.files = function() {
 </script><?php /****************************************************************
                the following lines contain the HTML output 
 ****************************************************************************/ ?>
+<form id="dummy_$ID" style="display:none;"></form>
 <form class="file_input_uploadform" id="uploadform_$ID" name="uploadform_$ID" method="post" enctype="multipart/form-data" style="<?php echo $styles_form; ?>">
 <?php if ( $testmode ): ?>
 	<input align="center" type="button" id="input_$ID" value="<?php echo $label; ?>" class="file_input_button" style="<?php echo $styles; ?>" onmouseout="javascript: document.getElementById('input_$ID').className = 'file_input_button';" onmouseover="javascript: document.getElementById('input_$ID').className = 'file_input_button_hover';" onclick="alert('<?php echo WFU_NOTIFY_TESTMODE; ?>');" />
@@ -4074,74 +4090,74 @@ this._focused = function(obj) {
 <!-- **** the following lines contain the HTML code of each field type ***** -->		
 	<?php if ( !$testmode ): ?>
 		<?php if ( $p["type"] == "text" ): ?>
-				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" value="<?php echo $p["default"]; ?>" autocomplete="<?php echo ( $p["donotautocomplete"] ? 'off' : 'on' ); ?>" form="uploadform_$ID" onfocus="GlobalData.WFU[$ID].userdata._focused(this);"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
+				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" value="<?php echo $p["default"]; ?>" autocomplete="<?php echo ( $p["donotautocomplete"] ? 'off' : 'on' ); ?>" form="dummy_$ID" onfocus="GlobalData.WFU[$ID].userdata._focused(this);"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
 		<?php elseif ( $p["type"] == "multitext" ): ?>
-				<textarea id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" value="<?php echo $p["default"]; ?>" form="uploadform_$ID" onfocus="GlobalData.WFU[$ID].userdata._focused(this);"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?>><?php echo $p["default"]; ?></textarea>
+				<textarea id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" value="<?php echo $p["default"]; ?>" form="dummy_$ID" onfocus="GlobalData.WFU[$ID].userdata._focused(this);"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?>><?php echo $p["default"]; ?></textarea>
 		<?php elseif ( $p["type"] == "number" ): ?>
-				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" value="<?php echo $p["default"]; ?>" autocomplete="<?php echo ( $p["donotautocomplete"] ? 'off' : 'on' ); ?>" form="uploadform_$ID" onfocus="GlobalData.WFU[$ID].userdata._focused(this);"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
+				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" value="<?php echo $p["default"]; ?>" autocomplete="<?php echo ( $p["donotautocomplete"] ? 'off' : 'on' ); ?>" form="dummy_$ID" onfocus="GlobalData.WFU[$ID].userdata._focused(this);"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
 		<?php elseif ( $p["type"] == "email" ): ?>
-				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message file_userdata_$ID_emailgroup_<?php echo $p["group"]; ?>" value="<?php echo $p["default"]; ?>" autocomplete="<?php echo ( $p["donotautocomplete"] ? 'off' : 'on' ); ?>" form="uploadform_$ID" onfocus="GlobalData.WFU[$ID].userdata._focused(this);"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
+				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message file_userdata_$ID_emailgroup_<?php echo $p["group"]; ?>" value="<?php echo $p["default"]; ?>" autocomplete="<?php echo ( $p["donotautocomplete"] ? 'off' : 'on' ); ?>" form="dummy_$ID" onfocus="GlobalData.WFU[$ID].userdata._focused(this);"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
 		<?php elseif ( $p["type"] == "confirmemail" ): ?>
 				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" value="<?php echo $p["default"]; ?>" autocomplete="<?php echo ( $p["donotautocomplete"] ? 'off' : 'on' ); ?>" onfocus="GlobalData.WFU[$ID].userdata._focused(this);"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
 		<?php elseif ( $p["type"] == "password" ): ?>
-				<input type="password" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message file_userdata_$ID_passwordgroup_<?php echo $p["group"]; ?>" value="<?php echo $p["default"]; ?>" autocomplete="<?php echo ( $p["donotautocomplete"] ? 'off' : 'on' ); ?>" form="uploadform_$ID" onfocus="GlobalData.WFU[$ID].userdata._focused(this);"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
+				<input type="password" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message file_userdata_$ID_passwordgroup_<?php echo $p["group"]; ?>" value="<?php echo $p["default"]; ?>" autocomplete="<?php echo ( $p["donotautocomplete"] ? 'off' : 'on' ); ?>" form="dummy_$ID" onfocus="GlobalData.WFU[$ID].userdata._focused(this);"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
 		<?php elseif ( $p["type"] == "confirmpassword" ): ?>
-				<input type="password" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" value="<?php echo $p["default"]; ?>" autocomplete="<?php echo ( $p["donotautocomplete"] ? 'off' : 'on' ); ?>" form="uploadform_$ID" onfocus="GlobalData.WFU[$ID].userdata._focused(this);"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
+				<input type="password" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" value="<?php echo $p["default"]; ?>" autocomplete="<?php echo ( $p["donotautocomplete"] ? 'off' : 'on' ); ?>" form="dummy_$ID" onfocus="GlobalData.WFU[$ID].userdata._focused(this);"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
 		<?php elseif ( $p["type"] == "checkbox" ): ?>
-				<input type="checkbox" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_checkbox" autocomplete="<?php echo ( $p["donotautocomplete"] ? 'off' : 'on' ); ?>" form="uploadform_$ID" style="display:none;" onfocus="GlobalData.WFU[$ID].userdata._focused(this);" />
+				<input type="checkbox" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_checkbox" autocomplete="<?php echo ( $p["donotautocomplete"] ? 'off' : 'on' ); ?>" form="dummy_$ID" style="display:none;" onfocus="GlobalData.WFU[$ID].userdata._focused(this);" />
 				<label id="userdata_$ID_checklabel_<?php echo $p["key"]; ?>" class="file_userdata_checkbox_description" for="userdata_$ID_field_<?php echo $p["key"]; ?>" style="display:none;"><?php echo $p["data"]; ?></label>
 		<?php elseif ( $p["type"] == "radiobutton" ): ?>
-				<input type="radio" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_radiobutton" name="userdata_$ID_radiogroup_<?php echo $p["group"]; ?>" autocomplete="<?php echo ( $p["donotautocomplete"] ? 'off' : 'on' ); ?>" form="uploadform_$ID" style="display:none;" onfocus="GlobalData.WFU[$ID].userdata._focused(document.getElementById('userdata_$ID_field_<?php echo $p["key"]; ?>'));" />
+				<input type="radio" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_radiobutton" name="userdata_$ID_radiogroup_<?php echo $p["group"]; ?>" autocomplete="<?php echo ( $p["donotautocomplete"] ? 'off' : 'on' ); ?>" form="dummy_$ID" style="display:none;" onfocus="GlobalData.WFU[$ID].userdata._focused(document.getElementById('userdata_$ID_field_<?php echo $p["key"]; ?>'));" />
 				<label id="userdata_$ID_radiolabel_<?php echo $p["key"]; ?>" class="file_userdata_radiobutton_label" for="userdata_$ID_field_<?php echo $p["key"]; ?>" style="display:none;"><?php echo $p["data"]; ?></label>
 		<?php elseif ( $p["type"] == "date" ): ?>
-				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" autocomplete="<?php echo ( $p["donotautocomplete"] ? 'off' : 'on' ); ?>" form="uploadform_$ID" readonly="readonly" onfocus="GlobalData.WFU[$ID].userdata._focused(this);"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
+				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" autocomplete="<?php echo ( $p["donotautocomplete"] ? 'off' : 'on' ); ?>" form="dummy_$ID" readonly="readonly" onfocus="GlobalData.WFU[$ID].userdata._focused(this);"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
 		<?php elseif ( $p["type"] == "time" ): ?>
-				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" autocomplete="<?php echo ( $p["donotautocomplete"] ? 'off' : 'on' ); ?>" form="uploadform_$ID" readonly="readonly" onfocus="GlobalData.WFU[$ID].userdata._focused(this);"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
+				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" autocomplete="<?php echo ( $p["donotautocomplete"] ? 'off' : 'on' ); ?>" form="dummy_$ID" readonly="readonly" onfocus="GlobalData.WFU[$ID].userdata._focused(this);"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
 		<?php elseif ( $p["type"] == "datetime" ): ?>
-				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" autocomplete="<?php echo ( $p["donotautocomplete"] ? 'off' : 'on' ); ?>" form="uploadform_$ID" readonly="readonly" onfocus="GlobalData.WFU[$ID].userdata._focused(this);"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
+				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" autocomplete="<?php echo ( $p["donotautocomplete"] ? 'off' : 'on' ); ?>" form="dummy_$ID" readonly="readonly" onfocus="GlobalData.WFU[$ID].userdata._focused(this);"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
 		<?php elseif ( $p["type"] == "list" ): ?>
-				<select id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_listbox" multiple="multiple" autocomplete="<?php echo ( $p["donotautocomplete"] ? 'off' : 'on' ); ?>" form="uploadform_$ID" value="<?php echo $p["default"]; ?>" onfocus="GlobalData.WFU[$ID].userdata._focused(this);">
+				<select id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_listbox" multiple="multiple" autocomplete="<?php echo ( $p["donotautocomplete"] ? 'off' : 'on' ); ?>" form="dummy_$ID" value="<?php echo $p["default"]; ?>" onfocus="GlobalData.WFU[$ID].userdata._focused(this);">
 					<option id="userdata_$ID_listitem_<?php echo $p["key"]; ?>" style="display:none;"></option>
 				</select>
 		<?php elseif ( $p["type"] == "dropdown" ): ?>
-				<select id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_dropdown" autocomplete="<?php echo ( $p["donotautocomplete"] ? 'off' : 'on' ); ?>" form="uploadform_$ID" value="<?php echo $p["default"]; ?>" onfocus="GlobalData.WFU[$ID].userdata._focused(this);">
+				<select id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_dropdown" autocomplete="<?php echo ( $p["donotautocomplete"] ? 'off' : 'on' ); ?>" form="dummy_$ID" value="<?php echo $p["default"]; ?>" onfocus="GlobalData.WFU[$ID].userdata._focused(this);">
 					<option id="userdata_$ID_listitem_<?php echo $p["key"]; ?>" style="display:none;"></option>
 				</select>
 		<?php endif ?>
 				<input id="userdata_$ID_props_<?php echo $p["key"]; ?>" type="hidden" value="p:<?php echo $p["hintposition"]; ?>" />
 	<?php else: ?>
 		<?php if ( $p["type"] == "text" ): ?>
-				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" value="Test value" autocomplete="off" form="uploadform_$ID" readonly="readonly"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
+				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" value="Test value" autocomplete="off" form="dummy_$ID" readonly="readonly"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
 		<?php elseif ( $p["type"] == "multitext" ): ?>
-				<textarea id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" value="Test value" form="uploadform_$ID" readonly="readonly"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?>>Test message</textarea>
+				<textarea id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" value="Test value" form="dummy_$ID" readonly="readonly"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?>>Test message</textarea>
 		<?php elseif ( $p["type"] == "number" ): ?>
-				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" value="100" autocomplete="off" form="uploadform_$ID" readonly="readonly"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
+				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" value="100" autocomplete="off" form="dummy_$ID" readonly="readonly"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
 		<?php elseif ( $p["type"] == "email" ): ?>
-				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message file_userdata_emailgroup_<?php echo $p["group"]; ?>" value="user@domain.com" autocomplete="off" form="uploadform_$ID" readonly="readonly"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
+				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message file_userdata_emailgroup_<?php echo $p["group"]; ?>" value="user@domain.com" autocomplete="off" form="dummy_$ID" readonly="readonly"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
 		<?php elseif ( $p["type"] == "confirmemail" ): ?>
-				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" value="Test message" autocomplete="off" form="uploadform_$ID" readonly="readonly"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
+				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" value="Test message" autocomplete="off" form="dummy_$ID" readonly="readonly"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
 		<?php elseif ( $p["type"] == "password" ): ?>
-				<input type="password" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message file_userdata_passwordgroup_<?php echo $p["group"]; ?>" value="Test" autocomplete="off" form="uploadform_$ID" readonly="readonly"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
+				<input type="password" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message file_userdata_passwordgroup_<?php echo $p["group"]; ?>" value="Test" autocomplete="off" form="dummy_$ID" readonly="readonly"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
 		<?php elseif ( $p["type"] == "confirmpassword" ): ?>
-				<input type="password" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" value="Test" autocomplete="off" form="uploadform_$ID" readonly="readonly"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
+				<input type="password" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" value="Test" autocomplete="off" form="dummy_$ID" readonly="readonly"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
 		<?php elseif ( $p["type"] == "checkbox" ): ?>
-				<input type="checkbox" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_checkbox" autocomplete="off" form="uploadform_$ID" readonly="readonly" />
+				<input type="checkbox" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_checkbox" autocomplete="off" form="dummy_$ID" readonly="readonly" />
 				<label id="userdata_$ID_checklabel_<?php echo $p["key"]; ?>" for="userdata_$ID_field_<?php echo $p["key"]; ?>" style="display:none;">[list]</label>
 		<?php elseif ( $p["type"] == "radiobutton" ): ?>
-				<input type="radio" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_radiobutton" name="userdata_$ID_radiogroup_<?php echo $p["group"]; ?>" autocomplete="off" form="uploadform_$ID" readonly="readonly" />
+				<input type="radio" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_radiobutton" name="userdata_$ID_radiogroup_<?php echo $p["group"]; ?>" autocomplete="off" form="dummy_$ID" readonly="readonly" />
 				<label id="userdata_$ID_radiolabel_<?php echo $p["key"]; ?>" for="userdata_$ID_field_<?php echo $p["key"]; ?>" style="display:none;">[list]</label>
 		<?php elseif ( $p["type"] == "date" ): ?>
-				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" autocomplete="off" form="uploadform_$ID" readonly="readonly"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
+				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" autocomplete="off" form="dummy_$ID" readonly="readonly"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
 		<?php elseif ( $p["type"] == "time" ): ?>
-				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" autocomplete="off" form="uploadform_$ID" readonly="readonly"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
+				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" autocomplete="off" form="dummy_$ID" readonly="readonly"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
 		<?php elseif ( $p["type"] == "datetime" ): ?>
-				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" autocomplete="off" form="uploadform_$ID" readonly="readonly"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
+				<input type="text" id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_message" autocomplete="off" form="dummy_$ID" readonly="readonly"<?php echo ( $p["labelposition"] == "placeholder" ? ' placeholder="'.$p["label"].'"' : '' ); ?> />
 		<?php elseif ( $p["type"] == "list" ): ?>
-				<select id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_listbox" multiple="multiple" autocomplete="off" form="uploadform_$ID" readonly="readonly">
+				<select id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_listbox" multiple="multiple" autocomplete="off" form="dummy_$ID" readonly="readonly">
 					<option>Test value</option>
 				</select>
 		<?php elseif ( $p["type"] == "dropdown" ): ?>
-				<select id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_dropdown" autocomplete="off" form="uploadform_$ID" readonly="readonly">
+				<select id="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_dropdown" autocomplete="off" form="dummy_$ID" readonly="readonly">
 					<option>Test value</option>
 				</select>
 		<?php endif ?>

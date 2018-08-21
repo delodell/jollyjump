@@ -647,6 +647,20 @@ function wfu_ajax_action_get_historylog_page() {
 	die(apply_filters('_wfu_ajax_action_get_historylog_page', 'wfu_historylog_page_success:'.wfu_plugin_encode_string($rows)));
 }
 
+function wfu_ajax_action_get_uploadedfiles_page() {
+	if ( !isset($_POST['token']) || !isset($_POST['page']) ) die();
+	check_ajax_referer( 'wfu-uploadedfiles-page', 'token' );
+	if ( !current_user_can( 'manage_options' ) ) die();
+	if ( WFU_VAR("WFU_UPLOADEDFILES_TABLE_MAXROWS") <= 0 ) die();
+	
+	$_POST = stripslashes_deep($_POST);
+	
+	$page = wfu_sanitize_int($_POST['page']);
+	$rows = wfu_uploadedfiles_manager($page, true);
+	
+	die(apply_filters('_wfu_ajax_action_get_uploadedfiles_page', 'wfu_uploadedfiles_page_success:'.wfu_plugin_encode_string($rows)));
+}
+
 function wfu_ajax_action_get_adminbrowser_page() {
 	if ( !isset($_POST['code']) || !isset($_POST['token']) || !isset($_POST['page']) ) die();
 

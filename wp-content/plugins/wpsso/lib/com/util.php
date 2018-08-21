@@ -1787,11 +1787,6 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 			}
 		}
 
-		// deprecated 2018/02/11
-		public static function keys_start_with( $str, array $opts ) {
-			return self::get_opts_begin( $str, $opts );
-		}
-
 		public static function get_opts_begin( $str, array $opts ) {
 			$found = array();
 			foreach ( $opts as $key => $value ) {
@@ -2181,6 +2176,10 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 				$mt_pre . ':retailer_category'               => '',
 				$mt_pre . ':retailer_part_no'                => '',
 				$mt_pre . ':retailer_title'                  => '',
+				$mt_pre . ':rating:average'                  => '',	// Non-standard / internal meta tag.
+				$mt_pre . ':rating:count'                    => '',	// Non-standard / internal meta tag.
+				$mt_pre . ':rating:worst'                    => '',	// Non-standard / internal meta tag.
+				$mt_pre . ':rating:best'                     => '',	// Non-standard / internal meta tag.
 				$mt_pre . ':sale_price:amount'               => '',
 				$mt_pre . ':sale_price:currency'             => '',
 				$mt_pre . ':sale_price_dates:start'          => '',
@@ -2210,19 +2209,19 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		public static function get_mt_video_seed( $mt_pre = 'og', array $mt_og = array() ) {
 
 			$og_ret = array(
-				$mt_pre . ':video:secure_url'    => '',
-				$mt_pre . ':video:url'           => '',
-				$mt_pre . ':video:type'          => '',		// Example: 'application/x-shockwave-flash' or 'text/html'.
-				$mt_pre . ':video:width'         => '',
-				$mt_pre . ':video:height'        => '',
-				$mt_pre . ':video:tag'           => array(),
-				$mt_pre . ':video:duration'      => '',		// Non-standard / internal meta tag.
-				$mt_pre . ':video:upload_date'   => '',		// Non-standard / internal meta tag.
-				$mt_pre . ':video:thumbnail_url' => '',		// Non-standard / internal meta tag.
-				$mt_pre . ':video:embed_url'     => '',		// Non-standard / internal meta tag.
-				$mt_pre . ':video:has_image'     => false,	// Non-standard / internal meta tag.
-				$mt_pre . ':video:title'         => '',		// Non-standard / internal meta tag.
-				$mt_pre . ':video:description'   => '',		// Non-standard / internal meta tag.
+				$mt_pre . ':video:secure_url'      => '',
+				$mt_pre . ':video:url'             => '',
+				$mt_pre . ':video:type'            => '',	// Example: 'application/x-shockwave-flash' or 'text/html'.
+				$mt_pre . ':video:width'           => '',
+				$mt_pre . ':video:height'          => '',
+				$mt_pre . ':video:tag'             => array(),
+				$mt_pre . ':video:duration'        => '',	// Non-standard / internal meta tag.
+				$mt_pre . ':video:upload_date'     => '',	// Non-standard / internal meta tag.
+				$mt_pre . ':video:thumbnail_url'   => '',	// Non-standard / internal meta tag.
+				$mt_pre . ':video:embed_url'       => '',	// Non-standard / internal meta tag.
+				$mt_pre . ':video:has_image'       => false,	// Non-standard / internal meta tag.
+				$mt_pre . ':video:title'           => '',	// Non-standard / internal meta tag.
+				$mt_pre . ':video:description'     => '',	// Non-standard / internal meta tag.
 				$mt_pre . ':video:iphone_name'     => '',	// Non-standard / internal meta tag for Twitter player card.
 				$mt_pre . ':video:iphone_id'       => '',	// Non-standard / internal meta tag for Twitter player card.
 				$mt_pre . ':video:iphone_url'      => '',	// Non-standard / internal meta tag for Twitter player card.
@@ -2723,6 +2722,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		}
 
 		public static function get_post_object( $use_post = false, $output = 'object' ) {
+
 			$post_obj = false; // Return false by default.
 
 			if ( is_numeric( $use_post ) && $use_post > 0 ) {
@@ -2908,6 +2908,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		}
 
 		public static function get_user_object( $user_id = 0, $output = 'object' ) {
+
 			$user_obj = false; // Return false by default.
 
 			if ( is_numeric( $user_id ) && $user_id > 0 ) {

@@ -4,7 +4,7 @@ if( !session_id() ) { session_start(); }
 /*
 Plugin URI: http://www.iptanus.com/support/wordpress-file-upload
 Description: Simple interface to upload files from a page.
-Version: 4.6.2
+Version: 4.7.0
 Author: Nickolas Bossinas
 Author URI: http://www.iptanus.com
 */
@@ -48,17 +48,21 @@ DEFINE("WPFILEUPLOAD_PLUGINFILE", __FILE__);
 DEFINE("WPFILEUPLOAD_DIR", plugin_dir_url( WPFILEUPLOAD_PLUGINFILE ));
 DEFINE("ABSWPFILEUPLOAD_DIR", plugin_dir_path( WPFILEUPLOAD_PLUGINFILE ));
 add_shortcode("wordpress_file_upload", "wordpress_file_upload_handler");
-load_plugin_textdomain('wp-file-upload', false, dirname(plugin_basename (__FILE__)).'/languages');
-/* load styles and scripts for front pages */
+//activation-deactivation hooks
+register_activation_hook(__FILE__,'wordpress_file_upload_install');
+register_deactivation_hook(__FILE__,'wordpress_file_upload_uninstall');
+add_action('plugins_loaded', 'wordpress_file_upload_initialize');
+add_action('plugins_loaded', 'wordpress_file_upload_update_db_check');
+//widget
+add_action( 'widgets_init', 'register_wfu_widget' );
+//admin hooks
+add_action('admin_init', 'wordpress_file_upload_admin_init');
+add_action('admin_menu', 'wordpress_file_upload_add_admin_pages');
+// load styles and scripts for front pages
 if ( !is_admin() ) {
 	add_action( 'wp_enqueue_scripts', 'wfu_enqueue_frontpage_scripts' );
 }
-add_action('admin_init', 'wordpress_file_upload_admin_init');
-add_action('admin_menu', 'wordpress_file_upload_add_admin_pages');
-register_activation_hook(__FILE__,'wordpress_file_upload_install');
-register_deactivation_hook(__FILE__,'wordpress_file_upload_uninstall');
-add_action('plugins_loaded', 'wordpress_file_upload_update_db_check');
-//ajax actions
+//general ajax actions
 add_action('wp_ajax_wfu_ajax_action', 'wfu_ajax_action_callback');
 add_action('wp_ajax_nopriv_wfu_ajax_action', 'wfu_ajax_action_callback');
 add_action('wp_ajax_wfu_ajax_action_ask_server', 'wfu_ajax_action_ask_server');
@@ -78,30 +82,35 @@ add_action('wp_ajax_wfu_ajax_action_download_file_monitor', 'wfu_ajax_action_dow
 add_action('wp_ajax_nopriv_wfu_ajax_action_download_file_monitor', 'wfu_ajax_action_download_file_monitor');
 add_action('wp_ajax_wfu_ajax_action_edit_shortcode', 'wfu_ajax_action_edit_shortcode');
 add_action('wp_ajax_wfu_ajax_action_get_historylog_page', 'wfu_ajax_action_get_historylog_page');
+add_action('wp_ajax_wfu_ajax_action_get_uploadedfiles_page', 'wfu_ajax_action_get_uploadedfiles_page');
 add_action('wp_ajax_wfu_ajax_action_get_adminbrowser_page', 'wfu_ajax_action_get_adminbrowser_page');
 add_action('wp_ajax_wfu_ajax_action_include_file', 'wfu_ajax_action_include_file');
 add_action('wp_ajax_wfu_ajax_action_update_envar', 'wfu_ajax_action_update_envar');
 add_action('wp_ajax_wfu_ajax_action_transfer_command', 'wfu_ajax_action_transfer_command');
 add_action('wp_ajax_wfu_ajax_action_pdusers_get_users', 'wfu_ajax_action_pdusers_get_users');
+//personal data related actions
 add_action( 'show_user_profile', 'wfu_show_consent_profile_fields' );
 add_action( 'edit_user_profile', 'wfu_show_consent_profile_fields' );
 add_action( 'personal_options_update', 'wfu_update_consent_profile_fields' );
 add_action( 'edit_user_profile_update', 'wfu_update_consent_profile_fields' );
-wfu_include_lib();
-//store the User State handler in a global variable for easy access by the
-//plugin's routines
-$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
-$wfu_user_state_handler = $plugin_options['userstatehandler'];
-//add abspath in session for use by downloader; exclude internal ajax requests
-if ( !isset($_POST["action"]) || ( $_POST["action"] != "wfu_ajax_action_wfu_call_async" && $_POST["action"] != "wfu_ajax_action_load_hook_code" ) )
-	WFU_USVAR_store_session('wfu_ABSPATH', wfu_abspath());
-//widget
-add_action( 'widgets_init', 'register_wfu_widget' );
 //Media editor custom properties
 if ( is_admin() ) add_action( 'attachment_submitbox_misc_actions', 'wfu_media_editor_properties', 11 );
 //register internal filter that is executed before upload for classic uploader
 add_filter("_wfu_before_upload", "wfu_classic_before_upload_handler", 10, 2);
+wfu_include_lib();
 
+function wordpress_file_upload_initialize() {
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	load_plugin_textdomain('wp-file-upload', false, dirname(plugin_basename (__FILE__)).'/languages');
+	wfu_initialize_i18n_strings();
+	//store the User State handler in a global variable for easy access by the
+	//plugin's routines
+	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
+	$GLOBALS["wfu_user_state_handler"] = $plugin_options['userstatehandler'];
+	//add abspath in session for use by downloader; exclude internal ajax requests
+	if ( !isset($_POST["action"]) || ( $_POST["action"] != "wfu_ajax_action_wfu_call_async" && $_POST["action"] != "wfu_ajax_action_load_hook_code" ) )
+		WFU_USVAR_store_session('wfu_ABSPATH', wfu_abspath());
+}
 
 function register_wfu_widget() {
     register_widget( 'WFU_Widget' );

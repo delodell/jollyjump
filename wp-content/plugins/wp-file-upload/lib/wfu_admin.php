@@ -22,12 +22,60 @@ function wordpress_file_upload_admin_init() {
 			wp_register_script('jquery-ui-datepicker', false, array('jquery'));
 		wp_register_script('wordpress_file_upload_admin_script', WPFILEUPLOAD_DIR.'js/wordpress_file_upload_adminfunctions.js', array( 'wp-color-picker' ), false, true);
 	}
+	//register scripts for Uploaded Files
+	elseif ( is_admin() && ( ( $is_admin && strpos($uri, "admin.php") !== false ) ) ) {
+		//apply wfu_before_admin_scripts to get additional settings 
+		$changable_data = array();
+		$ret_data = apply_filters('wfu_before_uploadedfiles_admin_scripts', $changable_data);
+		//if $ret_data contains 'return_value' key then no scripts will be
+		//registered
+		if ( isset($ret_data['return_value']) ) return $ret_data['return_value'];
+		//continue with script and style registering
+		wp_register_style('wordpress-file-upload-admin-style', WPFILEUPLOAD_DIR.'css/wordpress_file_upload_adminstyle.css',false,'1.0','all');
+		//do not register JQuery UI css if $ret_data denotes incompatibility
+		//issues
+		if ( ( !isset($ret_data["correct_NextGenGallery_incompatibility"]) || $ret_data["correct_NextGenGallery_incompatibility"] != "true" ) &&
+			( !isset($ret_data["correct_JQueryUI_incompatibility"]) || $ret_data["correct_JQueryUI_incompatibility"] != "true" ) )
+			wp_register_style('jquery-ui-css', WPFILEUPLOAD_DIR.'vendor/jquery/jquery-ui.min.css');
+		wp_register_script('wordpress_file_upload_admin_script', WPFILEUPLOAD_DIR.'js/wordpress_file_upload_adminfunctions.js', array( 'wp-color-picker' ), false, true);
+	}
 }
 
 function wordpress_file_upload_add_admin_pages() {
+	global $wpdb;
+	$table_name1 = $wpdb->prefix . "wfu_log";
+
 	$page_hook_suffix = false;
 	if ( current_user_can( 'manage_options' ) ) $page_hook_suffix = add_options_page('Wordpress File Upload', 'Wordpress File Upload', 'manage_options', 'wordpress_file_upload', 'wordpress_file_upload_manage_dashboard');
 	if ( $page_hook_suffix !== false ) add_action('admin_print_scripts-'.$page_hook_suffix, 'wfu_enqueue_admin_scripts');
+	//add Uploaded Files menu if it is allowed
+	$page_hook_suffix = false;
+	if ( current_user_can( 'manage_options' ) && WFU_VAR("WFU_UPLOADEDFILES_MENU") == "true" ) {
+		//get the last idlog read from options; create the option if it does not
+		//exist pointing to the currently last idlog
+		$last_idlog = get_option( "wordpress_file_upload_last_idlog" );
+		if ( $last_idlog === false ) {
+			$latest_idlog = $wpdb->get_var('SELECT MAX(idlog) FROM '.$table_name1);
+			$last_idlog = array( 'pre' => $latest_idlog, 'post' => $latest_idlog, 'time' => time() );
+			update_option( "wordpress_file_upload_last_idlog", $last_idlog );
+		}
+		$limit = (int)WFU_VAR("WFU_UPLOADEDFILES_RESET_TIME");
+		if ( $limit == -1 || time() > $last_idlog["time"] + $limit ) $unread_files_count = wfu_get_unread_files_count($last_idlog["post"]);
+		else $unread_files_count = wfu_get_unread_files_count($last_idlog["pre"]);
+		$text = $unread_files_count;
+		if ( $unread_files_count > 99 ) $text = "99+";
+		$title = 'Uploaded Files <span class="update-plugins count-'.$unread_files_count.'"><span class="plugin-count">'.$text.'</span></span>';
+		$page_hook_suffix = add_menu_page( 
+			'Uploaded Files',
+			$title,
+			'manage_options',
+			'wfu_uploaded_files',
+			'wfu_uploadedfiles_menu',
+			'dashicons-upload',
+			6
+		); 
+	}
+	if ( $page_hook_suffix !== false ) add_action('admin_print_scripts-'.$page_hook_suffix, 'wfu_enqueue_uploadedfiles_admin_scripts');
 }
 
 function wfu_enqueue_admin_scripts() {
@@ -51,6 +99,29 @@ function wfu_enqueue_admin_scripts() {
 		//don't load datepicker js if $ret_data exclude_datepicker flag is true
 		if ( !isset($ret_data["exclude_datepicker"]) || $ret_data["exclude_datepicker"] != "true" )
 			wp_enqueue_script('jquery-ui-datepicker');
+		wp_enqueue_script('wordpress_file_upload_admin_script');
+		$AdminParams = array("wfu_ajax_url" => site_url()."/wp-admin/admin-ajax.php");
+		wp_localize_script( 'wordpress_file_upload_admin_script', 'AdminParams', $AdminParams );
+	}
+}
+
+function wfu_enqueue_uploadedfiles_admin_scripts() {
+	$uri = $_SERVER['REQUEST_URI'];
+	$is_admin = current_user_can( 'manage_options' );
+	if ( is_admin() && ( ( $is_admin && strpos($uri, "admin.php") !== false ) ) ) {
+		//apply wfu_before_admin_scripts to get additional settings 
+		$changable_data = array();
+		$ret_data = apply_filters('wfu_before_uploadedfiles_admin_scripts', $changable_data);
+		//if $ret_data contains 'return_value' key then no scripts will be
+		//enqueued
+		if ( isset($ret_data['return_value']) ) return $ret_data['return_value'];
+		//continue with script and style enqueuing
+		wp_enqueue_style('wordpress-file-upload-admin-style');
+		//do not enqueue JQuery UI css if $ret_data denotes incompatibility
+		//issues
+		if ( ( !isset($ret_data["correct_NextGenGallery_incompatibility"]) || $ret_data["correct_NextGenGallery_incompatibility"] != "true" ) &&
+			( !isset($ret_data["correct_JQueryUI_incompatibility"]) || $ret_data["correct_JQueryUI_incompatibility"] != "true" ) )
+			wp_enqueue_style('jquery-ui-css');
 		wp_enqueue_script('wordpress_file_upload_admin_script');
 		$AdminParams = array("wfu_ajax_url" => site_url()."/wp-admin/admin-ajax.php");
 		wp_localize_script( 'wordpress_file_upload_admin_script', 'AdminParams', $AdminParams );
@@ -175,7 +246,10 @@ function wordpress_file_upload_manage_dashboard() {
 		$page = $tag;
 		if ( $page == '' ) $page = 1;
 		$page = (int)wfu_sanitize_int($page);
-		$echo_str = wfu_view_log($page);
+		$located_rec = $invoker;
+		if ( $located_rec == '' ) $located_rec = -1;
+		$located_rec = (int)wfu_sanitize_int($located_rec);
+		$echo_str = wfu_view_log($page, false, $located_rec);
 	}
 	elseif ( $action == 'rename_file' && $file != "" ) {
 		$echo_str = wfu_rename_file_prompt($file, 'file', false);
@@ -243,7 +317,7 @@ function wordpress_file_upload_manage_dashboard() {
 	}
 	elseif ( $action == 'edit_filedetails' && $file != "" ) {
 		wfu_edit_filedetails($file);
-		$echo_str = wfu_file_details($file, false);
+		$echo_str = wfu_file_details($file, false, $invoker);
 	}
 	elseif ( $action == 'personal_data' && $plugin_options["personaldata"] == "1" ) {
 		$echo_str = wfu_manage_personaldata_policies();

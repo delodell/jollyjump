@@ -720,13 +720,20 @@ function wfu_basedir($path) {
 
 function wfu_path_abs2rel($path) {
 	$abspath_notrailing_slash = substr(wfu_abspath(), 0, -1);
-//	return ( substr($path, 0, 6) == 'ftp://' || substr($path, 0, 7) == 'ftps://' || substr($path, 0, 7) == 'sftp://' ? $path : str_replace($abspath_notrailing_slash, "", $path) );
-	return ( substr($path, 0, 6) == 'ftp://' || substr($path, 0, 7) == 'ftps://' || substr($path, 0, 7) == 'sftp://' ? $path : substr($path, strlen($abspath_notrailing_slash)) );
+	if ( substr($path, 0, 6) == 'ftp://' || substr($path, 0, 7) == 'ftps://' || substr($path, 0, 7) == 'sftp://' ) return $path;
+	else {
+		$is_outside_root = ( substr($path, 0, strlen($abspath_notrailing_slash)) != $abspath_notrailing_slash );
+		if ( $is_outside_root ) return 'abs:'.$path;
+//		else return str_replace($abspath_notrailing_slash, "", $path);
+		else return substr($path, strlen($abspath_notrailing_slash));
+	}
 }
 
 function wfu_path_rel2abs($path) {
 	if ( substr($path, 0, 1) == "/" ) $path = substr($path, 1);
-	return ( substr($path, 0, 6) == 'ftp://' || substr($path, 0, 7) == 'ftps://' || substr($path, 0, 7) == 'sftp://' ? $path : wfu_abspath().$path );
+	if ( substr($path, 0, 6) == 'ftp://' || substr($path, 0, 7) == 'ftps://' || substr($path, 0, 7) == 'sftp://' ) return $path;
+	elseif ( substr($path, 0, 4) == 'abs:' ) return substr($path, 4);
+	else return wfu_abspath().$path;
 }
 
 function wfu_delete_file_execute($filepath, $userid) {
@@ -794,16 +801,36 @@ function wfu_upload_plugin_directory( $path ) {
 	return $dirparts[count($dirparts) - 1];
 }
 
-//function to extract sort information from path, which is stored as [[-sort]] inside the path
+//function to extract sort, filename or filter information from path, which are
+//stored as [[-sort]], {{filename}} or ((filter)) inside the path
 function wfu_extract_sortdata_from_path($path) {
-	$pos1 = strpos($path, '[[');
-	$pos2 = strpos($path, ']]');
 	$ret['path'] = $path;
 	$ret['sort'] = "";
+	$ret['file'] = "";
+	$ret['filter'] = "";
+	//extract sort info
+	$pos1 = strpos($path, '[[');
+	$pos2 = strpos($path, ']]');
 	if ( $pos1 !== false && $pos2 !== false )
 		if ( $pos2 > $pos1 ) {
 			$ret['sort'] = substr($path, $pos1 + 2, $pos2 - $pos1 - 2);
 			$ret['path'] = str_replace('[['.$ret['sort'].']]', '', $path);
+		}
+	//extract filename info
+	$pos1 = strpos($path, '{{');
+	$pos2 = strpos($path, '}}');
+	if ( $pos1 !== false && $pos2 !== false )
+		if ( $pos2 > $pos1 ) {
+			$ret['file'] = substr($path, $pos1 + 2, $pos2 - $pos1 - 2);
+			$ret['path'] = str_replace('{{'.$ret['file'].'}}', '', $path);
+		}
+	//extract filter info
+	$pos1 = strpos($path, '((');
+	$pos2 = strpos($path, '))');
+	if ( $pos1 !== false && $pos2 !== false )
+		if ( $pos2 > $pos1 ) {
+			$ret['filter'] = substr($path, $pos1 + 2, $pos2 - $pos1 - 2);
+			$ret['path'] = str_replace('(('.$ret['filter'].'))', '', $path);
 		}
 	return $ret;
 }
@@ -1439,6 +1466,13 @@ function wfu_get_username_by_id($id) {
 	return $username;
 }
 
+function wfu_get_unread_files_count($last_idlog) {
+	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	global $wpdb;
+	$table_name1 = $wpdb->prefix . "wfu_log";
+	return $wpdb->get_var('SELECT COUNT(idlog) FROM '.$table_name1.' WHERE action = \'upload\' AND idlog > '.(int)$last_idlog);
+}
+
 //get the most current database record for file $filepath and also include any userdata if $include_userdata is true
 function wfu_get_file_rec($filepath, $include_userdata) {
 	global $wpdb;
@@ -1470,10 +1504,18 @@ function wfu_get_file_rec($filepath, $include_userdata) {
 }
 
 //get database record for id
-function wfu_get_file_rec_from_id($idlog) {
+function wfu_get_file_rec_from_id($idlog, $include_userdata = false) {
 	global $wpdb;
 	$table_name1 = $wpdb->prefix . "wfu_log";
+	$table_name2 = $wpdb->prefix . "wfu_userdata";
+
 	$filerec = $wpdb->get_row('SELECT * FROM '.$table_name1.' WHERE idlog = '.$idlog);
+	if ( $filerec != null && $include_userdata ) {
+		$filerec->userdata = null;
+		if ( $filerec->uploadid != '' ) {
+			$filerec->userdata = $wpdb->get_results('SELECT * FROM '.$table_name2.' WHERE uploadid = \''.$filerec->uploadid.'\' AND date_to = 0 ORDER BY propkey');
+		}
+	}
 
 	return $filerec;
 }
@@ -1483,9 +1525,8 @@ function wfu_get_userdata_from_id($idlog) {
 	$table_name2 = $wpdb->prefix . "wfu_userdata";
 
 	$userdata = array();
-	$filerec = wfu_get_file_rec_from_id($idlog);
-	if ( $filerec != null && $filerec->uploadid != '' ) {
-		$filerec->userdata = $wpdb->get_results('SELECT * FROM '.$table_name2.' WHERE uploadid = \''.$filerec->uploadid.'\' AND date_to = 0 ORDER BY propkey');
+	$filerec = wfu_get_file_rec_from_id($idlog, true);
+	if ( $filerec != null && $filerec->userdata != null )
 		foreach ( $filerec->userdata as $item ) {
 			$arrayitem = array(
 				"property"	=> $item->property,
@@ -1493,8 +1534,27 @@ function wfu_get_userdata_from_id($idlog) {
 			);
 			array_push($userdata, $arrayitem);
 		}
-	}
 	
+	return $userdata;
+}
+
+function wfu_get_userdata_from_rec($filerec) {
+	global $wpdb;
+	$table_name2 = $wpdb->prefix . "wfu_userdata";
+
+	$userdata = array();
+	if ( $filerec->uploadid != '' ) {
+		$filerec->userdata = $wpdb->get_results('SELECT * FROM '.$table_name2.' WHERE uploadid = \''.$filerec->uploadid.'\' AND date_to = 0 ORDER BY propkey');
+		if ( $filerec->userdata != null )
+			foreach ( $filerec->userdata as $item ) {
+				$arrayitem = array(
+					"property"	=> $item->property,
+					"value"		=> $item->propvalue
+				);
+				array_push($userdata, $arrayitem);
+			}
+	}
+
 	return $userdata;
 }
 
@@ -1506,6 +1566,32 @@ function wfu_get_latest_rec_from_id($idlog) {
 		$filerec = $wpdb->get_row('SELECT * FROM '.$table_name1.' WHERE linkedto = '.$filerec->idlog);
 	
 	return $filerec;
+}
+
+function wfu_get_rec_new_history($idlog) {
+	global $wpdb;
+	$table_name1 = $wpdb->prefix . "wfu_log";
+	$filerecs = array();
+	$filerec = $wpdb->get_row('SELECT * FROM '.$table_name1.' WHERE idlog = '.$idlog);
+	while ( $filerec != null ) {
+		array_push($filerecs, $filerec);
+		$filerec = $wpdb->get_row('SELECT * FROM '.$table_name1.' WHERE linkedto = '.$filerec->idlog);
+	}
+	
+	return $filerecs;	
+}
+
+function wfu_get_rec_old_history($idlog) {
+	global $wpdb;
+	$table_name1 = $wpdb->prefix . "wfu_log";
+	$filerecs = array();
+	$filerec = $wpdb->get_row('SELECT * FROM '.$table_name1.' WHERE idlog = '.$idlog);
+	while ( $filerec != null ) {
+		array_push($filerecs, $filerec);
+		$filerec = ( $filerec->linkedto > 0 ? $wpdb->get_row('SELECT * FROM '.$table_name1.' WHERE idlog = '.$filerec->linkedto) : null );
+	}
+	
+	return $filerecs;	
 }
 
 /**

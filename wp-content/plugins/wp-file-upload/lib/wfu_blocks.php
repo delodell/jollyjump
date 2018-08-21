@@ -216,6 +216,7 @@ function wfu_prepare_uploadform_block($params, $additional_params, $occurrence_i
 	$uploadform_item["js"] = "GlobalData.WFU[".$data["ID"]."].uploadform = { ".
 		"attachActions: function(clickaction, changeaction) {}, ".
 		"reset: function() {}, ".
+		"resetDummy: function() {}, ".
 		"submit: function() {}, ".
 		"lock: function() {}, ".
 		"unlock: function() {}, ".

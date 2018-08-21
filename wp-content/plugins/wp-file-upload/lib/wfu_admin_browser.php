@@ -1,6 +1,6 @@
 <?php
 
-function wfu_browse_files($basedir_code, $page = 1, $only_table_rows = false) {
+function wfu_browse_files($basedir_code, $page = -1, $only_table_rows = false) {
 	$siteurl = site_url();
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
 	$user = wp_get_current_user();
@@ -13,16 +13,29 @@ function wfu_browse_files($basedir_code, $page = 1, $only_table_rows = false) {
 	//clean session array holding dir and file paths if it is too big
 	if ( WFU_USVAR_exists('wfu_filepath_safe_storage') && count(WFU_USVAR('wfu_filepath_safe_storage')) > WFU_VAR("WFU_PHP_ARRAY_MAXLEN") ) WFU_USVAR_store('wfu_filepath_safe_storage', array());
 	
-	//extract sort info from basedir
+	//basedir may also contain information about the sorting of the displayed
+	//elements, as well as a filename that needs to be located and get focus on
+	//the browser;
+	//sorting information is enclosed in double brackets: [[sort_info]]
+	//filename information is enclosed in double braces: {{filename}}
 	$sort = "";
+	$located_file = "";
+	$located_file_found = false;
+	$filter = "";
 	if ( $basedir !== false ) {
 		$ret = wfu_extract_sortdata_from_path($basedir);
 		$basedir = $ret['path'];
 		$sort = $ret['sort'];
+		$located_file = $ret['file'];
+		$filter = $ret['filter'];
 	}
 	if ( $sort == "" ) $sort = 'name';
 	if ( substr($sort, 0, 1) == '-' ) $order = SORT_DESC;
 	else $order = SORT_ASC;
+	//if page is not -1, then do not locate a file
+	if ( $located_file != "" && $page > -1 ) $located_file = "";
+	//adjust page to be larger than zero
+	if ( $page < 1 ) $page = 1;
 
 	//adjust basedir to have a standard format
 	if ( $basedir !== false ) {
@@ -68,8 +81,8 @@ function wfu_browse_files($basedir_code, $page = 1, $only_table_rows = false) {
 	//find contents of current folder taking into account pagination, if it is
 	//activated; contents are found following an optimized procedure as follows:
 	// 1.  all dirs and files are found and stored in separate arrays
-	// 2.  if pagination is activated then it is checked if there are any dirs in
-	//     the current page
+	// 2.  if pagination is activated then it is checked if there are any dirs
+	//     in the current page
 	// 3.  if dir sorting is name then dirs are sorted
 	// 4.  if dir sorting is date then stat is called for all dirs and then they
 	//     are sorted
@@ -83,12 +96,13 @@ function wfu_browse_files($basedir_code, $page = 1, $only_table_rows = false) {
 	//     then they are sorted
 	// 9.  if file sorting is user then db record is retrieved for all files and
 	//     then they are sorted
-	// 10. if pagination is activated then files array is sliced to keep only the
-	//     ones fitting in the page; then stat is called and/or db record is
+	// 10. if pagination is activated then files array is sliced to keep only
+	//     the ones fitting in the page; then stat is called and/or db record is
 	//     retrieved
 	//first calculate dirs and files arrays
 	$dirlist = array();
 	$dirlist_include = true;
+	$dirlist_perpage = array();
 	$dirstat_ok = false;
 	$filelist = array();
 	$filestat_ok = false;
@@ -109,10 +123,13 @@ function wfu_browse_files($basedir_code, $page = 1, $only_table_rows = false) {
 	$maxrows = (int)WFU_VAR("WFU_ADMINBROWSER_TABLE_MAXROWS");
 	$files_total = $dirlist_count + $filelist_count;
 	if ( $maxrows > 0 ) {
-		$pages = ceil($files_total / $maxrows);
+		$pages = max(ceil($files_total / $maxrows), 1);
 		if ( $page > $pages ) $page = $pages;
 		//if first item index passes number of dirs then do not include dirs
 		if ( ($page - 1) * $maxrows >= $dirlist_count ) $dirlist_include = false;
+		//if a filename has been defined to get focus, then $dirlist_include
+		//needs to be true in order to calculate the dirs of every page
+		if ( $located_file != "" ) $dirlist_include = true;
 	}
 	//process dirs if they are included in page
 	if ( $dirlist_include ) {
@@ -125,8 +142,9 @@ function wfu_browse_files($basedir_code, $page = 1, $only_table_rows = false) {
 			case "name": $dirsort .= ":s"; break;
 			case "mdate": $dirsort .= ":n"; break;
 		}
-		//if dir sort is mdate then first calculate stat
-		if ( substr($dirsort, 0, 5) == 'mdate' ) {
+		//if dir sort is mdate or if a file needs to be located then first
+		//calculate stat
+		if ( substr($dirsort, 0, 5) == 'mdate' || $located_file != "" ) {
 			foreach ( $dirlist as &$dir ) {
 				$stat = stat($dir['fullpath']);
 				$dir['mdate'] = $stat['mtime'];
@@ -136,12 +154,26 @@ function wfu_browse_files($basedir_code, $page = 1, $only_table_rows = false) {
 		}
 		//sort dirs
 		$dirlist = wfu_array_sort($dirlist, $dirsort, $dirorder);
-		//if pagination is activated then slice dirs array to keep only the items
-		//belonging in the current page
-		if ( $maxrows > 0 )
+		//if pagination is activated then slice dirs array to keep only the
+		//items belonging in the current page
+		if ( $maxrows > 0 ) {
+			//before slicing we store the items in $dirlist_perpage array
+			$i = $maxrows;
+			$ipage = 0;
+			foreach ( $dirlist as $dir ) {
+				if ( $i >= $maxrows ) {
+					$i = 0;
+					$ipage ++;
+					$dirlist_perpage[$ipage] = array();
+				}
+				array_push($dirlist_perpage[$ipage], $dir);
+				$i ++;
+			}
+			//now we slice $dirlist
 			$dirlist = array_slice($dirlist, ($page - 1) * $maxrows, $maxrows);
-		//calculate stat for the remaining dirs array, if it has not already been
-		//done
+		}
+		//calculate stat for the remaining dirs array, if it has not already
+		//been done
 		if ( !$dirstat_ok ) {
 			foreach ( $dirlist as &$dir ) {
 				$stat = stat($dir['fullpath']);
@@ -154,6 +186,9 @@ function wfu_browse_files($basedir_code, $page = 1, $only_table_rows = false) {
 	//determine if any files will be included in page; in case pagination is
 	//activated then the remaining places need to be more than zero
 	$files_included = ( $maxrows > 0 ? ( $maxrows - count($dirlist) > 0 ) : true );
+	//if a filename has been defined to get focus, then $files_included
+	//needs to be true in order to re-calculate the page
+	if ( $located_file != "" ) $files_included = true;
 	if ( $files_included ) {
 		//adjust sort details
 		$filesort = ( substr($sort, -4) == 'date' ? 'mdate' : substr($sort, -4) );
@@ -192,6 +227,24 @@ function wfu_browse_files($basedir_code, $page = 1, $only_table_rows = false) {
 		}
 		//sort files
 		$filelist = wfu_array_sort($filelist, $filesort, $order);
+		//if pagination is activated and a file needs to receive focus, then we
+		//need to calculate the page where the file is shown
+		if ( $maxrows > 0 && $located_file != "" ) {
+			$i = $dirlist_count;
+			foreach ( $filelist as $key => $file ) {
+				if ( $file['name'] == $located_file ) {
+					$located_file_found = true;
+					$filelist[$key]['highlighted'] = 1;
+					break;
+				}
+				$i ++;
+			}
+			if ( $located_file_found ) {
+				$page = floor( $i / $maxrows ) + 1;
+				if ( isset($dirlist_perpage[$page]) ) $dirlist = $dirlist_perpage[$page];
+				else $dirlist = array();
+			}
+		}
 		//if pagination is activated then slice files array to keep only the items
 		//belonging in the current page
 		if ( $maxrows > 0 )
@@ -253,29 +306,29 @@ function wfu_browse_files($basedir_code, $page = 1, $only_table_rows = false) {
 		$echo_str .= "\n\t\t\t".'<input id="wfu_download_file_nonce" type="hidden" value="'.wp_create_nonce('wfu_download_file_invoker').'" />';
 		$echo_str .= "\n\t\t\t".'<input id="wfu_include_file_nonce" type="hidden" value="'.wp_create_nonce('wfu_include_file').'" />';
 		$echo_str .= "\n\t\t".'</div>';
-		$echo_str .= "\n\t\t".'<table id="wfu_adminbrowser_table" class="wp-list-table widefat fixed striped">';
+		$echo_str .= "\n\t\t".'<table id="wfu_adminbrowser_table" class="wfu-adminbrowser wp-list-table widefat fixed striped">';
 		$echo_str .= "\n\t\t\t".'<thead>';
 		$echo_str .= "\n\t\t\t\t".'<tr>';
-		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="5%" style="text-align:center;">';
+		$echo_str .= "\n\t\t\t\t\t".'<td scope="col" width="5%" class="manage-column check-column">';
 		$echo_str .= "\n\t\t\t\t\t\t".'<input id="wfu_select_all_visible" type="checkbox" onchange="wfu_adminbrowser_select_all_visible_changed();" style="-webkit-appearance:checkbox;" />';
-		$echo_str .= "\n\t\t\t\t\t".'</th>';
-		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="25%" style="text-align:left;">';
+		$echo_str .= "\n\t\t\t\t\t".'</td>';
+		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="25%" class="manage-column column-primary">';
 		$dir_code = wfu_safe_store_filepath(wfu_path_abs2rel($basedir).'[['.( substr($sort, -4) == 'name' ? ( $order == SORT_ASC ? '-name' : 'name' ) : 'name' ).']]');
 		$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir='.$dir_code.'">Name'.( substr($sort, -4) == 'name' ? ( $order == SORT_ASC ? ' &uarr;' : ' &darr;' ) : '' ).'</a>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
-		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="10%" style="text-align:right;">';
+		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="10%" class="manage-column">';
 		$dir_code = wfu_safe_store_filepath(wfu_path_abs2rel($basedir).'[['.( substr($sort, -4) == 'size' ? ( $order == SORT_ASC ? '-size' : 'size' ) : 'size' ).']]');
 		$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir='.$dir_code.'">Size'.( substr($sort, -4) == 'size' ? ( $order == SORT_ASC ? ' &uarr;' : ' &darr;' ) : '' ).'</a>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
-		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="20%" style="text-align:left;">';
+		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="20%" class="manage-column">';
 		$dir_code = wfu_safe_store_filepath(wfu_path_abs2rel($basedir).'[['.( substr($sort, -4) == 'date' ? ( $order == SORT_ASC ? '-date' : 'date' ) : 'date' ).']]');
 		$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir='.$dir_code.'">Date'.( substr($sort, -4) == 'date' ? ( $order == SORT_ASC ? ' &uarr;' : ' &darr;' ) : '' ).'</a>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
-		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="10%" style="text-align:center;">';
+		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="10%" class="manage-column">';
 		$dir_code = wfu_safe_store_filepath(wfu_path_abs2rel($basedir).'[['.( substr($sort, -4) == 'user' ? ( $order == SORT_ASC ? '-user' : 'user' ) : 'user' ).']]');
 		$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir='.$dir_code.'">Uploaded By'.( substr($sort, -4) == 'user' ? ( $order == SORT_ASC ? ' &uarr;' : ' &darr;' ) : '' ).'</a>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
-		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="30%" style="text-align:left;">';
+		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="30%" class="manage-column">';
 		$echo_str .= "\n\t\t\t\t\t\t".'<label>User Data</label>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t".'</tr>';
@@ -287,22 +340,22 @@ function wfu_browse_files($basedir_code, $page = 1, $only_table_rows = false) {
 	if ( $reldir != "root/" ) {
 		$dir_code = wfu_safe_store_filepath(wfu_path_abs2rel($updir));
 		$echo_str .= "\n\t\t\t\t".'<tr>';
-		$echo_str .= "\n\t\t\t\t\t".'<td width="5%" style="padding: 5px 5px 5px 10px; text-align:center;"><input type="checkbox" disabled="disabled" /></td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td width="25%" style="padding: 5px 5px 5px 10px; text-align:left;">';
+		$echo_str .= "\n\t\t\t\t\t".'<th class="check-column"><input type="checkbox" disabled="disabled" /></th>';
+		$echo_str .= "\n\t\t\t\t\t".'<td class="column-primary" data-colname="Name">';
 		$echo_str .= "\n\t\t\t\t\t\t".'<a class="row-title" href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir='.$dir_code.'" title="go up">..</a>';
 		$echo_str .= "\n\t\t\t\t\t".'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td width="10%" style="padding: 5px 5px 5px 10px; text-align:right;"> </td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td width="20%" style="padding: 5px 5px 5px 10px; text-align:left;"> </td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td width="10%" style="padding: 5px 5px 5px 10px; text-align:center;"> </td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td width="30%" style="padding: 5px 5px 5px 10px; text-align:left;"> </td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Size"> </td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Date"> </td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Uploaded By"> </td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="User Data"> </td>';
 		$echo_str .= "\n\t\t\t\t".'</tr>';
 	}
 	$ii = 1;
 	foreach ( $dirlist as $dir ) {
 		$dir_code = wfu_safe_store_filepath(wfu_path_abs2rel($dir['fullpath']).'[['.$sort.']]');
 		$echo_str .= "\n\t\t\t\t".'<tr onmouseover="var actions=document.getElementsByName(\'wfu_dir_actions\'); for (var i=0; i<actions.length; i++) {actions[i].style.visibility=\'hidden\';} document.getElementById(\'wfu_dir_actions_'.$ii.'\').style.visibility=\'visible\'" onmouseout="var actions=document.getElementsByName(\'wfu_dir_actions\'); for (var i=0; i<actions.length; i++) {actions[i].style.visibility=\'hidden\';}">';
-		$echo_str .= "\n\t\t\t\t\t".'<td width="5%" style="padding: 5px 5px 5px 10px; text-align:center;"><input type="checkbox" disabled="disabled" /></td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td width="25%" style="padding: 5px 5px 5px 10px; text-align:left;">';
+		$echo_str .= "\n\t\t\t\t\t".'<th class="check-column"><input type="checkbox" disabled="disabled" /></th>';
+		$echo_str .= "\n\t\t\t\t\t".'<td class="column-primary" data-colname="Name">';
 		$echo_str .= "\n\t\t\t\t\t\t".'<a class="row-title" href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir='.$dir_code.'" title="'.$dir['name'].'">'.$dir['name'].'</a>';
 		$echo_str .= "\n\t\t\t\t\t\t".'<div id="wfu_dir_actions_'.$ii.'" name="wfu_dir_actions" style="visibility:hidden;">';
 		$echo_str .= "\n\t\t\t\t\t\t\t".'<span style="visibility:hidden;">';
@@ -317,11 +370,12 @@ function wfu_browse_files($basedir_code, $page = 1, $only_table_rows = false) {
 //		$echo_str .= "\n\t\t\t\t\t\t\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=delete_dir&file='.$dir_code.'" title="Delete this folder">Delete</a>';
 //		$echo_str .= "\n\t\t\t\t\t\t\t".'</span>';
 		$echo_str .= "\n\t\t\t\t\t\t".'</div>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<button type="button" class="toggle-row"><span class="screen-reader-text">Show more details</span></button>';
 		$echo_str .= "\n\t\t\t\t\t".'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td width="10%" style="padding: 5px 5px 5px 10px; text-align:right;"> </td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td width="20%" style="padding: 5px 5px 5px 10px; text-align:left;">'.get_date_from_gmt(date("Y-m-d H:i:s", $dir['mdate']), "d/m/Y H:i:s").'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td width="10%" style="padding: 5px 5px 5px 10px; text-align:center;"> </td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td width="30%" style="padding: 5px 5px 5px 10px; text-align:left;"> </td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Size"> </td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Date">'.get_date_from_gmt(date("Y-m-d H:i:s", $dir['mdate']), "d/m/Y H:i:s").'</td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Uploaded By"> </td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="User Data"> </td>';
 		$echo_str .= "\n\t\t\t\t".'</tr>';
 		$ii ++;
 	}
@@ -329,14 +383,15 @@ function wfu_browse_files($basedir_code, $page = 1, $only_table_rows = false) {
 	foreach ( $filelist as $file ) {
 		$is_included = ( $file['filedata'] != null );
 		$can_be_included = ( $plugin_options['includeotherfiles'] == "1" ) && !wfu_file_extension_blacklisted($file['name']);
+		$highlighted = ( isset($file['highlighted']) && $file['highlighted'] == 1 );
 		$file_code = '';
 		if ( $is_included || $can_be_included ) $file_code = wfu_safe_store_filepath(wfu_path_abs2rel($file['fullpath']).'[['.$sort.']]');
-		$echo_str .= "\n\t\t\t\t".'<tr onmouseover="var actions=document.getElementsByName(\'wfu_file_actions\'); for (var i=0; i<actions.length; i++) {actions[i].style.visibility=\'hidden\';} document.getElementById(\'wfu_file_actions_'.$ii.'\').style.visibility=\'visible\'" onmouseout="var actions=document.getElementsByName(\'wfu_file_actions\'); for (var i=0; i<actions.length; i++) {actions[i].style.visibility=\'hidden\';}">';
-		$echo_str .= "\n\t\t\t\t\t".'<td width="5%" style="padding: 5px 5px 5px 10px; text-align:center;">';
+		$echo_str .= "\n\t\t\t\t".'<tr '.( $highlighted ? 'class="wfu-highlighted" ' : '' ).'onmouseover="var actions=document.getElementsByName(\'wfu_file_actions\'); for (var i=0; i<actions.length; i++) {actions[i].style.visibility=\'hidden\';} document.getElementById(\'wfu_file_actions_'.$ii.'\').style.visibility=\'visible\'" onmouseout="var actions=document.getElementsByName(\'wfu_file_actions\'); for (var i=0; i<actions.length; i++) {actions[i].style.visibility=\'hidden\';}">';
+		$echo_str .= "\n\t\t\t\t\t".'<th class="check-column">';
 		if ( $is_included || $can_be_included ) $echo_str .= "\n\t\t\t\t\t\t".'<input class="wfu_selectors'.( $is_included ? ' wfu_included' : '' ).' wfu_selcode_'.$file_code.'" type="checkbox" onchange="wfu_adminbrowser_selector_changed(this);" />';
 		else $echo_str .= "\n\t\t\t\t\t\t".'<input type="checkbox" disabled="disabled" />';
-		$echo_str .= "\n\t\t\t\t\t".'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td width="25%" style="padding: 5px 5px 5px 10px; text-align:left;">';
+		$echo_str .= "\n\t\t\t\t\t".'</th>';
+		$echo_str .= "\n\t\t\t\t\t".'<td class="column-primary" data-colname="Name">';
 		if ( $is_included || $can_be_included )
 			$echo_str .= "\n\t\t\t\t\t\t".'<a id="wfu_file_link_'.$ii.'" class="row-title" href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_details&file='.$file_code.'" title="View and edit file details" style="font-weight:normal;'.( $is_included ? '' : ' display:none;' ).'">'.$file['name'].'</a>';
 		if ( !$is_included )
@@ -381,11 +436,12 @@ function wfu_browse_files($basedir_code, $page = 1, $only_table_rows = false) {
 		}
 		$echo_str .= "\n\t\t\t\t\t\t".'</div>';
 		$echo_str .= "\n\t\t\t\t\t\t".'<div id="wfu_file_download_container_'.$ii.'" style="display: none;"></div>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<button type="button" class="toggle-row"><span class="screen-reader-text">Show more details</span></button>';
 		$echo_str .= "\n\t\t\t\t\t".'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td width="10%" style="padding: 5px 5px 5px 10px; text-align:right;">'.$file['size'].'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td width="20%" style="padding: 5px 5px 5px 10px; text-align:left;">'.get_date_from_gmt(date("Y-m-d H:i:s", $file['mdate']), "d/m/Y H:i:s").'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td width="10%" style="padding: 5px 5px 5px 10px; text-align:center;">'.$file['user'].'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td width="30%" style="padding: 5px 5px 5px 10px; text-align:left;">';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Size">'.$file['size'].'</td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Date">'.get_date_from_gmt(date("Y-m-d H:i:s", $file['mdate']), "d/m/Y H:i:s").'</td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Uploaded By">'.$file['user'].'</td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="User Data">';
 		if ( $is_included ) {
 			if ( count($file['filedata']->userdata) > 0 ) {
 				$echo_str .= "\n\t\t\t\t\t\t".'<select multiple="multiple" style="width:100%; height:40px; background:none; font-size:small;">';
@@ -406,6 +462,10 @@ function wfu_browse_files($basedir_code, $page = 1, $only_table_rows = false) {
 		$echo_str .= "\n\t".'</div>';
 		$echo_str .= "\n\t".'</div>';
 		$echo_str .= "\n".'</div>';
+	}
+	if ( $located_file_found ) {
+		$handler = 'function() { wfu_focus_table_on_highlighted_file("wfu_adminbrowser_table"); }';
+		$echo_str .= "\n\t".'<script type="text/javascript">if(window.addEventListener) { window.addEventListener("load", '.$handler.', false); } else if(window.attachEvent) { window.attachEvent("onload", '.$handler.'); } else { window["onload"] = '.$handler.'; }</script>';
 	}
 
 	return $echo_str;
@@ -841,36 +901,73 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 	global $wpdb;
 	$table_name1 = $wpdb->prefix . "wfu_log";
 	$siteurl = site_url();
+	$allow_obsolete = false;
+	$file_exists = true;
+	$file_belongs = true;
+	$admin_can_edit = true;
+
+	//if $file_code starts with 'byID:', then it contains a db record ID and not
+	//a file path; in this case we show the properties of the specific record
+	//and all linked ones, even if it is obsolete; this is only allowed for
+	//admins
+	if ( substr($file_code, 0, 5) == "byID:" ) {
+		$allow_obsolete = true;
+		$file_code = substr($file_code, 5);
+	}
 
 	$user = wp_get_current_user();
 	$is_admin = current_user_can( 'manage_options' );
 	//check if user is allowed to view file details
 	if ( !$is_admin ) {
+		if ( $allow_obsolete ) return;
 			return;
 	}
-	$file_code = wfu_sanitize_code($file_code);
-	$dec_file = wfu_get_filepath_from_safe($file_code);
-	if ( $dec_file === false ) return;
+	if ( $allow_obsolete ) {
+		$file_code = wfu_sanitize_int($file_code);
+		$initialrec = wfu_get_file_rec_from_id($file_code, true);
+		if ( $initialrec == null ) return;
+		
+		//get all associated file records
+		$filerecs = wfu_get_rec_new_history($initialrec->idlog);
+		//get the latest record of this upload
+		$filerec = $filerecs[count($filerecs) - 1];
+		$filerec->userdata = $initialrec->userdata;
 
-	//extract file browser data from $file variable
-	$ret = wfu_extract_sortdata_from_path($dec_file);
-	$filepath = wfu_path_rel2abs($ret['path']);
-	
-	//check if user is allowed to perform this action
-	if ( !wfu_current_user_owes_file($filepath) ) return;
+		$filepath = wfu_path_rel2abs($filerec->filepath);
+		//in the case of $allow_obsolete we need to check if the file exists and
+		//if it belongs to the current record
+		$latestrec = wfu_get_file_rec($filepath, true);
+		$file_exists = ( $latestrec != null );
+		$file_belongs = ( $file_exists && $latestrec->idlog == $filerec->idlog );
+		$admin_can_edit = $file_exists;
 
-	//get file data from database with user data
-	$filedata = wfu_get_file_rec($filepath, true);
-	if ( $filedata == null ) return;
+		//extract file parts and file properties 
+		$parts = pathinfo($filepath);
+		if ( $file_exists ) $stat = stat($filepath);
+		else $stat['mtime'] = '';
+	}
+	else {
+		$file_code = wfu_sanitize_code($file_code);
+		$dec_file = wfu_get_filepath_from_safe($file_code);
+		if ( $dec_file === false ) return;
 
-	//get all users
-	$users = get_users();
+		//extract file browser data from $file variable
+		$ret = wfu_extract_sortdata_from_path($dec_file);
+		$filepath = wfu_path_rel2abs($ret['path']);
+		
+		//check if user is allowed to perform this action
+		if ( !wfu_current_user_owes_file($filepath) ) return;
 
-	//extract sort info and construct contained dir
-	$parts = pathinfo($filepath);
-	$dir_code = wfu_safe_store_filepath(wfu_path_abs2rel($parts['dirname']).'[['.$ret['sort'].']]');
+		//get file data from database with user data
+		$filerec = wfu_get_file_rec($filepath, true);
+		if ( $filerec == null ) return;
 
-	$stat = stat($filepath);
+		//extract sort info and construct contained dir
+		$parts = pathinfo($filepath);
+		$dir_code = wfu_safe_store_filepath(wfu_path_abs2rel($parts['dirname']).'[['.$ret['sort'].']]');
+
+		$stat = stat($filepath);
+	}
 
 	$echo_str = '<div class="regev_wrap">';
 	if ( $errorstatus == 'error' ) {
@@ -880,17 +977,31 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 	}
 	//show file detais
 	$echo_str .= "\n\t".'<h2>Detais of File: '.$parts['basename'].'</h2>';
+	if ( !$file_exists ) {
+		$echo_str .= "\n\t\t".'<div class="notice notice-warning">';
+		$echo_str .= "\n\t\t\t".'<p>File does not exist on the server anymore!</p>';
+		$echo_str .= "\n\t\t".'</div>';
+	}
+	elseif ( !$file_belongs ) {
+		$echo_str .= "\n\t\t".'<div class="notice notice-warning">';
+		$echo_str .= "\n\t\t\t".'<p>This record is old. The file is associated with another record.</p>';
+		$echo_str .= "\n\t\t".'</div>';
+	}
 	$echo_str .= "\n\t".'<div style="margin-top:10px;">';
 	if ( $is_admin ) {
 		$invoker_action = ( $invoker == '' ? false : wfu_get_browser_params_from_safe($invoker) );
 		$goback_action = ( $invoker_action === false ? 'file_browser&dir='.$dir_code : $invoker_action );
-		$echo_str .= "\n\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action='.$goback_action.'" class="button" title="go back">Go back</a>';
+		if ( substr($goback_action, 0, 18) == "wfu_uploaded_files" )
+			$echo_str .= "\n\t\t".'<a href="'.$siteurl.'/wp-admin/admin.php?page='.$goback_action.'" class="button" title="go back">Go back</a>';
+		elseif ( $goback_action != "no_referer" )
+			$echo_str .= "\n\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action='.$goback_action.'" class="button" title="go back">Go back</a>';
 		$echo_str .= "\n\t\t".'<form enctype="multipart/form-data" name="editfiledetails" id="editfiledetails" method="post" action="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=edit_filedetails" class="validate">';
 	}
 	$echo_str .= "\n\t\t\t".'<h3 style="margin-bottom: 10px; margin-top: 40px;">Upload Details</h3>';
 	$echo_str .= "\n\t\t\t".'<input type="hidden" name="action" value="edit_filedetails" />';
-	$echo_str .= "\n\t\t\t".'<input type="hidden" name="dir" value="'.$dir_code.'">';
-	$echo_str .= "\n\t\t\t".'<input type="hidden" name="file" value="'.$file_code.'">';
+	//$echo_str .= "\n\t\t\t".'<input type="hidden" name="dir" value="'.$dir_code.'">';
+	$echo_str .= "\n\t\t\t".'<input type="hidden" name="invoker" value="'.$invoker.'">';
+	$echo_str .= "\n\t\t\t".'<input type="hidden" name="file" value="'.( $allow_obsolete ? 'byID:'.$file_code : $file_code ).'">';
 	$echo_str .= "\n\t\t\t".'<table class="form-table">';
 	$echo_str .= "\n\t\t\t\t".'<tbody>';
 	if ( $is_admin ) {
@@ -908,14 +1019,18 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 		$echo_str .= "\n\t\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t\t\t".'<td>';
 		$echo_str .= "\n\t\t\t\t\t\t\t".'<select id="wfu_filedetails_users" disabled="disabled">';
+		//get all users
+		$users = get_users();
 		foreach ( $users as $userid => $user )
-			$echo_str .= "\n\t\t\t\t\t\t\t\t".'<option value="'.$user->ID.'"'.( $filedata->uploaduserid == $user->ID ? ' selected="selected"' : '' ).'>'.$user->display_name.' ('.$user->user_login.')</option>';
+			$echo_str .= "\n\t\t\t\t\t\t\t\t".'<option value="'.$user->ID.'"'.( $filerec->uploaduserid == $user->ID ? ' selected="selected"' : '' ).'>'.$user->display_name.' ('.$user->user_login.')</option>';
 		$echo_str .= "\n\t\t\t\t\t\t\t".'</select>';
-		$echo_str .= "\n\t\t\t\t\t\t\t".'<a class="button" id="btn_change" href="" onclick="document.getElementById(\'wfu_filedetails_users\').disabled = false; this.style.display = \'none\'; document.getElementById(\'btn_ok\').style.display = \'inline-block\'; document.getElementById(\'btn_cancel\').style.display = \'inline-block\'; return false;"'.( $is_admin ? '' : ' style="display:none;"' ).'>Change User</a>';
-		$echo_str .= "\n\t\t\t\t\t\t\t".'<a class="button" id="btn_ok" href="" onclick="document.getElementById(\'wfu_filedetails_users\').disabled = true; document.getElementById(\'btn_change\').style.display = \'inline-block\'; this.style.display=\'none\'; document.getElementById(\'btn_cancel\').style.display = \'none\'; document.getElementById(\'wfu_filedetails_userid\').value = document.getElementById(\'wfu_filedetails_users\').value; wfu_filedetails_changed(); return false;" style="display:none;">Ok</a>';
-		$echo_str .= "\n\t\t\t\t\t\t\t".'<a class="button" id="btn_cancel" href="" onclick="document.getElementById(\'wfu_filedetails_users\').disabled = true; document.getElementById(\'btn_change\').style.display = \'inline-block\'; this.style.display=\'none\'; document.getElementById(\'btn_ok\').style.display = \'none\'; document.getElementById(\'wfu_filedetails_users\').value = document.getElementById(\'wfu_filedetails_userid\').value; return false;" style="display:none;">Cancel</a>';
-		$echo_str .= "\n\t\t\t\t\t\t\t".'<input type="hidden" id="wfu_filedetails_userid" name="wfu_filedetails_userid" value="'.$filedata->uploaduserid.'" />';
-		$echo_str .= "\n\t\t\t\t\t\t\t".'<input type="hidden" id="wfu_filedetails_userid_default" value="'.$filedata->uploaduserid.'" />';
+		if ( $admin_can_edit ) {
+			$echo_str .= "\n\t\t\t\t\t\t\t".'<a class="button" id="btn_change" href="" onclick="document.getElementById(\'wfu_filedetails_users\').disabled = false; this.style.display = \'none\'; document.getElementById(\'btn_ok\').style.display = \'inline-block\'; document.getElementById(\'btn_cancel\').style.display = \'inline-block\'; return false;"'.( $is_admin ? '' : ' style="display:none;"' ).'>Change User</a>';
+			$echo_str .= "\n\t\t\t\t\t\t\t".'<a class="button" id="btn_ok" href="" onclick="document.getElementById(\'wfu_filedetails_users\').disabled = true; document.getElementById(\'btn_change\').style.display = \'inline-block\'; this.style.display=\'none\'; document.getElementById(\'btn_cancel\').style.display = \'none\'; document.getElementById(\'wfu_filedetails_userid\').value = document.getElementById(\'wfu_filedetails_users\').value; wfu_filedetails_changed(); return false;" style="display:none;">Ok</a>';
+			$echo_str .= "\n\t\t\t\t\t\t\t".'<a class="button" id="btn_cancel" href="" onclick="document.getElementById(\'wfu_filedetails_users\').disabled = true; document.getElementById(\'btn_change\').style.display = \'inline-block\'; this.style.display=\'none\'; document.getElementById(\'btn_ok\').style.display = \'none\'; document.getElementById(\'wfu_filedetails_users\').value = document.getElementById(\'wfu_filedetails_userid\').value; return false;" style="display:none;">Cancel</a>';
+			$echo_str .= "\n\t\t\t\t\t\t\t".'<input type="hidden" id="wfu_filedetails_userid" name="wfu_filedetails_userid" value="'.$filerec->uploaduserid.'" />';
+			$echo_str .= "\n\t\t\t\t\t\t\t".'<input type="hidden" id="wfu_filedetails_userid_default" value="'.$filerec->uploaduserid.'" />';
+		}
 		$echo_str .= "\n\t\t\t\t\t\t".'</td>';
 		$echo_str .= "\n\t\t\t\t\t".'</tr>';
 	}
@@ -924,7 +1039,7 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 	$echo_str .= "\n\t\t\t\t\t\t\t".'<label>File Size</label>';
 	$echo_str .= "\n\t\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t\t".'<td>';
-	$echo_str .= "\n\t\t\t\t\t\t\t".'<input type="text" value="'.$filedata->filesize.'" readonly="readonly" style="width:auto;" />';
+	$echo_str .= "\n\t\t\t\t\t\t\t".'<input type="text" value="'.$filerec->filesize.'" readonly="readonly" style="width:auto;" />';
 	$echo_str .= "\n\t\t\t\t\t\t".'</td>';
 	$echo_str .= "\n\t\t\t\t\t".'</tr>';
 	$echo_str .= "\n\t\t\t\t\t".'<tr>';
@@ -932,7 +1047,7 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 	$echo_str .= "\n\t\t\t\t\t\t\t".'<label>File Date</label>';
 	$echo_str .= "\n\t\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t\t".'<td>';
-	$echo_str .= "\n\t\t\t\t\t\t\t".'<input type="text" value="'.get_date_from_gmt(date("Y-m-d H:i:s", $stat['mtime']), "d/m/Y H:i:s").'" readonly="readonly" style="width:auto;" />';
+	$echo_str .= "\n\t\t\t\t\t\t\t".'<input type="text" value="'.( $file_exists ? get_date_from_gmt(date("Y-m-d H:i:s", $stat['mtime']), "d/m/Y H:i:s") : '' ).'" readonly="readonly" style="width:auto;" />';
 	$echo_str .= "\n\t\t\t\t\t\t".'</td>';
 	$echo_str .= "\n\t\t\t\t\t".'</tr>';
 	$echo_str .= "\n\t\t\t\t\t".'<tr>';
@@ -940,7 +1055,7 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 	$echo_str .= "\n\t\t\t\t\t\t\t".'<label>Uploaded From Page</label>';
 	$echo_str .= "\n\t\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t\t".'<td>';
-	$echo_str .= "\n\t\t\t\t\t\t\t".'<input type="text" value="'.get_the_title($filedata->pageid).' ('.$filedata->pageid.')'.'" readonly="readonly" style="width:50%;" />';
+	$echo_str .= "\n\t\t\t\t\t\t\t".'<input type="text" value="'.get_the_title($filerec->pageid).' ('.$filerec->pageid.')'.'" readonly="readonly" style="width:50%;" />';
 	$echo_str .= "\n\t\t\t\t\t\t".'</td>';
 	$echo_str .= "\n\t\t\t\t\t".'</tr>';
 	if ( $is_admin ) {
@@ -949,7 +1064,7 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 		$echo_str .= "\n\t\t\t\t\t\t\t".'<label>Upload Plugin ID</label>';
 		$echo_str .= "\n\t\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t\t\t".'<td>';
-		$echo_str .= "\n\t\t\t\t\t\t\t".'<input type="text" value="'.$filedata->sid.'" readonly="readonly" style="width:auto;" />';
+		$echo_str .= "\n\t\t\t\t\t\t\t".'<input type="text" value="'.$filerec->sid.'" readonly="readonly" style="width:auto;" />';
 		$echo_str .= "\n\t\t\t\t\t\t".'</td>';
 		$echo_str .= "\n\t\t\t\t\t".'</tr>';
 	}
@@ -965,35 +1080,28 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 		$echo_str .= "\n\t\t\t\t\t\t\t".'<label></label>';
 		$echo_str .= "\n\t\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t\t\t".'<td>';
-		//read all linked records
-		$filerecs = array();
-		array_push($filerecs, $filedata);
-		$currec = $filedata;
-		while ( $currec->linkedto > 0 ) {
-			$currec = $wpdb->get_row('SELECT * FROM '.$table_name1.' WHERE idlog = '.$currec->linkedto);
-			if ( $currec != null ) array_push($filerecs, $currec);
-			else break;
-		}
+		//read all linked older records
+		$filerecs = wfu_get_rec_old_history($filerec->idlog);
 		//construct report from db records
 		$rep = '';
-		foreach ( $filerecs as $filerec ) {
-			$username = wfu_get_username_by_id($filerec->userid);
-			$fileparts = pathinfo($filerec->filepath);
+		foreach ( $filerecs as $rec ) {
+			$username = wfu_get_username_by_id($rec->userid);
+			$fileparts = pathinfo($rec->filepath);
 			if ( $rep != '' ) $rep .= "<br />";
-			$rep .= '<strong>['.get_date_from_gmt($filerec->date_from).']</strong> ';
-			if ( $filerec->action == 'upload' )
+			$rep .= '<strong>['.get_date_from_gmt($rec->date_from).']</strong> ';
+			if ( $rec->action == 'upload' )
 				$rep .= 'File uploaded with name <strong>'.$fileparts['basename'].'</strong> by user <strong>'.$username.'</strong>';
-			elseif ( $filerec->action == 'include' )
+			elseif ( $rec->action == 'include' )
 				$rep .= 'File included in database with name <strong>'.$fileparts['basename'].'</strong> by user <strong>'.$username.'</strong>';
-			elseif ( $filerec->action == 'download' )
+			elseif ( $rec->action == 'download' )
 				$rep .= 'File downloaded by user <strong>'.$username.'</strong>';
-			elseif ( $filerec->action == 'rename' )
+			elseif ( $rec->action == 'rename' )
 				$rep .= 'File renamed to <strong>'.$fileparts['basename'].'</strong> by user <strong>'.$username.'</strong>';
-			elseif ( $filerec->action == 'delete' )
+			elseif ( $rec->action == 'delete' )
 				$rep .= 'File deleted by user <strong>'.$username.'</strong>';
-			elseif ( $filerec->action == 'modify' )
+			elseif ( $rec->action == 'modify' )
 				$rep .= 'File userdata modified by user <strong>'.$username.'</strong>';
-			elseif ( $filerec->action == 'changeuser' )
+			elseif ( $rec->action == 'changeuser' )
 				$rep .= 'File upload user modified by user <strong>'.$username.'</strong>';
 		}
 		$echo_str .= "\n\t\t\t\t\t\t\t".'<div style="border:1px solid #dfdfdf; border-radius:3px; width:50%; overflow:scroll; padding:6px; height:100px; background-color:#eee;">';
@@ -1008,15 +1116,15 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 	$echo_str .= "\n\t\t\t".'<h3 style="margin-bottom: 10px; margin-top: 40px;">User Data Details</h3>';
 	$echo_str .= "\n\t\t\t".'<table class="form-table">';
 	$echo_str .= "\n\t\t\t\t".'<tbody>';
-	if ( count($filedata->userdata) > 0 ) {
-		foreach ( $filedata->userdata as $userdata ) {
+	if ( count($filerec->userdata) > 0 ) {
+		foreach ( $filerec->userdata as $userdata ) {
 			$echo_str .= "\n\t\t\t\t\t".'<tr>';
 			$echo_str .= "\n\t\t\t\t\t\t".'<th scope="row">';
 			$echo_str .= "\n\t\t\t\t\t\t\t".'<label>'.$userdata->property.'</label>';
 			$echo_str .= "\n\t\t\t\t\t\t".'</th>';
 			$echo_str .= "\n\t\t\t\t\t\t".'<td>';
 //			$echo_str .= "\n\t\t\t\t\t\t\t".'<input id="wfu_filedetails_userdata_value_'.$userdata->propkey.'" name="wfu_filedetails_userdata" type="text"'.( $is_admin ? '' : ' readonly="readonly"' ).' value="'.$userdata->propvalue.'" />';
-			$echo_str .= "\n\t\t\t\t\t\t\t".'<textarea id="wfu_filedetails_userdata_value_'.$userdata->propkey.'" name="wfu_filedetails_userdata" '.( $is_admin ? '' : ' readonly="readonly"' ).' value="'.$userdata->propvalue.'">'.$userdata->propvalue.'</textarea>';
+			$echo_str .= "\n\t\t\t\t\t\t\t".'<textarea id="wfu_filedetails_userdata_value_'.$userdata->propkey.'" name="wfu_filedetails_userdata" '.( ($is_admin && $admin_can_edit) ? '' : ' readonly="readonly"' ).' value="'.$userdata->propvalue.'">'.$userdata->propvalue.'</textarea>';
 			$echo_str .= "\n\t\t\t\t\t\t\t".'<input id="wfu_filedetails_userdata_default_'.$userdata->propkey.'" type="hidden" value="'.$userdata->propvalue.'" />';
 			$echo_str .= "\n\t\t\t\t\t\t\t".'<input id="wfu_filedetails_userdata_'.$userdata->propkey.'" name="wfu_filedetails_userdata_'.$userdata->propkey.'" type="hidden" value="'.$userdata->propvalue.'" />';
 			$echo_str .= "\n\t\t\t\t\t\t".'</td>';
@@ -1033,7 +1141,7 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 	}
 	$echo_str .= "\n\t\t\t\t".'</tbody>';
 	$echo_str .= "\n\t\t\t".'</table>';
-	if ( $is_admin ) {
+	if ( ($is_admin && $admin_can_edit) ) {
 		$echo_str .= "\n\t\t\t".'<p class="submit">';
 		$echo_str .= "\n\t\t\t\t".'<input id="dp_filedetails_submit_fields" type="submit" class="button-primary" name="submit" value="Update" disabled="disabled" />';
 		$echo_str .= "\n\t\t\t".'</p>';
@@ -1050,32 +1158,59 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 function wfu_edit_filedetails($file_code) {
 	global $wpdb;
 	$table_name2 = $wpdb->prefix . "wfu_userdata";
+	$allow_obsolete = false;
+
+	if ( substr($file_code, 0, 5) == "byID:" ) {
+		$allow_obsolete = true;
+		$file_code = substr($file_code, 5);
+	}
 
 	$user = wp_get_current_user();
 	$is_admin = current_user_can( 'manage_options' );
 	//check if user is allowed to view file details
 	if ( !$is_admin ) {
+		if ( $allow_obsolete ) return;
 			return;
 	}
-	$file_code = wfu_sanitize_code($file_code);
-	$dec_file = wfu_get_filepath_from_safe($file_code);
-	if ( $dec_file === false ) return;
+	if ( $allow_obsolete ) {
+		$file_code = wfu_sanitize_int($file_code);
+		$initialrec = wfu_get_file_rec_from_id($file_code, true);
+		if ( $initialrec == null ) return;
+		
+		//get all associated file records
+		$filerecs = wfu_get_rec_new_history($initialrec->idlog);
+		//get the latest record of this upload
+		$filerec = $filerecs[count($filerecs) - 1];
+		$filerec->userdata = $initialrec->userdata;
 
-	$dec_file = wfu_path_rel2abs(wfu_flatten_path($dec_file));
+		$filepath = wfu_path_rel2abs($filerec->filepath);
+		$latestrec = wfu_get_file_rec($filepath, true);
+		//if $latestrec is null then this means that file does not exist
+		if ( $latestrec == null ) return;
+		//if the record is obsolete then do not proceed
+		if ( $latestrec->idlog != $filerec->idlog ) return;
+	}
+	else {
+		$file_code = wfu_sanitize_code($file_code);
+		$dec_file = wfu_get_filepath_from_safe($file_code);
+		if ( $dec_file === false ) return;
 
-	//check if user is allowed to perform this action
-	if ( !wfu_current_user_owes_file($dec_file) ) return;
+		$filepath = wfu_path_rel2abs(wfu_flatten_path($dec_file));
 
-	//get file data from database with user data
-	$filedata = wfu_get_file_rec($dec_file, true);
-	if ( $filedata == null ) return;
+		//check if user is allowed to perform this action
+		if ( !wfu_current_user_owes_file($filepath) ) return;
+
+		//get file data from database with user data
+		$filerec = wfu_get_file_rec($filepath, true);
+		if ( $filerec == null ) return;
+	}
 
 	if ( isset($_POST['submit']) ) {
 		if ( $_POST['submit'] == "Update" ) {
-			if ( !is_array($filedata->userdata) ) $filedata->userdata = array();
+			if ( !is_array($filerec->userdata) ) $filerec->userdata = array();
 			//check for errors
 			$is_error = false;
-			foreach ( $filedata->userdata as $userdata ) {
+			foreach ( $filerec->userdata as $userdata ) {
 				if ( !isset($_POST['wfu_filedetails_userdata_'.$userdata->propkey]) ) {
 					$is_error = true;
 					break;
@@ -1084,7 +1219,7 @@ function wfu_edit_filedetails($file_code) {
 			if ( !$is_error ) {
 				$now_date = date('Y-m-d H:i:s');
 				$userdata_count = 0;
-				foreach ( $filedata->userdata as $userdata ) {
+				foreach ( $filerec->userdata as $userdata ) {
 					$userdata_count ++;
 					//make existing userdata record obsolete
 					$wpdb->update($table_name2,
@@ -1113,10 +1248,10 @@ function wfu_edit_filedetails($file_code) {
 						)
 					);
 				}
-				if ( $userdata_count > 0 ) wfu_log_action('modify:'.$now_date, $dec_file, $user->ID, '', 0, 0, '', null);
+				if ( $userdata_count > 0 ) wfu_log_action('modify:'.$now_date, $filepath, $user->ID, '', 0, 0, '', null);
 			}
-			if ( isset($_POST['wfu_filedetails_userid']) && $_POST['wfu_filedetails_userid'] != $filedata->uploaduserid ) {
-				wfu_log_action('changeuser:'.$_POST['wfu_filedetails_userid'], $dec_file, $user->ID, '', 0, 0, '', null);
+			if ( isset($_POST['wfu_filedetails_userid']) && $_POST['wfu_filedetails_userid'] != $filerec->uploaduserid ) {
+				wfu_log_action('changeuser:'.$_POST['wfu_filedetails_userid'], $filepath, $user->ID, '', 0, 0, '', null);
 			}
 		}
 	}

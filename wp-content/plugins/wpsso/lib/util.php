@@ -1910,23 +1910,44 @@ if ( ! class_exists( 'WpssoUtil' ) && class_exists( 'SucomUtil' ) ) {
 				if ( ! empty( $mod['id'] ) ) {
 
 					if ( ! empty( $mod['obj'] ) ) {
-						$url = $mod['obj']->get_options( $mod['id'], $type . '_url' );	// returns null if an index key is not found
+						$url = $mod['obj']->get_options( $mod['id'], $type . '_url' );	// Returns null if an index key is not found.
 					}
 
-					if ( ! empty( $url ) ) {	// must be a non-empty string
+					if ( ! empty( $url ) ) {	// Must be a non-empty string.
+
 						if ( $this->p->debug->enabled ) {
 							$this->p->debug->log( 'custom post ' . $type . '_url = ' . $url );
 						}
+
+					} elseif ( $mod['post_status'] !== 'published' ) {
+
+						$post_obj = self::get_post_object( $mod['id'] );
+
+						$post_obj->post_status = 'published';
+						$post_obj->post_name   = $post_obj->post_name ? 
+							$post_obj->post_name : sanitize_title( $post_obj->post_title );
+
+						$url = get_permalink( $post_obj );
+
+						if ( empty( $url ) ) {	// Just in case.
+							$url = get_permalink( $mod['id'] );
+						}
+
 					} else {
+
 						$url = get_permalink( $mod['id'] );
+
 						if ( $this->p->debug->enabled ) {
 							$this->p->debug->log( 'get_permalink url = ' . $url );
 						}
+
 						$url = $this->check_url_string( $url, 'post permalink' );
 					}
 
 					if ( ! empty( $url ) && $add_page && get_query_var( 'page' ) > 1 ) {
+
 						global $wp_rewrite;
+
 						$post_obj = self::get_post_object( $mod['id'] );
 						$numpages = substr_count( $post_obj->post_content, '<!--nextpage-->' ) + 1;
 
@@ -2062,9 +2083,7 @@ if ( ! class_exists( 'WpssoUtil' ) && class_exists( 'SucomUtil' ) ) {
 				}
 
 				if ( apply_filters( $this->p->lca . '_server_request_url_disable_cache', $disable_cache, $url, $mod, $add_page, $src_id ) ) {
-					$this->disable_cache_filters( array(
-						'shorten_url' => '__return_false',
-					) );
+					$this->disable_cache_filters( array( 'shorten_url' => '__return_false' ) );
 				}
 			}
 
@@ -2072,10 +2091,13 @@ if ( ! class_exists( 'WpssoUtil' ) && class_exists( 'SucomUtil' ) ) {
 			 * Check and possibly enforce the FORCE_SSL constant.
 			 */
 			if ( ! empty( $this->p->options['plugin_honor_force_ssl'] ) ) {
+
 				if ( SucomUtil::get_const( 'FORCE_SSL' ) && strpos( $url, 'http:' ) === 0 ) {
+
 					if ( $this->p->debug->enabled ) {
 						$this->p->debug->log( 'force ssl is enabled - replacing http by https' );
 					}
+
 					$url = preg_replace( '/^http:/', 'https:', $url );
 				}
 			}
@@ -2606,13 +2628,6 @@ if ( ! class_exists( 'WpssoUtil' ) && class_exists( 'SucomUtil' ) ) {
 			}
 		}
 
-		/**
-		 * Deprecated on 2018/03/31.
-		 */
-		public function do_metabox_tabs( $metabox_id = '', $tabs = array(), $table_rows = array(), $args = array() ) {
-			echo $this->get_metabox_tabbed( $metabox_id, $tabs, $table_rows, $args );
-		}
-
 		public function do_metabox_tabbed( $metabox_id = '', $tabs = array(), $table_rows = array(), $args = array() ) {
 			echo $this->get_metabox_tabbed( $metabox_id, $tabs, $table_rows, $args );
 		}
@@ -2674,13 +2689,6 @@ if ( ! class_exists( 'WpssoUtil' ) && class_exists( 'SucomUtil' ) ) {
 			$ret_html .= '</div><!-- .' . $class_metabox_tabs . ' -->' . "\n\n";
 
 			return $ret_html;
-		}
-
-		/**
-		 * Deprecated on 2018/03/31.
-		 */
-		public function do_table_rows( $table_rows, $class_href_key = '', $class_tabset_mb = '', $class_tabset = 'sucom-no_tabset' ) {
-			echo $this->get_metabox_table( $table_rows, $class_href_key, $class_tabset_mb, $class_tabset );
 		}
 
 		public function do_metabox_table( $table_rows, $class_href_key = '', $class_tabset_mb = '', $class_tabset = 'sucom-no_tabset' ) {

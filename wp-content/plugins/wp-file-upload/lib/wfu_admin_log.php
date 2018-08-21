@@ -1,6 +1,6 @@
 <?php
 
-function wfu_view_log($page = 1, $only_table_rows = false) {
+function wfu_view_log($page = 1, $only_table_rows = false, $located_rec = -1) {
 	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
 	global $wpdb;
 	$siteurl = site_url();
@@ -9,9 +9,17 @@ function wfu_view_log($page = 1, $only_table_rows = false) {
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
 
 	if ( !current_user_can( 'manage_options' ) ) return;
+	
+	$maxrows = (int)WFU_VAR("WFU_HISTORYLOG_TABLE_MAXROWS");
 	//get log data from database
 	$files_total = $wpdb->get_var('SELECT COUNT(idlog) FROM '.$table_name1);
-	$filerecs = $wpdb->get_results('SELECT * FROM '.$table_name1.' ORDER BY date_from DESC'.( WFU_VAR("WFU_HISTORYLOG_TABLE_MAXROWS") > 0 ? ' LIMIT '.WFU_VAR("WFU_HISTORYLOG_TABLE_MAXROWS").' OFFSET '.(($page - 1) * (int)WFU_VAR("WFU_HISTORYLOG_TABLE_MAXROWS")) : '' ));
+	//if we need to locate and focus on a specific record, then we need to
+	//recalculate and define the right page
+	if ( $located_rec > 0 && $maxrows > 0 ) {
+		$files_before = $wpdb->get_var('SELECT COUNT(idlog) FROM '.$table_name1.' WHERE idlog > '.(int)$located_rec);
+		$page = floor( $files_before / $maxrows ) + 1;
+	}
+	$filerecs = $wpdb->get_results('SELECT * FROM '.$table_name1.' ORDER BY date_from DESC'.( $maxrows > 0 ? ' LIMIT '.$maxrows.' OFFSET '.(($page - 1) * $maxrows) : '' ));
 
 	$echo_str = "";
 	if ( !$only_table_rows ) {
@@ -22,30 +30,31 @@ function wfu_view_log($page = 1, $only_table_rows = false) {
 		$echo_str .= "\n\t".'<div style="position:relative;">';
 		$echo_str .= wfu_add_loading_overlay("\n\t\t", "historylog");
 		$echo_str .= "\n\t\t".'<div class="wfu_historylog_header" style="width: 100%;">';
-		if ( WFU_VAR("WFU_HISTORYLOG_TABLE_MAXROWS") > 0 ) {
-			$pages = ceil($files_total / WFU_VAR("WFU_HISTORYLOG_TABLE_MAXROWS"));
-			$echo_str .= wfu_add_pagination_header("\n\t\t\t", "historylog", 1, $pages);
+		if ( $maxrows > 0 ) {
+			$pages = max(ceil($files_total / $maxrows), 1);
+			if ( $page > $pages ) $page = $pages;
+			$echo_str .= wfu_add_pagination_header("\n\t\t\t", "historylog", $page, $pages);
 		}
 		$echo_str .= "\n\t\t".'</div>';
-		$echo_str .= "\n\t\t".'<table id="wfu_historylog_table" class="wp-list-table widefat fixed striped">';
+		$echo_str .= "\n\t\t".'<table id="wfu_historylog_table" class="wfu-historylog wp-list-table widefat fixed striped">';
 		$echo_str .= "\n\t\t\t".'<thead>';
 		$echo_str .= "\n\t\t\t\t".'<tr>';
-		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="5%" style="text-align:center;">';
+		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="5%" class="manage-column">';
 		$echo_str .= "\n\t\t\t\t\t\t".'<label>#</label>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
-		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="15%" style="text-align:left;">';
-		$echo_str .= "\n\t\t\t\t\t\t".'<label>Date</label>';
-		$echo_str .= "\n\t\t\t\t\t".'</th>';
-		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="10%" style="text-align:center;">';
-		$echo_str .= "\n\t\t\t\t\t\t".'<label>Action</label>';
-		$echo_str .= "\n\t\t\t\t\t".'</th>';
-		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="30%" style="text-align:left;">';
+		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="30%" class="manage-column column-primary">';
 		$echo_str .= "\n\t\t\t\t\t\t".'<label>File</label>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
-		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="15%" style="text-align:center;">';
+		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="10%" class="manage-column">';
+		$echo_str .= "\n\t\t\t\t\t\t".'<label>Action</label>';
+		$echo_str .= "\n\t\t\t\t\t".'</th>';
+		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="15%" class="manage-column">';
+		$echo_str .= "\n\t\t\t\t\t\t".'<label>Date</label>';
+		$echo_str .= "\n\t\t\t\t\t".'</th>';
+		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="15%" class="manage-column">';
 		$echo_str .= "\n\t\t\t\t\t\t".'<label>User</label>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
-		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="25%" style="text-align:left;">';
+		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="25%" class="manage-column">';
 		$echo_str .= "\n\t\t\t\t\t\t".'<label>Remarks</label>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t".'</tr>';
@@ -56,9 +65,11 @@ function wfu_view_log($page = 1, $only_table_rows = false) {
 	$userdatarecs = $wpdb->get_results('SELECT * FROM '.$table_name2);
 	$deletedfiles = array();
 	$filecodes = array();
+	$logpagecode = wfu_safe_store_browser_params('view_log&tag='.$page);
 	$time0 = strtotime("0000-00-00 00:00:00");
-	$i = ($page - 1) * (int)WFU_VAR("WFU_HISTORYLOG_TABLE_MAXROWS");
-	foreach ( $filerecs as $filerec ) {
+	$i = ($page - 1) * $maxrows;
+	$filerecs_count = count($filerecs);
+	foreach ( $filerecs as $ind => $filerec ) {
 		$remarks = '';
 		if ( $filerec->action == 'delete' ) array_push($deletedfiles, $filerec->linkedto);
 		elseif ( $filerec->action == 'rename' ) {
@@ -79,7 +90,7 @@ function wfu_view_log($page = 1, $only_table_rows = false) {
 				}
 			}
 			if ( $remarks != '' ) {
-				$remarks = "\n\t\t\t\t\t\t".'<select multiple="multiple" style="width:100%; height:40px; background:none; font-size:small; overflow:scroll;">'.$remarks;
+				$remarks = "\n\t\t\t\t\t\t".'<select multiple="multiple" style="width:100%; height:40px; background:none; font-size:small; overflow:scroll; resize:vertical;">'.$remarks;
 				$remarks .= "\n\t\t\t\t\t\t".'</select>';
 			}
 		}
@@ -98,30 +109,51 @@ function wfu_view_log($page = 1, $only_table_rows = false) {
 			$remarks = "\n\t\t\t\t\t\t".'<textarea style="width:100%; resize:vertical; background:none;" readonly="readonly">'.$info.'</textarea>';
 		}
 		$i ++;
-		$otheraction = ( $filerec->action == 'other' );
-		$echo_str .= "\n\t\t\t\t".'<tr>';
-		$echo_str .= "\n\t\t\t\t\t".'<td style="padding: 5px 5px 5px 10px; text-align:center;">'.$i.'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td style="padding: 5px 5px 5px 10px; text-align:left;">'.get_date_from_gmt($filerec->date_from).'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td style="padding: 5px 5px 5px 10px; text-align:center;">'.$filerec->action.'</td>';
-		if ( !$otheraction ) {	
-			$echo_str .= "\n\t\t\t\t\t".'<td style="padding: 5px 5px 5px 10px; text-align:left;">';
-			if ( $filerec->action == 'datasubmit' ) $echo_str .= "\n\t\t\t\t\t\t".'<span>N/A</span>';
-			elseif ( in_array($filerec->linkedto, $deletedfiles) || in_array($filerec->idlog, $deletedfiles) ) $echo_str .= "\n\t\t\t\t\t\t".'<span>'.$filerec->filepath.'</span>';
-			else {
-				$lid = 0;
-				if ( $filerec->action == 'upload' || $filerec->action == 'include' ) $lid = $filerec->idlog;
-				elseif ( $filerec->linkedto > 0 ) $lid = $filerec->linkedto;
-				if ( $lid > 0 && file_exists(wfu_path_rel2abs($filerec->filepath)) ) {
-					if ( !isset($filecodes[$lid]) ) $filecodes[$lid] = wfu_safe_store_filepath($filerec->filepath);
-					$logpagecode = wfu_safe_store_browser_params('view_log&tag='.$page);
-					$echo_str .= "\n\t\t\t\t\t\t".'<a class="row-title" href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_details&file='.$filecodes[$lid].'&invoker='.$logpagecode.'" title="View and edit file details" style="font-weight:normal;">'.$filerec->filepath.'</a>';
+		$echo_str .= "\n\t\t\t\t".'<tr'.( $located_rec > 0 && $filerec->idlog == $located_rec ? ' class="wfu-highlighted"' : '' ).'>';
+		$echo_str .= "\n\t\t\t\t\t".'<th style="word-wrap: break-word;">'.$i.'</th>';
+		$echo_str .= "\n\t\t\t\t\t".'<td class="column-primary" data-colname="File">';
+		if ( $filerec->action == 'other' ) $echo_str .= "\n\t\t\t\t\t\t".'<span>Other action not related to file</span>';
+		elseif ( $filerec->action == 'datasubmit' ) $echo_str .= "\n\t\t\t\t\t\t".'<span>Submission of data without file</span>';
+		elseif ( in_array($filerec->linkedto, $deletedfiles) || in_array($filerec->idlog, $deletedfiles) ) $echo_str .= "\n\t\t\t\t\t\t".'<span>'.$filerec->filepath.'</span>';
+		else {
+			//find newest linked record
+			$newestidlog = $filerec->idlog;
+			$newestind = $ind;
+			$parind = $ind;
+			while ( $parind >= 0 && $filerecs[$newestind]->date_to != "0000-00-00 00:00:00" ) {
+				if ( isset($filerecs[$parind]->linkedto) && $filerecs[$parind]->linkedto == $newestidlog ) {
+					$newestind = $parind;
+					$newestidlog = $filerecs[$parind]->idlog;
 				}
-				else $echo_str .= "\n\t\t\t\t\t\t".'<span>'.$filerec->filepath.'</span>';
+				$parind --;
 			}
-			$echo_str .= "\n\t\t\t\t\t".'</td>';
-			$echo_str .= "\n\t\t\t\t\t".'<td style="padding: 5px 5px 5px 10px; text-align:center;">'.wfu_get_username_by_id($filerec->userid).'</td>';
+			//find oldest linked record
+			$oldestidlog = $filerec->idlog;
+			$oldestind = $ind;
+			$parind = $ind;
+			while ( $parind < $filerecs_count && isset($filerecs[$oldestind]->linkedto) ) {
+				if ( $filerecs[$parind]->idlog == $filerecs[$oldestind]->linkedto ) {
+					$oldestind = $parind;
+					$oldestidlog = $filerecs[$parind]->idlog;
+				}
+				$parind ++;
+			}
+			$lid = $oldestidlog;
+			//make the file linkable only if the record is still valid, the
+			//filename has not changed (due to a rename action) and the file
+			//exists
+			if ( $filerecs[$newestind]->date_to == "0000-00-00 00:00:00" && $filerec->filepath == $filerecs[$newestind]->filepath && file_exists(wfu_path_rel2abs($filerec->filepath)) ) {
+				if ( !isset($filecodes[$lid]) ) $filecodes[$lid] = wfu_safe_store_filepath($filerec->filepath);
+				$echo_str .= "\n\t\t\t\t\t\t".'<a class="row-title" href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_details&file='.$filecodes[$lid].'&invoker='.$logpagecode.'" title="View and edit file details" style="font-weight:normal;">'.$filerec->filepath.'</a>';
+			}
+			else $echo_str .= "\n\t\t\t\t\t\t".'<span>'.$filerec->filepath.'</span>';
 		}
-		$echo_str .= "\n\t\t\t\t\t".'<td style="padding: 5px 5px 5px 10px; text-align:left;"'.( $otheraction ? ' colspan="3"' : '' ).'>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<button type="button" class="toggle-row"><span class="screen-reader-text">Show more details</span></button>';
+		$echo_str .= "\n\t\t\t\t\t".'</td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Action">'.( $filerec->action != 'other' && $filerec->action != 'datasubmit' ? $filerec->action : '' ).'</td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Date">'.get_date_from_gmt($filerec->date_from).'</td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="User">'.wfu_get_username_by_id($filerec->userid).'</td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Remarks">';
 		$echo_str .= $remarks;
 		$echo_str .= "\n\t\t\t\t\t".'</td>';
 		$echo_str .= "\n\t\t\t\t".'</tr>';
@@ -132,6 +164,10 @@ function wfu_view_log($page = 1, $only_table_rows = false) {
 		$echo_str .= "\n\t".'</div>';
 		$echo_str .= "\n\t".'</div>';
 		$echo_str .= "\n".'</div>';
+	}
+	if ( $located_rec > 0 ) {
+		$handler = 'function() { wfu_focus_table_on_highlighted_file("wfu_historylog_table"); }';
+		$echo_str .= "\n\t".'<script type="text/javascript">if(window.addEventListener) { window.addEventListener("load", '.$handler.', false); } else if(window.attachEvent) { window.attachEvent("onload", '.$handler.'); } else { window["onload"] = '.$handler.'; }</script>';
 	}
 
 	return $echo_str;

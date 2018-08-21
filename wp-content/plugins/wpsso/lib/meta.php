@@ -326,7 +326,7 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 				$this->p->debug->mark();
 			}
 
-			$table_rows = array();
+			$table_rows   = array();
 			$script_class = '';
 
 			if ( ! is_array( WpssoMeta::$head_meta_tags ) ) {	// Just in case.
@@ -352,7 +352,9 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 
 				} elseif ( isset( $parts[5] ) ) {
 
-					// skip meta tags with reserved values but display empty values
+					/**
+					 * Skip meta tags with reserved values but display empty values.
+					 */
 					if ( $parts[5] === WPSSO_UNDEF_INT || $parts[5] === (string) WPSSO_UNDEF_INT ) {
 						if ( $this->p->debug->enabled ) {
 							$this->p->debug->log( $parts[3] . ' value is ' . WPSSO_UNDEF_INT . ' (skipped)' );
@@ -366,7 +368,9 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 						$match_name = $parts[3];
 					}
 
-					// convert mixed case itemprop names (for example) to lower case
+					/**
+					 * Convert mixed case itemprop names (for example) to lower case.
+					 */
 					$opt_name = strtolower( 'add_' . $parts[1] . '_' . $parts[2] . '_' . $parts[3] );
 
 					$tr_class = ( empty( $script_class ) ? '' : ' ' . $script_class ) . 
@@ -375,13 +379,12 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 						( isset( $this->p->options[$opt_name] ) ? ' is_standard' : ' is_internal hide_row_in_basic' ) . '">';
 
 					$table_rows[] = '<tr class="' . trim( $tr_class ) . 
-					'<th class="xshort">' . $parts[1] . '</th>' . 
-					'<th class="xshort">' . $parts[2] . '</th>' . 
-					'<td class="">' . ( empty( $parts[6] ) ?
-						'' : '<!-- ' . $parts[6] . ' -->' ) . $match_name . '</td>' . 
-					'<th class="xshort">' . $parts[4] . '</th>' . 
-					'<td class="wide">' . ( strpos( $parts[5], 'http' ) === 0 ? 
-						'<a href="' . $parts[5] . '">' . $parts[5] . '</a>' : $parts[5] ) . '</td>';
+						'<th class="xshort">' . $parts[1] . '</th>' . 
+						'<th class="xshort">' . $parts[2] . '</th>' . 
+						'<td class="">' . ( empty( $parts[6] ) ? '' : '<!-- ' . $parts[6] . ' -->' ) . $match_name . '</td>' . 
+						'<th class="xshort">' . $parts[4] . '</th>' . 
+						'<td class="wide">' . ( strpos( $parts[5], 'http' ) === 0 ? 
+							'<a href="' . $parts[5] . '">' . $parts[5] . '</a>' : $parts[5] ) . '</td>';
 				}
 			}
 
@@ -548,7 +551,7 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 
 				$opts =& $this->p->options;		// Shortcut variable name.
 
-				$og_type = $this->p->og->get_mod_og_type( $mod, false, false );	// $ret_og_ns = false, $use_mod_opts = false
+				$og_type = $this->p->og->get_mod_og_type( $mod, false, false );	// $ret_og_ns is false, $use_mod_opts is false
 
 				$md_defs = array(
 					'options_filtered' => '',
@@ -964,13 +967,17 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 			return $md_opts;
 		}
 
-		// return sortable column keys and their query sort info
+		/**
+		 * Return sortable column keys and their query sort info.
+		 */
 		public static function get_sortable_columns( $col_idx = false ) { 
 
 			static $sort_cols = null;
 
 			if ( null === $sort_cols ) {
+
 				$wpsso =& Wpsso::get_instance();
+
 				$sort_cols = (array) apply_filters( $wpsso->lca . '_get_sortable_columns', $wpsso->cf['edit']['columns'] );
 			}
 
@@ -1001,7 +1008,7 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 
 		public static function get_column_headers() { 
 
-			$headers = array();
+			$headers   = array();
 			$sort_cols = self::get_sortable_columns();
 
 			foreach ( $sort_cols as $col_idx => $col_info ) {
@@ -1103,22 +1110,22 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 			return $columns;
 		}
 
-		public function get_og_img_column_html( $head_info, $mod ) {
+		public function get_og_img_column_html( $head_info, $mod, $md_pre = 'og', $mt_pre = 'og' ) {
 
 			$media_html  = false;
-			$force_regen = $this->p->util->is_force_regen( $mod, 'og' );	// false by default
+			$force_regen = $this->p->util->is_force_regen( $mod, $md_pre );	// false by default
 
-			if ( ! empty( $head_info['og:image:id'] ) ) {
+			if ( ! empty( $head_info[ $mt_pre . ':image:id' ] ) ) {
 
 				if ( $this->p->debug->enabled ) {
-					$this->p->debug->log( 'getting thumbnail for image id ' . $head_info['og:image:id'] );
+					$this->p->debug->log( 'getting thumbnail for image id ' . $head_info[ $mt_pre . ':image:id' ] );
 				}
 
 				$mt_single_image = array();
 
-				$this->p->media->add_mt_single_image_src( $mt_single_image, $head_info['og:image:id'], 'thumbnail', false, $force_regen );
+				$this->p->media->add_mt_single_image_src( $mt_single_image, $head_info[ $mt_pre . ':image:id' ], 'thumbnail', false, $force_regen );
 
-				if ( ! empty( $mt_single_image['og:image:url'] ) ) {	// Just in case.
+				if ( ! empty( $mt_single_image[ $mt_pre . ':image:url' ] ) ) {	// Just in case.
 					$head_info =& $mt_single_image;
 				}
 			}
