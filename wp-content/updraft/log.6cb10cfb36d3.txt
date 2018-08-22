@@ -218,3 +218,90 @@
 0048.917 (0) Dropbox quota usage: used=24537 MB, total=1050880 MB, available=1026343 MB
 0048.918 (0) Dropbox: Attempt to upload: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads.zip to: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads.zip
 0056.520 (0) Dropbox chunked upload: 31.8 % uploaded (AAAAAAAAOrJZZmRP4-BZhg, 8388608, 9216 KB)
+0066.062 (0) Dropbox chunked upload: 67.5 % uploaded (AAAAAAAAOrJZZmRP4-BZhg, 17825792, 8192 KB)
+0073.939 (0) Dropbox chunked upload: 99.2 % uploaded (AAAAAAAAOrJZZmRP4-BZhg, 26214400, 9216 KB)
+0075.561 (0) Dropbox chunked upload: 100 % uploaded (AAAAAAAAOrJZZmRP4-BZhg, 26413308, 9216 KB)
+0076.654 (0) Recording as successfully uploaded: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads.zip
+0076.656 (0) Deleting local file: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads.zip: skipped: user has unchecked updraft_delete_local option
+0076.657 (0) Dropbox: File upload success (backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads.zip): 25794 KB in 27s (929 KB/s)
+0076.940 (0) Dropbox quota usage: used=24562.2 MB, total=1050880 MB, available=1026317.8 MB
+0076.941 (0) Dropbox: Attempt to upload: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads2.zip to: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads2.zip
+0085.753 (0) Dropbox chunked upload: 35.8 % uploaded (AAAAAAAAOrTFaQIGndUzAg, 9437184, 9216 KB)
+0094.578 (0) Dropbox chunked upload: 71.5 % uploaded (AAAAAAAAOrTFaQIGndUzAg, 18874368, 9216 KB)
+0102.874 (0) Dropbox chunked upload: 100 % uploaded (AAAAAAAAOrTFaQIGndUzAg, 26390333, 9216 KB)
+0104.672 (0) Recording as successfully uploaded: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads2.zip
+0104.674 (0) Deleting local file: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads2.zip: skipped: user has unchecked updraft_delete_local option
+0104.675 (0) Dropbox: File upload success (backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads2.zip): 25771 KB in 27s (929 KB/s)
+0104.990 (0) Dropbox quota usage: used=24167.7 MB, total=1050880 MB, available=1026712.3 MB
+0104.991 (0) Dropbox: Attempt to upload: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads3.zip to: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads3.zip
+0114.642 (0) Dropbox chunked upload: 35.8 % uploaded (AAAAAAAAOrW_rqwlUTJUlA, 9437184, 8192 KB)
+0123.792 (0) Dropbox chunked upload: 67.6 % uploaded (AAAAAAAAOrW_rqwlUTJUlA, 17825792, 7680 KB)
+0131.868 (0) Dropbox chunked upload: 97.4 % uploaded (AAAAAAAAOrW_rqwlUTJUlA, 25690112, 8192 KB)
+0133.247 (0) Dropbox chunked upload: 100 % uploaded (AAAAAAAAOrW_rqwlUTJUlA, 26383125, 8192 KB)
+0134.571 (0) Recording as successfully uploaded: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads3.zip
+0134.575 (0) Deleting local file: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads3.zip: skipped: user has unchecked updraft_delete_local option
+0134.576 (0) Dropbox: File upload success (backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads3.zip): 25764 KB in 29s (870 KB/s)
+0134.891 (0) Dropbox quota usage: used=24192.9 MB, total=1050880 MB, available=1026687.1 MB
+0134.892 (0) Dropbox: Attempt to upload: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads4.zip to: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads4.zip
+0142.711 (0) Dropbox chunked upload: 26.1 % uploaded (AAAAAAAAOradqwauPMJCxg, 8388608, 9216 KB)
+0151.848 (0) Dropbox chunked upload: 55.4 % uploaded (AAAAAAAAOradqwauPMJCxg, 17825792, 8704 KB)
+0160.320 (0) Dropbox chunked upload: 83.1 % uploaded (AAAAAAAAOradqwauPMJCxg, 26738688, 9216 KB)
+0166.822 (0) Dropbox chunked upload: 100 % uploaded (AAAAAAAAOradqwauPMJCxg, 32163316, 9216 KB)
+0168.835 (0) Recording as successfully uploaded: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads4.zip
+0168.837 (0) Deleting local file: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads4.zip: skipped: user has unchecked updraft_delete_local option
+0168.838 (0) Dropbox: File upload success (backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads4.zip): 31409 KB in 33s (925 KB/s)
+0169.164 (0) Dropbox quota usage: used=24223.6 MB, total=1050880 MB, available=1026656.4 MB
+0169.165 (0) Dropbox: Attempt to upload: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads5.zip to: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads5.zip
+0184.009 (0) Dropbox chunked upload: 32.4 % uploaded (AAAAAAAAOrfcCeiCiG4rVQ, 9437184, 9216 KB)
+0200.131 (0) Dropbox chunked upload: 64.8 % uploaded (AAAAAAAAOrfcCeiCiG4rVQ, 18874368, 9216 KB)
+0214.899 (0) Dropbox chunked upload: 97.2 % uploaded (AAAAAAAAOrfcCeiCiG4rVQ, 28311552, 9216 KB)
+0217.487 (0) Dropbox chunked upload: 100 % uploaded (AAAAAAAAOrfcCeiCiG4rVQ, 29117013, 9216 KB)
+0218.946 (0) Recording as successfully uploaded: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads5.zip
+0218.949 (0) Deleting local file: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads5.zip: skipped: user has unchecked updraft_delete_local option
+0218.950 (0) Dropbox: File upload success (backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads5.zip): 28434 KB in 49s (571 KB/s)
+0219.279 (0) Dropbox quota usage: used=24251.3 MB, total=1050880 MB, available=1026628.7 MB
+0219.280 (0) Dropbox: Attempt to upload: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads6.zip to: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads6.zip
+0236.115 (0) Dropbox chunked upload: 36 % uploaded (AAAAAAAAOrhFXljPn7NMpw, 9437184, 9216 KB)
+0250.420 (0) Dropbox chunked upload: 72 % uploaded (AAAAAAAAOrhFXljPn7NMpw, 18874368, 9216 KB)
+0259.586 (0) The scheduled resumption is within 45 seconds - will reschedule
+0259.589 (0) Rescheduling resumption 1: moving to 350 seconds from now (1534900058)
+0259.592 (0) To decrease the likelihood of overlaps, increasing resumption interval to: 305 + 45 = 350
+0259.593 (0) Dropbox chunked upload: 100 % uploaded (AAAAAAAAOrhFXljPn7NMpw, 26197344, 9216 KB)
+0261.800 (0) Recording as successfully uploaded: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads6.zip
+0261.802 (0) Deleting local file: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads6.zip: skipped: user has unchecked updraft_delete_local option
+0261.803 (0) Dropbox: File upload success (backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads6.zip): 25583 KB in 42s (601 KB/s)
+0262.098 (0) Dropbox quota usage: used=24276.3 MB, total=1050880 MB, available=1026603.7 MB
+0262.099 (0) Dropbox: Attempt to upload: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads7.zip to: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads7.zip
+0278.513 (0) Dropbox chunked upload: 34.2 % uploaded (AAAAAAAAOrk6QIAg2WUIeA, 9437184, 9216 KB)
+0289.136 (0) Dropbox chunked upload: 68.4 % uploaded (AAAAAAAAOrk6QIAg2WUIeA, 18874368, 9216 KB)
+0299.846 (0) Dropbox chunked upload: 100 % uploaded (AAAAAAAAOrk6QIAg2WUIeA, 27590022, 9216 KB)
+0302.901 (0) Recording as successfully uploaded: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads7.zip
+0302.903 (0) Deleting local file: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads7.zip: skipped: user has unchecked updraft_delete_local option
+0302.904 (0) Dropbox: File upload success (backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-uploads7.zip): 26943 KB in 40s (660 KB/s)
+0303.234 (0) Dropbox quota usage: used=24302.6 MB, total=1050880 MB, available=1026577.4 MB
+0303.235 (0) Dropbox: Attempt to upload: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-others.zip to: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-others.zip
+0303.750 (0) Dropbox chunked upload: 100 % uploaded (AAAAAAAAOrrpeRMakdyZqw, 3691, 9216 KB)
+0304.791 (0) Recording as successfully uploaded: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-others.zip
+0304.794 (0) Deleting local file: backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-others.zip: skipped: user has unchecked updraft_delete_local option
+0304.795 (0) Dropbox: File upload success (backup_2018-08-22-0057_Jolly_Jump_6cb10cfb36d3-others.zip): 3 KB in 1s (2 KB/s)
+0304.808 (0) Retain: beginning examination of existing backup sets; user setting: retain_files=1, retain_db=1
+0304.810 (0) Number of backup sets in history: 2; groups (db): 1
+0304.811 (0) Examining (for databases) backup set with group_id=0, nonce=96ea4b53c913, datestamp=1534899514 (Aug 22 2018 00:58:34)
+0304.813 (0) This backup set remains non-empty (f=0/d=1); will retain in history
+0304.814 (0) Examining (for databases) backup set with group_id=0, nonce=6cb10cfb36d3, datestamp=1534899448 (Aug 22 2018 00:57:28)
+0304.814 (0) Number of backup sets in history: 2; groups (files): 1
+0304.816 (0) Examining (for files) backup set with nonce=96ea4b53c913, datestamp=1534899514 (Aug 22 2018 00:58:34)
+0304.816 (0) This backup set remains non-empty (f=0/d=1); will retain in history
+0304.817 (0) Examining (for files) backup set with nonce=6cb10cfb36d3, datestamp=1534899448 (Aug 22 2018 00:57:28)
+0304.817 (0) This backup set is the backup set just made, so will not be deleted.
+0304.818 (0) This backup set is the backup set just made, so will not be deleted.
+0304.819 (0) This backup set is the backup set just made, so will not be deleted.
+0304.820 (0) This backup set is the backup set just made, so will not be deleted.
+0304.820 (0) This backup set remains non-empty (f=1/d=0); will retain in history
+0304.821 (0) Retain: saving new backup history (sets now: 2) and finishing retain operation
+0304.827 (0) Resume backup (6cb10cfb36d3, 0): finish run
+0304.830 (0) Decremented the semaphore (f) by 1
+0304.833 (0) Semaphore (f) unlocked
+0304.833 (0) There were no errors in the uploads, so the 'resume' event (1) is being unscheduled
+0304.839 (0) No email will/can be sent - the user has not configured an email address.
+0304.840 (0) The backup apparently succeeded and is now complete
