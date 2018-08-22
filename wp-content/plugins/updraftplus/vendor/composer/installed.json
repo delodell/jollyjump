@@ -646,17 +646,17 @@
     },
     {
         "name": "symfony/event-dispatcher",
-        "version": "v2.8.44",
-        "version_normalized": "2.8.44.0",
+        "version": "v2.8.42",
+        "version_normalized": "2.8.42.0",
         "source": {
             "type": "git",
             "url": "https://github.com/symfony/event-dispatcher.git",
-            "reference": "84ae343f39947aa084426ed1138bb96bf94d1f12"
+            "reference": "9b69aad7d4c086dc94ebade2d5eb9145da5dac8c"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/84ae343f39947aa084426ed1138bb96bf94d1f12",
-            "reference": "84ae343f39947aa084426ed1138bb96bf94d1f12",
+            "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/9b69aad7d4c086dc94ebade2d5eb9145da5dac8c",
+            "reference": "9b69aad7d4c086dc94ebade2d5eb9145da5dac8c",
             "shasum": ""
         },
         "require": {
@@ -673,7 +673,7 @@
             "symfony/dependency-injection": "",
             "symfony/http-kernel": ""
         },
-        "time": "2018-07-26T09:03:18+00:00",
+        "time": "2018-04-06T07:35:03+00:00",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -708,23 +708,23 @@
     },
     {
         "name": "symfony/process",
-        "version": "v3.4.14",
-        "version_normalized": "3.4.14.0",
+        "version": "v3.4.12",
+        "version_normalized": "3.4.12.0",
         "source": {
             "type": "git",
             "url": "https://github.com/symfony/process.git",
-            "reference": "0414db29bd770ec5a4152683e655f55efd4fa60f"
+            "reference": "acc5a37c706ace827962851b69705b24e71ca17c"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/symfony/process/zipball/0414db29bd770ec5a4152683e655f55efd4fa60f",
-            "reference": "0414db29bd770ec5a4152683e655f55efd4fa60f",
+            "url": "https://api.github.com/repos/symfony/process/zipball/acc5a37c706ace827962851b69705b24e71ca17c",
+            "reference": "acc5a37c706ace827962851b69705b24e71ca17c",
             "shasum": ""
         },
         "require": {
             "php": "^5.5.9|>=7.0.8"
         },
-        "time": "2018-07-26T11:19:56+00:00",
+        "time": "2018-05-30T04:24:30+00:00",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -756,5 +756,52 @@
         ],
         "description": "Symfony Process Component",
         "homepage": "https://symfony.com"
+    },
+    {
+        "name": "yahnis-elsts/plugin-update-checker",
+        "version": "v4.3.1",
+        "version_normalized": "4.3.1.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/YahnisElsts/plugin-update-checker.git",
+            "reference": "22fd23a32b158ac051f09690c757f5fe509d21aa"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/YahnisElsts/plugin-update-checker/zipball/22fd23a32b158ac051f09690c757f5fe509d21aa",
+            "reference": "22fd23a32b158ac051f09690c757f5fe509d21aa",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.2.0"
+        },
+        "time": "2017-11-03T17:20:11+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "files": [
+                "plugin-update-checker.php"
+            ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Yahnis Elsts",
+                "email": "whiteshadow@w-shadow.com",
+                "homepage": "http://w-shadow.com/",
+                "role": "Developer"
+            }
+        ],
+        "description": "A custom update checker for WordPress plugins and themes. Useful if you can't host your plugin in the official WP repository but still want it to support automatic updates.",
+        "homepage": "https://github.com/YahnisElsts/plugin-update-checker/",
+        "keywords": [
+            "automatic updates",
+            "plugin updates",
+            "theme updates",
+            "wordpress"
+        ]
     }
 ]

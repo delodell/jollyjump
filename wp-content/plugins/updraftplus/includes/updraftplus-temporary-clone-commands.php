@@ -17,20 +17,16 @@ class UpdraftPlus_Temporary_Clone_Commands {
 	 * @param array $restore_data - an array of relevant information
 	 * @return void
 	 */
-	public function updraftplus_restore_completed() {
-		global $updraftplus;
+	public function updraftplus_restore_completed($restore_data) {
+		global $updraftplus_admin;
 
-		if (!defined('UPDRAFTPLUS_USER_ID') || !is_numeric(UPDRAFTPLUS_USER_ID) || !defined('UPDRAFTPLUS_VPS_ID') || !is_numeric(UPDRAFTPLUS_VPS_ID) || !defined('UPDRAFTPLUS_UNIQUE_TOKEN')) {
+		if (empty($restore_data['clone_id']) || empty($restore_data['secret_token'])) {
 			error_log("updraftplus_restore_completed called, but no clone information (presumably a user-initiated restore)");
 			return;
 		}
 
-		$user_id = UPDRAFTPLUS_USER_ID;
-		$vps_id = UPDRAFTPLUS_VPS_ID;
-		$token = UPDRAFTPLUS_UNIQUE_TOKEN;
-		
-		$data = array('user_id' => $user_id, 'vps_id' => $vps_id, 'token' => $token);
-		$updraftplus->get_updraftplus_clone()->clone_restore_complete($data);
+		$data = array('clone_id' => $restore_data['clone_id'], 'secret_token' => $restore_data['secret_token']);
+		$updraftplus_admin->get_updraftplus_clone()->clone_restore_complete($data);
 	}
 }
 
