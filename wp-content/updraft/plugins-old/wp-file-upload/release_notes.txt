@@ -1,0 +1,10 @@
+<!--  --><span><strong>Version 4.7.0</strong> is a <strong>significant update</strong> introducing a new feature and some improvements and it fixes some bugs as follows:</span>
+<ul style="list-style: disc; padding-left: 30px;">
+<li>A top level Dashboard menu item has been added, <strong>Uploaded Files</strong>, where the uploaded files are shown for quick reference. The menu item displays the </span><span style="text-decoration: underline;">number of new uploads</span><span> in a bubble, just like Wordpress displays the number of pending updates of the website. The uploaded files' list displays the <strong>files</strong>, <strong>useful information</strong> about them (upload date, user, whether they have userdata or associated Media Library item etc.) and provides some <strong>quick actions</strong>, such as opening of the file links, of File Details page, location of the files in File Browser and View Log and download of the files.</li>
+<li>Added <strong>Portuguese</strong> translation kindly provided by <strong>Rui Alao</strong>.</li>
+<li>Checked and verified compatibility with <strong>Gutenberg</strong>, the new Wordpress editor. Read this <a target="_blank" href="https://www.iptanus.com/wordpress-file-upload-and-gutenberg/" title="WordPress File Upload and Gutenberg">article</a> for more details.</li>
+<li>Fixed a frustrating bug </span><span style="text-decoration: underline;">clearing userdata fields</span><span> when Select File was pressed.</li>
+<li><strong>File Browser</strong> and <strong>View Log</strong> tables modified to become more <strong>responsive</strong> especially for small screens.</li>
+</ul>
+For more details about this version's changes please visit the Release Notes of the plugin's </span><a href="http://www.iptanus.com/wordpress-plugins/wordpress-file-upload/">support page</a><span>.</span><!--  -->
+<!--  -->

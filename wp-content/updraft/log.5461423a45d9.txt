@@ -1,0 +1,4 @@
+0000.001 (3) Opened log file at time: Wed, 22 Aug 2018 00:55:33 +0000 on http://localhost:8888/jollyjump.org
+0000.008 (3) UpdraftPlus WordPress backup plugin (https://updraftplus.com): 1.14.13 WP: 4.9.8 PHP: 7.2.7 (apache2handler, Darwin Michaels-MacBook-Pro.local 17.7.0 Darwin Kernel Version 17.7.0: Thu Jun 21 22:53:14 PDT 2018; root:xnu-4570.71.2~1/RELEASE_X86_64 x86_64) MySQL: 5.7.21 WPLANG: en_US Server: Apache/2.2.34 (Unix) mod_wsgi/3.5 Python/2.7.13 PHP/7.2.7 mod_ssl/2.2.34 OpenSSL/1.0.2o DAV/2 mod_fastcgi/mod_fastcgi-SNAP-0910052141 mod_perl/2.0.9 Perl/v5.24.0 safe_mode: 0 max_execution_time: 900 memory_limit: 256M (used: 35.2M | 36.3M) multisite: N openssl: OpenSSL 1.0.2o  27 Mar 2018 mcrypt: N LANG:  ZipArchive::addFile: Y
+0000.009 (3) Free space on disk containing Updraft's temporary directory: 131538.2 MB
+0000.012 (3) This backup task (5461423a45d9) is either complete or began over 2 days ago: ending (1534899333.2699, ) (existing jobdata keys: )

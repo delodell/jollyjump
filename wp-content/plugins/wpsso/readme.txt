@@ -12,7 +12,7 @@ Requires PHP: 5.4
 Requires At Least: 3.8
 Tested Up To: 4.9.8
 WC Tested Up To: 3.4.4
-Stable Tag: 4.10.0
+Stable Tag: 4.11.0
 
 Easy, complete, accurate, and automatic - give social sites and search engines better information about your content, business and authors.
 
@@ -327,7 +327,7 @@ Version components: `{major}.{minor}.{bugfix}[-{stage}.{level}]`
 
 <h3>Changelog / Release Notes</h3>
 
-**Version 4.11.0-b.1 (2018/08/18)**
+**Version 4.11.0 (2018/08/21)**
 
 * *New Features*
 	* None.
@@ -645,11 +645,7 @@ Version components: `{major}.{minor}.{bugfix}[-{stage}.{level}]`
 
 == Upgrade Notice ==
 
-= 4.11.0-b.1 =
+= 4.11.0 =
 
-(2018/08/18) Added two new options under the SSO &gt; Advanced &gt; Custom Meta tab (Pro version).
-
-= 4.10.0 =
-
-(2018/08/11) Added Open Graph type selections under the SSO &gt; General &gt; Site Information tab.
+(2018/08/21) Added two new options under the SSO &gt; Advanced &gt; Custom Meta tab (Pro version).
 

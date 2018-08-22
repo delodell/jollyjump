@@ -1,0 +1,181 @@
+0000.003 () Opened log file at time: Wed, 22 Aug 2018 00:55:17 +0000 on http://localhost:8888/jollyjump.org
+0000.003 () UpdraftPlus WordPress backup plugin (https://updraftplus.com): 2.14.13.1 WP: 4.9.8 PHP: 7.2.7 (apache2handler, Darwin Michaels-MacBook-Pro.local 17.7.0 Darwin Kernel Version 17.7.0: Thu Jun 21 22:53:14 PDT 2018; root:xnu-4570.71.2~1/RELEASE_X86_64 x86_64) MySQL: 5.7.21 WPLANG: en_US Server: Apache/2.2.34 (Unix) mod_wsgi/3.5 Python/2.7.13 PHP/7.2.7 mod_ssl/2.2.34 OpenSSL/1.0.2o DAV/2 mod_fastcgi/mod_fastcgi-SNAP-0910052141 mod_perl/2.0.9 Perl/v5.24.0 safe_mode: 0 max_execution_time: 900 memory_limit: 256M (used: 46.4M | 28.3M) multisite: N openssl: OpenSSL 1.0.2o  27 Mar 2018 mcrypt: N LANG:  ZipArchive::addFile: Y
+0000.004 () Free space on disk containing Updraft's temporary directory: 131629.6 MB
+0000.005 () Restore job started. Entities to restore: plugins, themes, uploads, others, db. Restore options: {"updraft_restorer_replacesiteurl":"1","updraft_encryptionphrase":"","updraft_restorer_wpcore_includewpconfig":false,"updraft_incremental_restore_point":-1}
+0000.048 () Entity: db
+0000.048 () restore_backup(backup_file=backup_2018-08-21-2339_Jolly_Jump_5461423a45d9-db.gz, type=db, info=a:0:{}, last_one=)
+0000.049 () Unpacking backup... (backup_2018-08-21-2339_Jolly_Jump_5461423a45d9-db.gz, 1.7 Mb)
+0000.057 () Database successfully unpacked
+0000.058 () Restoring the database (on a large site this can take a long time - if it times out (which can happen if your web hosting company has configured your hosting to limit resources) then you should use a different method, such as phpMyAdmin)...
+0000.058 () Using direct MySQL access; value of use_mysqli is: 1
+0000.182 () Max packet size: 32 MB
+0000.182 () Entering maintenance mode
+0000.182 () Enabling Maintenance mode&#8230;
+0000.187 () Backup of: http://2019.jollyjumpsandbox.org
+0000.190 () Content URL: http://2019.jollyjumpsandbox.org/wp-content
+0000.190 () Uploads URL: http://2019.jollyjumpsandbox.org/wp-content/uploads
+0000.190 () Old table prefix: wp_
+0000.190 () Site information: multisite=0
+0000.194 () New table prefix: wp_
+0000.241 () Processing table (MyISAM): wp_options
+0000.484 () Restoring prior UD configuration (table: wp_options; keys: 91)
+0000.681 () Search and replacing table: wp_options: rows: 884
+0001.328 () Processing table (MyISAM): wp_users
+0001.351 () Search and replacing table: wp_users: rows: 4
+0001.352 () Processing table (MyISAM): wp_usermeta
+0001.379 () Search and replacing table: wp_usermeta: rows: 170
+0001.391 () Processing table (MyISAM): wp_commentmeta
+0001.428 () Search and replacing table: wp_commentmeta: rows: 20
+0001.432 () Processing table (MyISAM): wp_comments
+0001.711 () Search and replacing table: wp_comments: rows: 1135
+0001.901 () Processing table (MyISAM): wp_links
+0001.935 () Search and replacing table: wp_links: rows: 7
+0001.937 () Processing table (MyISAM): wp_postmeta
+0002.226 () Search and replacing table: wp_postmeta: rows: 84
+0002.266 () Processing table (MyISAM): wp_posts
+0002.654 () Database queries processed: 50 in 2.59 seconds
+0002.828 () Skipping search/replace on GUID column in posts table
+0002.829 () Search and replacing table: wp_posts: rows: 1672
+0003.601 () Processing table (MyISAM): wp_term_relationships
+0003.638 () Skipping this table: data in this table (wp_term_relationships) should not be search/replaced
+0003.639 () Processing table (MyISAM): wp_term_taxonomy
+0003.661 () Search and replacing table: wp_term_taxonomy: rows: 28
+0003.664 () Processing table (MyISAM): wp_termmeta
+0003.678 () Search and replacing table: wp_termmeta: rows: 15
+0003.682 () Processing table (MyISAM): wp_terms
+0003.712 () Search and replacing table: wp_terms: rows: 28
+0003.715 () Processing table (MyISAM): wp_mts_wp_reviews
+0003.731 () Search and replacing table: wp_mts_wp_reviews: rows: 0
+0003.731 () Processing table (MyISAM): wp_nf3_action_meta
+0003.749 () Search and replacing table: wp_nf3_action_meta: rows: 134
+0003.759 () Processing table (MyISAM): wp_nf3_actions
+0003.783 () Search and replacing table: wp_nf3_actions: rows: 14
+0003.785 () Processing table (MyISAM): wp_nf3_field_meta
+0003.803 () Search and replacing table: wp_nf3_field_meta: rows: 0
+0003.804 () Processing table (MyISAM): wp_nf3_fields
+0003.820 () Search and replacing table: wp_nf3_fields: rows: 0
+0003.821 () Processing table (MyISAM): wp_nf3_form_meta
+0003.838 () Search and replacing table: wp_nf3_form_meta: rows: 60
+0003.843 () Processing table (MyISAM): wp_nf3_forms
+0003.857 () Search and replacing table: wp_nf3_forms: rows: 4
+0003.858 () Processing table (MyISAM): wp_nf3_object_meta
+0003.876 () Search and replacing table: wp_nf3_object_meta: rows: 0
+0003.876 () Processing table (MyISAM): wp_nf3_objects
+0003.894 () Search and replacing table: wp_nf3_objects: rows: 0
+0003.894 () Processing table (MyISAM): wp_nf3_relationships
+0003.911 () Search and replacing table: wp_nf3_relationships: rows: 0
+0003.912 () Processing table (MyISAM): wp_nf_objectmeta
+0003.944 () Search and replacing table: wp_nf_objectmeta: rows: 270
+0003.962 () Processing table (MyISAM): wp_nf_objects
+0003.978 () Database queries processed: 100 in 3.91 seconds
+0003.979 () Search and replacing table: wp_nf_objects: rows: 17
+0003.980 () Processing table (MyISAM): wp_nf_relationships
+0004.001 () Search and replacing table: wp_nf_relationships: rows: 11
+0004.003 () Processing table (MyISAM): wp_ninja_forms_fav_fields
+0004.022 () Search and replacing table: wp_ninja_forms_fav_fields: rows: 17
+0004.028 () Processing table (MyISAM): wp_ninja_forms_fields
+0004.045 () Search and replacing table: wp_ninja_forms_fields: rows: 52
+0004.064 () Processing table (MyISAM): wp_wfu_dbxqueue
+0004.086 () Search and replacing table: wp_wfu_dbxqueue: rows: 0
+0004.086 () Processing table (MyISAM): wp_wfu_log
+0004.105 () Search and replacing table: wp_wfu_log: rows: 6
+0004.106 () Processing table (MyISAM): wp_wfu_userdata
+0004.115 () Unlocking database and leaving maintenance mode
+0004.115 () Disabling Maintenance mode&#8230;
+0004.117 () Search and replacing table: wp_wfu_userdata: rows: 6
+0004.119 () Finished: lines processed: 119 in 4.05 seconds
+0004.120 () Cleaning up rubbish...
+0004.120 () Begin search and replace (updraftplus_restored_db)
+0004.120 () [Database-replace-site-url] Database: search and replace site URL
+0004.122 () Restored pre-migration site ID for this installation
+0004.132 () Database search and replace: replace http://2019.jollyjumpsandbox.org in backup dump with http://localhost:8888/jollyjump.org
+0004.132 () Database search and replace: replace https://2019.jollyjumpsandbox.org in backup dump with http://localhost:8888/jollyjump.org
+0004.133 () Search and replacing table: wp_commentmeta: already done
+0004.133 () Search and replacing table: wp_comments: already done
+0004.133 () Search and replacing table: wp_links: already done
+0004.134 () Search and replacing table: wp_mts_wp_reviews: already done
+0004.134 () Search and replacing table: wp_nf3_action_meta: already done
+0004.134 () Search and replacing table: wp_nf3_actions: already done
+0004.134 () Search and replacing table: wp_nf3_field_meta: already done
+0004.134 () Search and replacing table: wp_nf3_fields: already done
+0004.134 () Search and replacing table: wp_nf3_form_meta: already done
+0004.134 () Search and replacing table: wp_nf3_forms: already done
+0004.134 () Search and replacing table: wp_nf3_object_meta: already done
+0004.134 () Search and replacing table: wp_nf3_objects: already done
+0004.135 () Search and replacing table: wp_nf3_relationships: already done
+0004.135 () Search and replacing table: wp_nf_objectmeta: already done
+0004.135 () Search and replacing table: wp_nf_objects: already done
+0004.135 () Search and replacing table: wp_nf_relationships: already done
+0004.135 () Search and replacing table: wp_ninja_forms_fav_fields: already done
+0004.135 () Search and replacing table: wp_ninja_forms_fields: already done
+0004.135 () Search and replacing table: wp_options: already done
+0004.135 () Search and replacing table: wp_postmeta: already done
+0004.135 () Search and replacing table: wp_posts: already done
+0004.136 () Search and replacing table: wp_term_relationships: already done
+0004.136 () Search and replacing table: wp_term_taxonomy: already done
+0004.136 () Search and replacing table: wp_termmeta: already done
+0004.136 () Search and replacing table: wp_terms: already done
+0004.136 () Search and replacing table: wp_usermeta: already done
+0004.136 () Search and replacing table: wp_users: already done
+0004.136 () Search and replacing table: wp_wfu_dbxqueue: already done
+0004.136 () Search and replacing table: wp_wfu_log: already done
+0004.137 () Search and replacing table: wp_wfu_userdata: already done
+0004.144 () Entity: plugins
+0004.144 () restore_backup(backup_file=backup_2018-08-21-2339_Jolly_Jump_5461423a45d9-plugins.zip, type=plugins, info=a:2:{s:4:"path";s:68:"/Users/mikedelrosso/sites/wordpress/jollyjump.org/wp-content/plugins";s:11:"description";s:7:"Plugins";}, last_one=)
+0004.145 () Unpacking backup... (backup_2018-08-21-2339_Jolly_Jump_5461423a45d9-plugins.zip, 21.7 Mb)
+0008.462 () Moving old data: filesystem method / updraft_dir is potentially possible
+0008.463 () Moving old data: can potentially use wp_filesystem method / -old
+0008.463 () Moving old data out of the way...
+0011.411 () Top-level entities being moved: wp-tab-widget, force-regenerate-thumbnails, index.php, ninja-forms-paypal-express, wp-subscribe, wp-review, better-search-replace, contact-form-7, synved-shortcodes, wp-shortcode, wp-file-upload, quick-setup, updraftplus, wpsso, ninja-forms, social-media-feather, disable-comments, user-role-editor, limit-login-attempts
+0011.419 () Moving unpacked backup into place...
+0014.216 () Top-level entities being moved: wp-tab-widget, force-regenerate-thumbnails, index.php, ninja-forms-paypal-express, wp-subscribe, to-top, wp-review, wp-rollback, better-search-replace, contact-form-7, synved-shortcodes, wp-shortcode, wp-file-upload, quick-setup, updraftplus, wpsso, ninja-forms, social-media-feather, disable-comments, user-role-editor, limit-login-attempts
+0014.225 () Cleaning up rubbish...
+0014.229 () Entity: themes
+0014.230 () restore_backup(backup_file=backup_2018-08-21-2339_Jolly_Jump_5461423a45d9-themes.zip, type=themes, info=a:2:{s:4:"path";s:67:"/Users/mikedelrosso/sites/wordpress/jollyjump.org/wp-content/themes";s:11:"description";s:6:"Themes";}, last_one=)
+0014.230 () Unpacking backup... (backup_2018-08-21-2339_Jolly_Jump_5461423a45d9-themes.zip, 1.2 Mb)
+0014.328 () Moving old data: filesystem method / updraft_dir is potentially possible
+0014.328 () Moving old data: can potentially use wp_filesystem method / -old
+0014.328 () Moving old data out of the way...
+0014.650 () Top-level entities being moved: index.php, point, hitmag
+0014.651 () Moving unpacked backup into place...
+0014.728 () Top-level entities being moved: index.php, point, clean-blogging
+0014.729 () Cleaning up rubbish...
+0014.732 () Entity: uploads
+0014.732 () restore_backup(backup_file=backup_2018-08-21-2339_Jolly_Jump_5461423a45d9-uploads2.zip, type=uploads, info=a:2:{s:4:"path";s:68:"/Users/mikedelrosso/sites/wordpress/jollyjump.org/wp-content/uploads";s:11:"description";s:7:"Uploads";}, last_one=)
+0014.732 () Unpacking backup... (backup_2018-08-21-2339_Jolly_Jump_5461423a45d9-uploads2.zip, 25 Mb)
+0015.462 () Moving old data: filesystem method / updraft_dir is potentially possible
+0015.462 () Moving old data: can potentially use wp_filesystem method / -old
+0015.462 () Moving old data out of the way...
+0017.146 () Moving unpacked backup into place...
+0017.314 () Cleaning up rubbish...
+0017.316 () restore_backup(backup_file=backup_2018-08-21-2339_Jolly_Jump_5461423a45d9-uploads3.zip, type=uploads, info=a:2:{s:4:"path";s:68:"/Users/mikedelrosso/sites/wordpress/jollyjump.org/wp-content/uploads";s:11:"description";s:7:"Uploads";}, last_one=)
+0017.316 () Unpacking backup... (backup_2018-08-21-2339_Jolly_Jump_5461423a45d9-uploads3.zip, 25.1 Mb)
+0017.780 () Moving unpacked backup into place...
+0017.932 () Cleaning up rubbish...
+0017.934 () restore_backup(backup_file=backup_2018-08-21-2339_Jolly_Jump_5461423a45d9-uploads4.zip, type=uploads, info=a:2:{s:4:"path";s:68:"/Users/mikedelrosso/sites/wordpress/jollyjump.org/wp-content/uploads";s:11:"description";s:7:"Uploads";}, last_one=)
+0017.934 () Unpacking backup... (backup_2018-08-21-2339_Jolly_Jump_5461423a45d9-uploads4.zip, 34.9 Mb)
+0019.024 () Moving unpacked backup into place...
+0019.203 () Cleaning up rubbish...
+0019.204 () restore_backup(backup_file=backup_2018-08-21-2339_Jolly_Jump_5461423a45d9-uploads5.zip, type=uploads, info=a:2:{s:4:"path";s:68:"/Users/mikedelrosso/sites/wordpress/jollyjump.org/wp-content/uploads";s:11:"description";s:7:"Uploads";}, last_one=)
+0019.205 () Unpacking backup... (backup_2018-08-21-2339_Jolly_Jump_5461423a45d9-uploads5.zip, 24.4 Mb)
+0019.883 () Moving unpacked backup into place...
+0020.387 () Cleaning up rubbish...
+0020.389 () restore_backup(backup_file=backup_2018-08-21-2339_Jolly_Jump_5461423a45d9-uploads7.zip, type=uploads, info=a:2:{s:4:"path";s:68:"/Users/mikedelrosso/sites/wordpress/jollyjump.org/wp-content/uploads";s:11:"description";s:7:"Uploads";}, last_one=)
+0020.389 () Unpacking backup... (backup_2018-08-21-2339_Jolly_Jump_5461423a45d9-uploads7.zip, 25.3 Mb)
+0021.038 () Moving unpacked backup into place...
+0021.348 () Cleaning up rubbish...
+0021.349 () restore_backup(backup_file=backup_2018-08-21-2339_Jolly_Jump_5461423a45d9-uploads6.zip, type=uploads, info=a:2:{s:4:"path";s:68:"/Users/mikedelrosso/sites/wordpress/jollyjump.org/wp-content/uploads";s:11:"description";s:7:"Uploads";}, last_one=)
+0021.349 () Unpacking backup... (backup_2018-08-21-2339_Jolly_Jump_5461423a45d9-uploads6.zip, 25.4 Mb)
+0022.091 () Moving unpacked backup into place...
+0022.511 () Cleaning up rubbish...
+0022.516 () restore_backup(backup_file=backup_2018-08-21-2339_Jolly_Jump_5461423a45d9-uploads.zip, type=uploads, info=a:2:{s:4:"path";s:68:"/Users/mikedelrosso/sites/wordpress/jollyjump.org/wp-content/uploads";s:11:"description";s:7:"Uploads";}, last_one=)
+0022.516 () Unpacking backup... (backup_2018-08-21-2339_Jolly_Jump_5461423a45d9-uploads.zip, 25.1 Mb)
+0023.136 () Moving unpacked backup into place...
+0023.491 () Cleaning up rubbish...
+0023.493 () Entity: others
+0023.493 () restore_backup(backup_file=backup_2018-08-21-2339_Jolly_Jump_5461423a45d9-others.zip, type=others, info=a:2:{s:4:"path";s:60:"/Users/mikedelrosso/sites/wordpress/jollyjump.org/wp-content";s:11:"description";s:6:"Others";}, last_one=1)
+0023.493 () Unpacking backup... (backup_2018-08-21-2339_Jolly_Jump_5461423a45d9-others.zip, 0 Mb)
+0023.499 () Cleaning up rubbish...
+0023.500 () Error: Failed to delete working directory after restoring. (/Users/mikedelrosso/sites/wordpress/jollyjump.org/wp-content/upgrade/b1575f19)
+0023.525 () Restore successful!
+0023.525 () Restore successful
