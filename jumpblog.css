@@ -1872,6 +1872,7 @@ embed, iframe, object {
 }
 .span_1_of_2 {
     width: 49%;
+    text-align:center;
 }
 
 /*  GO FULL WIDTH AT LESS THAN 480 PIXELS */
