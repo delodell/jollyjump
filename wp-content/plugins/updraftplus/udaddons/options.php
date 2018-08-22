@@ -236,7 +236,7 @@ ENDHERE;
 
 		if ($this->connected) {
 			echo '<p style="clear: both; float: left;">'.__('You are presently <strong>connected</strong> to an UpdraftPlus.Com account.', 'updraftplus');
-			echo ' <a href="#" onclick="jQuery(\'#ud_connectsubmit\').click();">'.__('If you bought new add-ons, then follow this link to refresh your connection', 'updraftplus').'</a>.';
+			echo ' <a href="'.UpdraftPlus::get_current_clean_url().'" onclick="jQuery(\'.ud_connectsubmit\').click();">'.__('If you bought new add-ons, then follow this link to refresh your connection', 'updraftplus').'</a>.';
 			if (!empty($options['password'])) echo ' '.__("Note that after you have claimed your add-ons, you can remove your password (but not the email address) from the settings below, without affecting this site's access to updates.", 'updraftplus');
 		} else {
 
@@ -338,6 +338,8 @@ ENDHERE;
 						alert("$ukresponse "+response);
 					}
 				});
+				
+				return false;
 			}
 		</script>
 ENDHERE;

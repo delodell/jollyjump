@@ -28,6 +28,9 @@ class UpdraftPlus_Addons_RemoteStorage_remotesend extends UpdraftPlus_RemoteStor
 		// 2MB. After being b64-encoded twice, this is ~ 3.7MB = 113 seconds on 32KB/s uplink
 		$this->default_chunk_size = (defined('UPDRAFTPLUS_REMOTESEND_DEFAULT_CHUNK_BYTES') && is_numeric(UPDRAFTPLUS_REMOTESEND_DEFAULT_CHUNK_BYTES) && UPDRAFTPLUS_REMOTESEND_DEFAULT_CHUNK_BYTES >= 16384) ? UPDRAFTPLUS_REMOTESEND_DEFAULT_CHUNK_BYTES : 2097152;
 
+		add_filter('updraftplus_clone_remotesend_options', array($this, 'updraftplus_clone_remotesend_options'), 10, 1);
+		add_action('updraftplus_remotesend_upload_complete', array($this, 'upload_complete'));
+
 		// 3rd parameter: chunking? 4th: Test button?
 		parent::__construct('remotesend', 'Remote send', false, false);
 	}
@@ -255,6 +258,47 @@ class UpdraftPlus_Addons_RemoteStorage_remotesend extends UpdraftPlus_RemoteStor
 
 	}
 
+	/**
+	 * This function is called via an action and will send a message to the remote site to inform it that the backup has finished sending
+	 *
+	 * @return void
+	 */
+	public function upload_complete() {
+		global $updraftplus;
+
+		$service = $updraftplus->jobdata_get('service');
+		$remote_sent = (!empty($service) && ((is_array($service) && in_array('remotesend', $service)) || 'remotesend' === $service)) ? true : false;
+
+		if (!$remote_sent) return;
+		
+		$this->options = $this->get_options();
+
+		if (!$this->options_exist($this->options)) {
+			$updraftplus->log('No '.$this->method.' settings were found');
+			$updraftplus->log(sprintf(__('No %s settings were found', 'updraftplus'), $this->description), 'error');
+			return false;
+		}
+
+		$storage = $this->bootstrap();
+		if (is_wp_error($storage)) return $updraftplus->log_wp_error($storage, false, true);
+
+		$this->set_storage($storage);
+		
+		$response = $this->send_message('upload_complete', array(), 30);
+
+		if (is_wp_error($response)) {
+			throw new Exception($response->get_error_message().' ('.$response->get_error_code().')');
+		}
+
+		if (!is_array($response) || empty($response['response'])) throw new Exception(__('Unexpected response:', 'updraftplus').' '.serialize($response));
+
+		if ('error' == $response['response']) {
+			$msg = $response['data'];
+			// Could interpret the codes to get more interesting messages directly to the user
+			throw new Exception(__('Error:', 'updraftplus').' '.$msg);
+		}
+	}
+
 	private function remotesend_set_new_chunk_size($new_chunk_size) {
 		global $updraftplus;
 		$this->remotesend_use_chunk_size = $new_chunk_size;
@@ -310,7 +354,75 @@ class UpdraftPlus_Addons_RemoteStorage_remotesend extends UpdraftPlus_RemoteStor
 	public function get_opts() {
 		global $updraftplus;
 		$opts = $updraftplus->jobdata_get('remotesend_info');
+		$opts = apply_filters('updraftplus_clone_remotesend_options', $opts);
 		return is_array($opts) ? $opts : array();
+	}
+
+	/**
+	 * This function will check the options we have for the remote send and if it's a clone job and there are missing settings it will call the mothership to get this information.
+	 *
+	 * @param array $opts - an array of remote send options
+	 *
+	 * @return array      - an array of options
+	 */
+	public function updraftplus_clone_remotesend_options($opts) {
+		global $updraftplus;
+		if (empty($updraftplus_admin)) include_once(UPDRAFTPLUS_DIR.'/admin.php');
+		
+		$clone_job = $updraftplus->jobdata_get('clone_job');
+		
+		// check this is a clone job before we proceed
+		if (empty($clone_job)) return $opts;
+
+		// check that we don't already have the needed information
+		if (is_array($opts) && !empty($opts['url']) && !empty($opts['name_indicator']) && !empty($opts['key'])) return $opts;
+
+		$updraftplus->jobdata_set('jobstatus', 'clonepolling');
+		$clone_id = $updraftplus->jobdata_get('clone_id');
+		$clone_url = $updraftplus->jobdata_get('clone_url');
+		$clone_key = $updraftplus->jobdata_get('clone_key');
+		$secret_token = $updraftplus->jobdata_get('secret_token');
+			
+		if (empty($clone_id) && empty($secret_token)) return $opts;
+		
+		$params = array('clone_id' => $clone_id, 'secret_token' => $secret_token);
+		$response = $updraftplus->get_updraftplus_clone()->clone_info_poll($params);
+
+		if (!isset($response['status']) || 'success' != $response['status']) {
+			$updraftplus->log("UpdraftClone migration information poll failed with code: " . $response['code']);
+			return $opts;
+		}
+
+		if (!isset($response['data']) || !isset($response['data']['url']) || !isset($response['data']['key'])) {
+			$updraftplus->log("UpdraftClone migration information poll unexpected return information with code:" . $response['code']);
+			return $opts;
+		}
+
+		$clone_url = $response['data']['url'];
+		$clone_key = json_decode($response['data']['key'], true);
+
+		if (empty($clone_url) || empty($clone_key)) {
+			$updraftplus->log("UpdraftClone migration information not found: will poll again in 60");
+			$updraftplus->reschedule(60);
+			$updraftplus->record_still_alive();
+			die;
+		}
+
+		// Store the information
+		$remotesites = UpdraftPlus_Options::get_updraft_option('updraft_remotesites');
+		if (!is_array($remotesites)) $remotesites = array();
+
+		foreach ($remotesites as $k => $rsite) {
+			if (!is_array($rsite)) continue;
+			if ($rsite['url'] == $clone_key['url']) unset($remotesites[$k]);
+		}
+
+		$remotesites[] = $clone_key;
+		UpdraftPlus_Options::update_updraft_option('updraft_remotesites', $remotesites);
+
+		$updraftplus->jobdata_set_multi('clone_url', $clone_url, 'clone_key', $clone_key, 'remotesend_info', $clone_key, 'jobstatus', 'clouduploading');
+
+		return $clone_key;
 	}
 
 	// do_listfiles(), do_download(), do_delete() : the absence of any method here means that the parent will correctly throw an error
