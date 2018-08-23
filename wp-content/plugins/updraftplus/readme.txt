@@ -169,6 +169,7 @@ N.B. Paid versions of UpdraftPlus Backup / Restore have a version number which i
 * TWEAK: Tweaked downwards the minimum time in the future for rescheduling a resumption
 * TWEAK: Deal with a possible issue in automatic collation selection in restoration when all character sets are supported and a collation is not supported
 * TWEAK: Replace absolute URLs in place of relative URLs in anchor links
+* TWEAK: Update error code URL for binary zip errors
 
 = 1.14.12 - 17/July/2018 =
 

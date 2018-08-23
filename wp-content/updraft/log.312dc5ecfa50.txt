@@ -1,0 +1,146 @@
+0000.000 (0) Opened log file at time: Thu, 23 Aug 2018 13:47:39 +0000 on http://localhost:8888/jollyjump.org
+0000.004 (0) UpdraftPlus WordPress backup plugin (https://updraftplus.com): 2.14.13.1 WP: 4.9.8 PHP: 7.2.7 (apache2handler, Darwin Michaels-MacBook-Pro.local 17.7.0 Darwin Kernel Version 17.7.0: Thu Jun 21 22:53:14 PDT 2018; root:xnu-4570.71.2~1/RELEASE_X86_64 x86_64) MySQL: 5.7.21 WPLANG: en_US Server: Apache/2.2.34 (Unix) mod_wsgi/3.5 Python/2.7.13 PHP/7.2.7 mod_ssl/2.2.34 OpenSSL/1.0.2o DAV/2 mod_fastcgi/mod_fastcgi-SNAP-0910052141 mod_perl/2.0.9 Perl/v5.24.0 safe_mode: 0 max_execution_time: 900 memory_limit: 256M (used: 42.4M | 6.3M) multisite: N openssl: OpenSSL 1.0.2o  27 Mar 2018 mcrypt: N LANG:  ZipArchive::addFile: Y
+0000.005 (0) Free space on disk containing Updraft's temporary directory: 130203.8 MB
+0000.015 (0) Tasks: Backup files: 0 (schedule: weekly) Backup DB: 1 (schedule: daily)
+0000.019 (0) Requesting semaphore lock (d) (apparently not via scheduler)
+0000.027 (0) Set semaphore last lock (d) time to 2018-08-23 13:47:39
+0000.028 (0) Semaphore lock (d) complete
+0000.036 (0) Backup run: resumption=0, nonce=312dc5ecfa50, begun at=1535032059 (0s ago), job type=backup
+0000.038 (0) Scheduling a resumption (1) after 300 seconds (1535032359) in case this run gets aborted
+0000.058 (0) This backup run is not intended for files - skipping
+0000.059 (0) Beginning creation of database dump (WordPress DB)
+0000.134 (0) Table wp_options: Total expected rows (approximate): 855
+0000.359 (0) Table wp_options: Total rows added: 851 in 0.22 seconds
+0000.362 (0) Table wp_options: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_options.table.gz - 290.9 KB)
+0000.368 (0) Table wp_users: Total expected rows (approximate): 4
+0000.374 (0) Table wp_users: Total rows added: 4 in 0.00 seconds
+0000.375 (0) Table wp_users: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_users.table.gz - 0.9 KB)
+0000.381 (0) Table wp_usermeta: Total expected rows (approximate): 172
+0000.389 (0) Table wp_usermeta: Total rows added: 172 in 0.01 seconds
+0000.392 (0) Table wp_usermeta: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_usermeta.table.gz - 4.5 KB)
+0000.399 (0) Table wp_commentmeta: Total expected rows (approximate): 20
+0000.404 (0) Table wp_commentmeta: Total rows added: 20 in 0.00 seconds
+0000.405 (0) Table wp_commentmeta: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_commentmeta.table.gz - 0.5 KB)
+0000.414 (0) Table wp_comments: Total expected rows (approximate): 1135
+0000.862 (0) Table wp_comments: Total rows added: 1135 in 0.45 seconds
+0000.869 (0) Table wp_comments: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_comments.table.gz - 892.7 KB)
+0000.880 (0) Table wp_links: Total expected rows (approximate): 7
+0000.890 (0) Table wp_links: Total rows added: 7 in 0.01 seconds
+0000.893 (0) Table wp_links: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_links.table.gz - 0.6 KB)
+0000.898 (0) Table wp_postmeta: Total expected rows (approximate): 2767
+0000.991 (0) Table wp_postmeta: Total rows added: 2767 in 0.09 seconds
+0000.993 (0) Table wp_postmeta: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_postmeta.table.gz - 73.1 KB)
+0000.997 (0) Table wp_posts: Total expected rows (approximate): 1676
+0001.715 (0) Table wp_posts: Total rows added: 1676 in 0.72 seconds
+0001.717 (0) Table wp_posts: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_posts.table.gz - 616.6 KB)
+0001.727 (0) Table wp_term_relationships: Total expected rows (approximate): 173
+0001.731 (0) Table wp_term_relationships: Total rows added: 173 in 0.00 seconds
+0001.732 (0) Table wp_term_relationships: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_term_relationships.table.gz - 0.9 KB)
+0001.739 (0) Table wp_term_taxonomy: Total expected rows (approximate): 28
+0001.743 (0) Table wp_term_taxonomy: Total rows added: 28 in 0.00 seconds
+0001.745 (0) Table wp_term_taxonomy: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_term_taxonomy.table.gz - 0.6 KB)
+0001.750 (0) Table wp_termmeta: Total expected rows (approximate): 15
+0001.759 (0) Table wp_termmeta: Total rows added: 15 in 0.01 seconds
+0001.760 (0) Table wp_termmeta: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_termmeta.table.gz - 0.7 KB)
+0001.764 (0) Table wp_terms: Total expected rows (approximate): 28
+0001.768 (0) Table wp_terms: Total rows added: 28 in 0.00 seconds
+0001.771 (0) Table wp_terms: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_terms.table.gz - 0.7 KB)
+0001.779 (0) Table wp_mts_wp_reviews: Total expected rows (approximate): 0
+0001.784 (0) Table wp_mts_wp_reviews: Total rows added: 0 in 0.00 seconds
+0001.789 (0) Table wp_mts_wp_reviews: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_mts_wp_reviews.table.gz - 0.3 KB)
+0001.793 (0) Table wp_nf3_action_meta: Total expected rows (approximate): 134
+0001.797 (0) Table wp_nf3_action_meta: Total rows added: 134 in 0.00 seconds
+0001.798 (0) Table wp_nf3_action_meta: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_nf3_action_meta.table.gz - 1.9 KB)
+0001.810 (0) Table wp_nf3_actions: Total expected rows (approximate): 14
+0001.814 (0) Table wp_nf3_actions: Total rows added: 14 in 0.00 seconds
+0001.817 (0) Table wp_nf3_actions: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_nf3_actions.table.gz - 0.6 KB)
+0001.825 (0) Table wp_nf3_field_meta: Total expected rows (approximate): 0
+0001.827 (0) Table wp_nf3_field_meta: Total rows added: 0 in 0.00 seconds
+0001.828 (0) Table wp_nf3_field_meta: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_nf3_field_meta.table.gz - 0.3 KB)
+0001.834 (0) Table wp_nf3_fields: Total expected rows (approximate): 0
+0001.836 (0) Table wp_nf3_fields: Total rows added: 0 in 0.00 seconds
+0001.838 (0) Table wp_nf3_fields: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_nf3_fields.table.gz - 0.4 KB)
+0001.844 (0) Table wp_nf3_form_meta: Total expected rows (approximate): 60
+0001.848 (0) Table wp_nf3_form_meta: Total rows added: 60 in 0.00 seconds
+0001.849 (0) Table wp_nf3_form_meta: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_nf3_form_meta.table.gz - 1.1 KB)
+0001.854 (0) Table wp_nf3_forms: Total expected rows (approximate): 4
+0001.858 (0) Table wp_nf3_forms: Total rows added: 4 in 0.00 seconds
+0001.859 (0) Table wp_nf3_forms: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_nf3_forms.table.gz - 0.5 KB)
+0001.865 (0) Table wp_nf3_object_meta: Total expected rows (approximate): 0
+0001.867 (0) Table wp_nf3_object_meta: Total rows added: 0 in 0.00 seconds
+0001.868 (0) Table wp_nf3_object_meta: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_nf3_object_meta.table.gz - 0.3 KB)
+0001.874 (0) Table wp_nf3_objects: Total expected rows (approximate): 0
+0001.878 (0) Table wp_nf3_objects: Total rows added: 0 in 0.00 seconds
+0001.880 (0) Table wp_nf3_objects: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_nf3_objects.table.gz - 0.4 KB)
+0001.884 (0) Table wp_nf3_relationships: Total expected rows (approximate): 0
+0001.886 (0) Table wp_nf3_relationships: Total rows added: 0 in 0.00 seconds
+0001.888 (0) Table wp_nf3_relationships: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_nf3_relationships.table.gz - 0.4 KB)
+0001.892 (0) Table wp_nf_objectmeta: Total expected rows (approximate): 270
+0001.900 (0) Table wp_nf_objectmeta: Total rows added: 270 in 0.01 seconds
+0001.903 (0) Table wp_nf_objectmeta: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_nf_objectmeta.table.gz - 3.4 KB)
+0001.907 (0) Table wp_nf_objects: Total expected rows (approximate): 17
+0001.911 (0) Table wp_nf_objects: Total rows added: 17 in 0.00 seconds
+0001.912 (0) Table wp_nf_objects: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_nf_objects.table.gz - 0.4 KB)
+0001.918 (0) Table wp_nf_relationships: Total expected rows (approximate): 11
+0001.920 (0) Table wp_nf_relationships: Total rows added: 11 in 0.00 seconds
+0001.922 (0) Table wp_nf_relationships: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_nf_relationships.table.gz - 0.4 KB)
+0001.925 (0) Table wp_ninja_forms_fav_fields: Total expected rows (approximate): 17
+0001.931 (0) Table wp_ninja_forms_fav_fields: Total rows added: 17 in 0.00 seconds
+0001.934 (0) Table wp_ninja_forms_fav_fields: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_ninja_forms_fav_fields.table.gz - 2.6 KB)
+0001.939 (0) Table wp_ninja_forms_fields: Total expected rows (approximate): 52
+0001.944 (0) Table wp_ninja_forms_fields: Total rows added: 52 in 0.00 seconds
+0001.946 (0) Table wp_ninja_forms_fields: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_ninja_forms_fields.table.gz - 3.1 KB)
+0001.951 (0) Table wp_wfu_dbxqueue: Total expected rows (approximate): 0
+0001.954 (0) Table wp_wfu_dbxqueue: Total rows added: 0 in 0.00 seconds
+0001.955 (0) Table wp_wfu_dbxqueue: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_wfu_dbxqueue.table.gz - 0.3 KB)
+0001.959 (0) Table wp_wfu_log: Total expected rows (approximate): 6
+0001.962 (0) Table wp_wfu_log: Total rows added: 6 in 0.00 seconds
+0001.964 (0) Table wp_wfu_log: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_wfu_log.table.gz - 0.9 KB)
+0001.969 (0) Table wp_wfu_userdata: Total expected rows (approximate): 6
+0001.972 (0) Table wp_wfu_userdata: Total rows added: 6 in 0.00 seconds
+0001.973 (0) Table wp_wfu_userdata: finishing file (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_wfu_userdata.table.gz - 0.6 KB)
+0001.978 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_options.table.gz (1/30): adding to final database dump
+0002.127 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_users.table.gz (2/30): adding to final database dump
+0002.129 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_usermeta.table.gz (3/30): adding to final database dump
+0002.132 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_commentmeta.table.gz (4/30): adding to final database dump
+0002.132 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_comments.table.gz (5/30): adding to final database dump
+0002.504 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_links.table.gz (6/30): adding to final database dump
+0002.506 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_postmeta.table.gz (7/30): adding to final database dump
+0002.549 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_posts.table.gz (8/30): adding to final database dump
+0002.956 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_term_relationships.table.gz (9/30): adding to final database dump
+0002.957 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_term_taxonomy.table.gz (10/30): adding to final database dump
+0002.959 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_termmeta.table.gz (11/30): adding to final database dump
+0002.960 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_terms.table.gz (12/30): adding to final database dump
+0002.961 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_mts_wp_reviews.table.gz (13/30): adding to final database dump
+0002.962 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_nf3_action_meta.table.gz (14/30): adding to final database dump
+0002.964 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_nf3_actions.table.gz (15/30): adding to final database dump
+0002.965 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_nf3_field_meta.table.gz (16/30): adding to final database dump
+0002.966 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_nf3_fields.table.gz (17/30): adding to final database dump
+0002.969 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_nf3_form_meta.table.gz (18/30): adding to final database dump
+0002.970 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_nf3_forms.table.gz (19/30): adding to final database dump
+0002.971 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_nf3_object_meta.table.gz (20/30): adding to final database dump
+0002.972 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_nf3_objects.table.gz (21/30): adding to final database dump
+0002.974 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_nf3_relationships.table.gz (22/30): adding to final database dump
+0002.975 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_nf_objectmeta.table.gz (23/30): adding to final database dump
+0002.978 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_nf_objects.table.gz (24/30): adding to final database dump
+0002.979 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_nf_relationships.table.gz (25/30): adding to final database dump
+0002.979 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_ninja_forms_fav_fields.table.gz (26/30): adding to final database dump
+0002.982 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_ninja_forms_fields.table.gz (27/30): adding to final database dump
+0002.985 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_wfu_dbxqueue.table.gz (28/30): adding to final database dump
+0002.986 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_wfu_log.table.gz (29/30): adding to final database dump
+0002.987 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db-table-wp_wfu_userdata.table.gz (30/30): adding to final database dump
+0002.988 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db.gz: finished writing out complete database file (1880 KB)
+0003.049 (0) Total database tables backed up: 30 (backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db.gz, size: 1936963, sha256)
+0003.056 (0) backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db.gz: db: This file has not yet been successfully uploaded: will queue
+0003.056 (0) Saving backup history. Total backup size: 1.8 MB
+0003.060 (0) Requesting upload of the files that have not yet been successfully uploaded (1)
+0003.062 (0) Cloud backup selection (1/1): none with instance (1/1) (last)
+0003.063 (0) No remote despatch: user chose no remote backup service
+0003.064 (0) Recording as successfully uploaded: backup_2018-08-23-1347_Jolly_Jump_312dc5ecfa50-db.gz
+0003.066 (0) Prune old backups from local store: nothing to do, since the user disabled local deletion and we are using local backups
+0003.067 (0) Resume backup (312dc5ecfa50, 0): finish run
+0003.068 (0) Decremented the semaphore (d) by 1
+0003.069 (0) Semaphore (d) unlocked
+0003.070 (0) There were no errors in the uploads, so the 'resume' event (1) is being unscheduled
+0003.073 (0) No email will/can be sent - the user has not configured an email address.
+0003.074 (0) The backup apparently succeeded and is now complete
