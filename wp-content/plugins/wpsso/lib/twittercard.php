@@ -16,6 +16,7 @@ if ( ! class_exists( 'WpssoTwitterCard' ) ) {
 		private $p;
 
 		public function __construct( &$plugin ) {
+
 			$this->p =& $plugin;
 
 			if ( $this->p->debug->enabled ) {
@@ -46,17 +47,6 @@ if ( ! class_exists( 'WpssoTwitterCard' ) ) {
 		 * Use reference for $mt_og argument to allow unset of existing twitter meta tags.
 		 */
 		public function get_array( array &$mod, array &$mt_og, $crawler_name = false ) {
-
-			if ( false === $crawler_name ) {
-				$crawler_name = SucomUtil::get_crawler_name();
-			}
-
-			if ( ! empty( $this->p->avail['*']['vary_ua'] ) ) {
-				switch ( $crawler_name ) {
-					case 'pinterest':
-						return array();
-				}
-			}
 
 			if ( $this->p->debug->enabled ) {
 				$this->p->debug->mark();

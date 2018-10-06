@@ -3,7 +3,7 @@ Contributors: nickboss
 Donate link: http://www.iptanus.com/support/wordpress-file-upload
 Tags: file, upload, ajax, form, page, post, sidebar, responsive, widget, webcam, ftp
 Requires at least: 2.9.2
-Tested up to: 4.9.7
+Tested up to: 4.9.8
 Stable tag: "trunk"
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -148,6 +148,21 @@ There is an option in plugin's settings in Dashboard to relax the CSS rules, so 
 8. A screenshot of the file browser.
 
 == Changelog ==
+
+= 4.9.0 =
+* code further improved to reduce "Iptanus Server unreachable..." errors
+* checked Weglot Translate compatibility; /wp-admin/admin-ajax.php needs to be added to Exclusion URL list of Weglot configuration so that uploads can work
+* several significant additions in the Pro version, including Microsoft OneDrive integration
+
+= 4.8.0 =
+* added item in Admin Bar that displays number of new uploads and redirects to Uploaded Files Dashboard page
+* code improved in Uploaded Files Dashboard page so that download action directly downloads the file, instead of redirecting to File Browser
+* added Advanced option 'WFU_UPLOADEDFILES_COLUMNS' that controls the order and visibility of Uploaded Files Dashboard page columns
+* added Advanced option 'WFU_UPLOADEDFILES_ACTIONS' that controls the order and visibility of Uploaded Files Dashboard page file actions
+* added several filters in Uploaded Files Dashboard page to make it more customizable
+* PHP function redeclaration system significantly improved to support arguments by reference, execution after the original function and redeclaration of variables
+* code improved to reduce "Iptanus Server unreachable..." errors (better operation of verify_peer http context property)
+* added a link in Iptanus Unreachable Server error message to an Iptanus article describing how to resolve it
 
 = 4.7.0 =
 * added Uploaded Files top-level Dashboard menu item, showing all the uploaded files and highlighting the new ones
@@ -779,6 +794,12 @@ Added the option to allow anyone to upload files, by setting the attribute uploa
 Initial version.
 
 == Upgrade Notice ==
+
+= 4.9.0 =
+Significant update to introduce some new features and improvements and fix some bugs.
+
+= 4.8.0 =
+Significant update to introduce some new features and improvements and fix some bugs.
 
 = 4.7.0 =
 Significant update to introduce some new features and improvements and fix some bugs.

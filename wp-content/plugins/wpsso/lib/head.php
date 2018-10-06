@@ -16,6 +16,7 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 		private $p;
 
 		public function __construct( &$plugin ) {
+
 			$this->p =& $plugin;
 
 			if ( $this->p->debug->enabled ) {
@@ -30,73 +31,6 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 			 */
 			add_action( 'amp_post_template_head', array( $this, 'maybe_disable_rel_canonical' ), -1000 );
 			add_action( 'amp_post_template_head', array( $this, 'show_head' ), WPSSO_HEAD_PRIORITY );
-
-			/**
-			 * Crawlers are only seen on the front-end, so skip if in back-end.
-			 */
-			if ( ! is_admin() && $this->p->avail['*']['vary_ua'] ) {
-				if ( $this->p->debug->enabled ) {
-					$this->p->debug->log( 'maybe add/remove query argument for custom crawler' );
-				}
-				$this->vary_user_agent_check();
-			}
-		}
-
-		public function vary_user_agent_check() {
-
-			if ( $this->p->debug->enabled ) {
-				$this->p->debug->mark();
-			}
-
-			/**
-			 * Query argument used to bust external caches.
-			 */
-			$crawler_arg = 'uaid';
-
-			if ( strpos( $this->get_head_cache_index( false ), 'uaid:' ) !== false ) {	// Custom crawler found.
-
-				$crawler_name = SucomUtil::get_crawler_name();
-
-				if ( $this->p->debug->enabled ) {
-					$this->p->debug->log( 'custom crawler cache index found for ' . $crawler_name );
-
-				}
-				if ( ! defined( 'DONOTCACHEPAGE' ) ) {	// Define as true.
-					if ( $this->p->debug->enabled ) {
-						$this->p->debug->log( 'defining DONOTCACHEPAGE as true' );
-					}
-					define( 'DONOTCACHEPAGE', true );
-				} elseif ( DONOTCACHEPAGE ) {	// Already defined as true.
-					if ( $this->p->debug->enabled ) {
-						$this->p->debug->log( 'DONOTCACHEPAGE already defined as true' );
-					}
-				} else {	// Already defined as false.
-					if ( $this->p->debug->enabled ) {
-						$this->p->debug->log( 'error defining DONOTCACHEPAGE - constant already defined as false' );
-					}
-				}
-
-				/**
-				 * Add a query argument for this crawler and redirect to bust external caches.
-				 */
-				if ( empty( $_GET[$crawler_arg] ) || $_GET[$crawler_arg] !== $crawler_name ) {
-
-					wp_redirect( add_query_arg( $crawler_arg, $crawler_name, remove_query_arg( $crawler_arg ) ) );	// 302 by default.
-
-					exit;
-				}
-
-			/**
-			 * If not a custom crawler, then remove the query (if set) and redirect.
-			 */
-			} elseif ( isset( $_GET[$crawler_arg] ) ) {
-
-				wp_redirect( remove_query_arg( $crawler_arg ) );	// 302 by default.
-
-				exit;
-			}
-
-			add_filter( 'wp_headers', array( $this, 'add_vary_user_agent_header' ) );
 		}
 
 		public function add_vary_user_agent_header( $headers ) {
@@ -106,8 +40,6 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 
 		/**
 		 * Can return an empty string if $mixed and $sharing_rul are false.
-		 *
-		 * $mixed and $sharing_url are false when called by the vary_user_agent_check() method.
 		 *
 		 * $mixed = 'default' | 'current' | post ID | $mod array
 		 */
@@ -132,20 +64,6 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 			 */
 			if ( SucomUtil::is_amp() ) {
 				$cache_index .= '_amp:true';
-			}
-
-			/**
-			 * Crawlers are only seen on the front-end, so skip if in back-end.
-			 */
-			if ( ! is_admin() && ! empty( $this->p->avail['*']['vary_ua'] ) ) {
-
-				$crawler_name = SucomUtil::get_crawler_name();
-
-				switch ( $crawler_name ) {
-					case 'pinterest':
-						$cache_index .= '_uaid:' . $crawler_name;
-						break;
-				}
 			}
 
 			$cache_index = trim( $cache_index, '_' );	// Cleanup leading underscores.
@@ -208,9 +126,9 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 				$this->p->debug->log( 'required call to get_page_mod()' );
 			}
 
-			$mod = $this->p->util->get_page_mod( $use_post );	// Get post/user/term id, module name, and module object reference.
-			$r_cache = true;
-			$mt_og = array();
+			$mod        = $this->p->util->get_page_mod( $use_post );	// Get post/user/term id, module name, and module object reference.
+			$read_cache = true;
+			$mt_og      = array();
 
 			if ( $this->p->debug->enabled ) {
 				$this->p->debug->log( 'home url = ' . get_option( 'home' ) );
@@ -228,7 +146,7 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 			}
 
 			if ( $add_head_html ) {
-				echo $this->get_head_html( $use_post, $mod, $r_cache, $mt_og );
+				echo $this->get_head_html( $use_post, $mod, $read_cache, $mt_og );
 			} else {
 				echo "\n" . '<!-- ' . $this->p->lca . ' head html is disabled -->' . "\n";
 			}
@@ -255,6 +173,7 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 
 				switch ( $mt_match ) {
 
+					case 'property-og:url':
 					case 'property-og:type':
 					case 'property-og:title':
 					case 'property-og:description':
@@ -412,7 +331,7 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 			return $ret;
 		}
 
-		public function get_head_html( $use_post = false, &$mod = false, $r_cache = true, array &$mt_og ) {
+		public function get_head_html( $use_post = false, &$mod = false, $read_cache = true, array &$mt_og ) {
 
 			if ( $this->p->debug->enabled ) {
 				$this->p->debug->mark();
@@ -429,12 +348,15 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 				$mod = $this->p->util->get_page_mod( $use_post );
 			}
 
-			$start_time   = microtime( true );
-			$crawler_name = SucomUtil::get_crawler_name();
-			$html         = $this->get_mt_mark( 'begin' );
-			$indent       = 0;
+			$mtime_start = microtime( true );
 
-			foreach ( $this->get_head_array( $use_post, $mod, $r_cache, $mt_og ) as $mt ) {
+			$crawler_name = SucomUtil::get_crawler_name();
+
+			$html = $this->get_mt_mark( 'begin' );
+
+			$indent = 0;
+
+			foreach ( $this->get_head_array( $use_post, $mod, $read_cache, $mt_og ) as $mt ) {
 
 				if ( ! empty( $mt[0] ) ) {
 
@@ -452,16 +374,19 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 
 			$html .= $this->get_mt_mark( 'end' );
 
-			$html .= '<!-- added on ' . date( 'c' ) . ' in ' . sprintf( '%f secs', microtime( true ) - $start_time ) . 
-				( $crawler_name !== 'none' ? ' for ' . $crawler_name : '' ) . ' from ' . SucomUtilWP::raw_home_url() . ' -->' . "\n\n";
+			$mtime_total = microtime( true ) - $mtime_start;
+
+			$html .= '<!-- added on ' . date( 'c' ) . ' in ' . sprintf( '%f secs', $mtime_total ) . 
+				( $crawler_name !== 'none' ? ' for ' . $crawler_name : '' ) . 
+					' from ' . SucomUtilWP::raw_home_url() . ' -->' . "\n\n";
 
 			return $html;
 		}
 
 		/**
-		 * $r_cache is false when called by the post/term/user load_meta_page() method.
+		 * $read_cache is false when called by the post/term/user load_meta_page() method.
 		 */
-		public function get_head_array( $use_post = false, &$mod = false, $r_cache = true, &$mt_og = array() ) {
+		public function get_head_array( $use_post = false, &$mod = false, $read_cache = true, &$mt_og = array() ) {
 
 			if ( $this->p->debug->enabled ) {
 				$this->p->debug->mark( 'build head array' );	// Begin timer.
@@ -516,7 +441,7 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 
 			if ( $cache_exp_secs > 0 ) {
 
-				if ( $r_cache ) {	// False when called by the post/term/user load_meta_page() method.
+				if ( $read_cache ) {	// False when called by the post/term/user load_meta_page() method.
 
 					$cache_array = get_transient( $cache_id );
 
@@ -599,17 +524,22 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 			 * Fallback for article authors without a Facebook page URL in their user profile.
 			 */
 			if ( ! empty( $this->p->options['add_meta_name_author'] ) ) {
+
 				if ( ! empty( $mt_og['og:type'] ) && $mt_og['og:type'] === 'article' ) {
+
 					if ( empty( $mt_og['article:author'] ) ) {
+
 						if ( is_object( $this->p->m['util']['user'] ) ) {
 							$mt_name['author'] = $this->p->m['util']['user']->get_author_meta( $author_id,
 								$this->p->options['fb_author_name'] );
 						} elseif ( $this->p->debug->enabled ) {
 							$this->p->debug->log( 'skipped fallback author meta tag - user module not defined' );
 						}
+
 					} elseif ( $this->p->debug->enabled ) {
 						$this->p->debug->log( 'skipped fallback author meta tag - article:author is not empty' );
 					}
+
 				} elseif ( $this->p->debug->enabled ) {
 					$this->p->debug->log( 'skipped fallback author meta tag - og:type is not an article' );
 				}
@@ -620,7 +550,7 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 
 			if ( $add_meta_name_description ) {
 				$mt_name['description'] = $this->p->page->get_description( $this->p->options['seo_desc_len'],
-					'...', $mod, true, false, true, 'seo_desc' );	// add_hashtags is false.
+					'...', $mod, true, false, true, 'seo_desc' );	// $add_hashtags is false.
 			}
 
 			if ( ! empty( $this->p->options['add_meta_name_p:domain_verify'] ) ) {
@@ -977,10 +907,10 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 
 					continue;
 
-				} elseif ( $parts[5] === WPSSO_UNDEF_INT || $parts[5] === (string) WPSSO_UNDEF_INT ) {
+				} elseif ( $parts[5] === WPSSO_UNDEF || $parts[5] === (string) WPSSO_UNDEF ) {
 
 					if ( $this->p->debug->enabled ) {
-						$this->p->debug->log( $log_prefix . ' skipped: value is ' . WPSSO_UNDEF_INT );
+						$this->p->debug->log( $log_prefix . ' skipped: value is ' . WPSSO_UNDEF );
 					}
 
 					continue;

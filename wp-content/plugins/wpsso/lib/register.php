@@ -13,10 +13,10 @@ if ( ! class_exists( 'WpssoRegister' ) ) {
 
 	class WpssoRegister {
 
-		protected $p;
-		protected static $wp_persons = array( 'administrator', 'author', 'editor', 'subscriber' ); // Default wp roles.
+		private $p;
 
 		public function __construct( &$plugin ) {
+
 			$this->p =& $plugin;
 
 			register_activation_hook( WPSSO_FILEPATH, array( $this, 'network_activate' ) );
@@ -33,8 +33,11 @@ if ( ! class_exists( 'WpssoRegister' ) ) {
 		 * Fires immediately after a new site is created.
 		 */
 		public function wpmu_new_blog( $blog_id, $user_id, $domain, $path, $site_id, $meta ) {
+
 			switch_to_blog( $blog_id );
+
 			$this->activate_plugin();
+
 			restore_current_blog();
 		}
 
@@ -42,16 +45,21 @@ if ( ! class_exists( 'WpssoRegister' ) ) {
 		 * Fires immediately after a site is activated (not called when users and sites are created by a Super Admin).
 		 */
 		public function wpmu_activate_blog( $blog_id, $user_id, $password, $signup_title, $meta ) {
+
 			switch_to_blog( $blog_id );
+
 			$this->activate_plugin();
+
 			restore_current_blog();
 		}
 
 		public function network_activate( $sitewide ) {
+
 			self::do_multisite( $sitewide, array( $this, 'activate_plugin' ) );
 		}
 
 		public function network_deactivate( $sitewide ) {
+
 			self::do_multisite( $sitewide, array( $this, 'deactivate_plugin' ) );
 		}
 
@@ -59,6 +67,7 @@ if ( ! class_exists( 'WpssoRegister' ) ) {
 		 * uninstall.php defines constants before calling network_uninstall().
 		 */
 		public static function network_uninstall() {
+
 			$sitewide = true;
 
 			/**
@@ -68,7 +77,8 @@ if ( ! class_exists( 'WpssoRegister' ) ) {
 
 			$opts = get_site_option( WPSSO_SITE_OPTIONS_NAME, array() );
 
-			if ( empty( $opts['plugin_preserve'] ) ) {
+			if ( ! empty( $opts['plugin_clean_on_uninstall'] ) ) {
+
 				delete_site_option( WPSSO_SITE_OPTIONS_NAME );
 			}
 		}
@@ -83,7 +93,9 @@ if ( ! class_exists( 'WpssoRegister' ) ) {
 				$blog_ids = $wpdb->get_col( $db_query );
 
 				foreach ( $blog_ids as $blog_id ) {
+
 					switch_to_blog( $blog_id );
+
 					call_user_func_array( $method, array( $args ) );
 				}
 
@@ -104,77 +116,105 @@ if ( ! class_exists( 'WpssoRegister' ) ) {
 			$this->p->set_options( true ); // Read / create options and site_options ( $activate = true ).
 			$this->p->set_objects( true ); // Load all the class objects ( $activate = true ).
 
-			if ( ! SucomUtil::get_const( 'WPSSO_REG_CLEAR_CACHE_DISABLE' ) ) {
-				$this->p->util->clear_all_cache( false );
+			/**
+			 * Clear All Caches on Activate.
+			 */
+			if ( ! empty( $this->p->options['plugin_clear_on_activate'] ) ) {
+
+				$settings_page_link = $this->p->util->get_admin_url( 'advanced#sucom-tabset_plugin-tab_cache',
+					_x( 'Clear All Caches on Activate', 'option label', 'wpsso' ) );
+
+				$this->p->notice->upd( sprintf( __( 'A background task will begin shortly to clear all caches (the %s option is enabled).',
+					'wpsso' ), $settings_page_link ) );
+
+				$this->p->util->schedule_clear_all_cache( $user_id = get_current_user_id(), $clear_other = true );
 			}
 
+			/**
+			 * Save plugin install, activation, update times.
+			 */
 			$plugin_version = WpssoConfig::$cf['plugin']['wpsso']['version'];
+
+			if ( $this->p->debug->enabled ) {
+				$this->p->debug->log( 'saving all times for wpsso v' . $plugin_version );
+			}
 
 			WpssoUtil::save_all_times( 'wpsso', $plugin_version );
 
-			if ( ! empty( $this->p->options['plugin_add_person_role'] ) ) {
-				foreach ( SucomUtil::get_users_by_roles( self::$wp_persons ) as $user ) {
-					$user->add_role( 'person' );
-				}
+			/**
+			 * Add the Person role for WpssoUser::get_public_user_ids(). 
+			 */
+			$this->p->util->schedule_add_user_roles();
+
+			/**
+			 * End of plugin activation.
+			 */
+			if ( $this->p->debug->enabled ) {
+				$this->p->debug->log( 'done plugin activation' );
 			}
 		}
 
 		private function deactivate_plugin() {
 
-			if ( ! SucomUtil::get_const( 'WPSSO_REG_CLEAR_CACHE_DISABLE' ) ) {
-				$this->p->util->clear_all_cache( false, true, false );
-			}
-
 			/**
-			 * Delete all stored notices for all users.
+			 * Clear All Caches on Deactivate.
 			 */
-			$this->p->notice->trunc_all();
-
-			if ( is_object( $this->p->admin ) ) {
-				$this->p->admin->reset_check_head_count();
+			if ( ! empty( $this->p->options['plugin_clear_on_deactivate'] ) ) {
+				$this->p->util->clear_all_cache( $user_id = 0, $clear_other = true, $clear_short = true, $refresh_all = false );
 			}
+
+			delete_option( WPSSO_POST_CHECK_NAME );	// Remove the post duplicate check counter.
 		}
 
 		/**
-		 * uninstall.php defines constants before calling network_uninstall().
+		 * uninstall.php defines constants before calling network_uninstall(),
+		 * which calls do_multisite(), and then calls uninstall_plugin().
 		 */
 		private static function uninstall_plugin() {
 
-			$opts = get_option( WPSSO_OPTIONS_NAME, array() );
+			$blog_id  = get_current_blog_id();
+			$opts     = get_option( WPSSO_OPTIONS_NAME, array() );
 
 			delete_option( WPSSO_TS_NAME );
 
-			if ( empty( $opts['plugin_preserve'] ) ) {
+			if ( ! empty( $opts['plugin_clean_on_uninstall'] ) ) {
 
 				delete_option( WPSSO_OPTIONS_NAME );
 
 				/**
-				 * Delete all post meta.
+				 * Delete post settings and meta.
 				 */
-				delete_post_meta_by_key( WPSSO_META_NAME );	// Since wp v2.3.
+				delete_metadata( 'post', null, WPSSO_META_NAME, '', true );	// $delete_all is true.
 
-				foreach ( get_users() as $user ) {
-					if ( ! empty( $user-> ID ) ) {	// Just in case.
+				/**
+				 * Delete term settings and meta.
+				 */
+				foreach ( WpssoTerm::get_public_term_ids() as $term_id ) {
+					WpssoTerm::delete_term_meta( $term_id, WPSSO_META_NAME );
+				}
 
-						delete_user_option( $user->ID, WPSSO_DISMISS_NAME, false );	// $global is false.
-						delete_user_option( $user->ID, WPSSO_DISMISS_NAME, true );	// $global is true.
+				/**
+				 * Delete user settings and meta.
+				 */
+				delete_metadata( 'user', null, WPSSO_META_NAME, '', true );	// $delete_all is true.
+				delete_metadata( 'user', null, WPSSO_PREF_NAME, '', true );	// $delete_all is true.
+
+				while ( $user_ids = SucomUtil::get_user_ids( $blog_id, '', 1000 ) ) {	// Get a maximum of 1000 user IDs at a time.
+
+					foreach ( $user_ids as $user_id ) {
+
+						delete_user_option( $user_id, WPSSO_DISMISS_NAME, false );	// $global is false.
+						delete_user_option( $user_id, WPSSO_DISMISS_NAME, true );	// $global is true.
 	
-						delete_user_meta( $user->ID, WPSSO_META_NAME );
-						delete_user_meta( $user->ID, WPSSO_PREF_NAME );
-	
-						WpssoUser::delete_metabox_prefs( $user->ID );
+						WpssoUser::delete_metabox_prefs( $user_id );
 
-						$user->remove_role( 'person' );
+						$user_obj = get_user_by( 'ID', $user_id );
+
+						$user_obj->remove_role( 'person' );
 					}
 				}
 
 				remove_role( 'person' );
-
-				foreach ( WpssoTerm::get_public_term_ids() as $term_id ) {
-					if ( ! empty( $term_id ) ) {	// Just in case.
-						WpssoTerm::delete_term_meta( $term_id, WPSSO_META_NAME );
-					}
-				}
 			}
 
 			/**
@@ -230,14 +270,14 @@ if ( ! class_exists( 'WpssoRegister' ) ) {
 					require_once trailingslashit( ABSPATH ) . 'wp-admin/includes/plugin.php';
 				}
 
-				deactivate_plugins( WPSSO_PLUGINBASE, true );	// $silent is true
+				deactivate_plugins( WPSSO_PLUGINBASE, true );	// $silent is true.
 
 				if ( method_exists( 'SucomUtil', 'safe_error_log' ) ) {
 
-					// translators: %s is the short plugin name
+					// translators: %s is the short plugin name.
 					$error_pre = sprintf( __( '%s warning:', 'wpsso' ), $info['short'] );
 
-					// translators: %1$s is the short plugin name, %2$s is the application name, %3$s is the application version number
+					// translators: %1$s is the short plugin name, %2$s is the application name, %3$s is the application version number.
 					$error_msg = sprintf( __( '%1$s requires %2$s version %3$s or higher and has been deactivated.',
 						'wpsso' ), $plugin_name, $app_label, $min_version );
 

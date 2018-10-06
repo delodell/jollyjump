@@ -4,7 +4,7 @@ if( !session_id() ) { session_start(); }
 /*
 Plugin URI: http://www.iptanus.com/support/wordpress-file-upload
 Description: Simple interface to upload files from a page.
-Version: 4.7.0
+Version: 4.9.0
 Author: Nickolas Bossinas
 Author URI: http://www.iptanus.com
 */
@@ -58,10 +58,12 @@ add_action( 'widgets_init', 'register_wfu_widget' );
 //admin hooks
 add_action('admin_init', 'wordpress_file_upload_admin_init');
 add_action('admin_menu', 'wordpress_file_upload_add_admin_pages');
-// load styles and scripts for front pages
+//load styles and scripts for front pages
 if ( !is_admin() ) {
 	add_action( 'wp_enqueue_scripts', 'wfu_enqueue_frontpage_scripts' );
 }
+//add admin bar menu item of new uploaded files
+add_action( 'wp_before_admin_bar_render', 'wfu_admin_toolbar_new_uploads', 999 );
 //general ajax actions
 add_action('wp_ajax_wfu_ajax_action', 'wfu_ajax_action_callback');
 add_action('wp_ajax_nopriv_wfu_ajax_action', 'wfu_ajax_action_callback');
@@ -100,7 +102,7 @@ add_filter("_wfu_before_upload", "wfu_classic_before_upload_handler", 10, 2);
 wfu_include_lib();
 
 function wordpress_file_upload_initialize() {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	load_plugin_textdomain('wp-file-upload', false, dirname(plugin_basename (__FILE__)).'/languages');
 	wfu_initialize_i18n_strings();
 	//store the User State handler in a global variable for easy access by the
@@ -117,7 +119,7 @@ function register_wfu_widget() {
 }
 
 function wfu_enqueue_frontpage_scripts() {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
 	$relaxcss = false;
 	if ( isset($plugin_options['relaxcss']) ) $relaxcss = ( $plugin_options['relaxcss'] == '1' );
@@ -135,6 +137,7 @@ function wfu_enqueue_frontpage_scripts() {
 		wp_enqueue_style('wordpress-file-upload-style', WPFILEUPLOAD_DIR.'css/wordpress_file_upload_style.css');
 		wp_enqueue_style('wordpress-file-upload-style-safe', WPFILEUPLOAD_DIR.'css/wordpress_file_upload_style_safe.css');
 	}
+	wp_enqueue_style('wordpress-file-upload-adminbar-style', WPFILEUPLOAD_DIR.'css/wordpress_file_upload_adminbarstyle.css');
 	//do not load JQuery UI css if $ret_data denotes incompatibility issues
 	if ( ( !isset($ret_data["correct_NextGenGallery_incompatibility"]) || $ret_data["correct_NextGenGallery_incompatibility"] != "true" ) &&
 		( !isset($ret_data["correct_JQueryUI_incompatibility"]) || $ret_data["correct_JQueryUI_incompatibility"] != "true" ) )
@@ -194,7 +197,7 @@ function wordpress_file_upload_browser_handler($incomingfrompost) {
 }
 
 function wordpress_file_upload_function($incomingfromhandler) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	global $post;
 	global $blog_id;
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
@@ -543,7 +546,7 @@ function wfu_post_plugin_actions($params) {
 }
 
 function wfu_get_subfolders_paths($params) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$subfolder_paths = array ( );
 	if ( $params["askforsubfolders"] == "true" && $params["testmode"] != "true" ) {
 		array_push($subfolder_paths, "");

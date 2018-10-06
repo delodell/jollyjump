@@ -15,61 +15,70 @@ if ( ! class_exists( 'SucomDebug' ) ) {
 
 		private $p;
 		private $display_name = '';
-		private $log_prefix = '';
-		private $buffer = array();	// accumulate text strings going to html output
-		private $subsys = array();	// associative array to enable various outputs
-		private $start_stats = null;
-		private $begin_marks = array();
+		private $log_prefix   = '';
+		private $buffer       = array();	// Accumulate text strings going to html output.
+		private $subsys       = array();	// Associative array to enable various outputs.
+		private $start_stats  = null;
+		private $begin_marks  = array();
 
 		public $enabled = false;	// true if at least one subsys is true
 
-		public function __construct( &$plugin, $subsys = array( 'html' => false, 'wp' => false ) ) {
+		public function __construct( &$plugin, $subsys = array( 'html' => false, 'log' => false ) ) {
+
 			$this->p =& $plugin;
 
 			$this->start_stats = array(
-				'time' => microtime( true ),
-				'mem' => memory_get_usage( true ),
+				'mtime' => microtime( true ),
+				'mem'   => memory_get_usage(),
 			);
 
-			$this->display_name = $this->p->cf['lca'];
-			$this->log_prefix = strtoupper( $this->display_name );
-			$this->subsys = $subsys;
+			$this->display_name = $this->p->lca;
+			$this->log_prefix   = strtoupper( $this->display_name );
+			$this->subsys       = $subsys;
+
 			$this->is_enabled();	// sets $this->enabled value
 
-			if ( $this->enabled ) {
-				$this->mark();
-			}
-
-			if ( ! empty( $subsys['wp'] ) ) {
+			if ( ! empty( $subsys['log'] ) ) {
 				if ( ! isset( $_SESSION ) ) {
 					session_start();
 				}
 			}
+
+			if ( $this->enabled ) {
+				$this->mark();
+			}
 		}
 
 		public function is_enabled( $name = '' ) {
+
 			if ( ! empty( $name ) ) {
 				return isset( $this->subsys[$name] ) ? $this->subsys[$name] : false;
 			} else {
 				// return true if any sybsys is true (use strict checking)
 				$this->enabled = in_array( true, $this->subsys, true ) ? true : false;
 			}
+
 			return $this->enabled;
 		}
 
 		public function enable( $name, $state = true ) {
+
 			if ( ! empty( $name ) ) {
+
 				$this->subsys[$name] = $state;
-				if ( $name === 'wp' ) {
+
+				if ( $name === 'log' ) {
 					if ( ! isset( $_SESSION ) ) {
 						session_start();
 					}
 				}
 			}
+
 			$this->is_enabled();	// sets $this->enabled value
 		}
 
 		public function disable( $name ) {
+
 			$this->enable( $name, false );
 		}
 
@@ -132,10 +141,10 @@ if ( ! class_exists( 'SucomDebug' ) ) {
 				return;
 			}
 
-			$first_col = '%-38s:: ';
+			$first_col  = '%-38s:: ';
 			$second_col = '%-48s: ';
-			$stack = debug_backtrace();
-			$log_msg = '';
+			$stack      = debug_backtrace();
+			$log_msg    = '';
 
 			if ( is_int( $class_idx ) ) {
 				if ( false === $function_idx ) {
@@ -172,13 +181,15 @@ if ( ! class_exists( 'SucomDebug' ) ) {
 				$log_msg .= $input;
 			}
 
-			if ( $this->subsys['html'] == true ) {
+			if ( $this->subsys['html'] ) {
 				$this->buffer[] = $log_msg;
 			}
 
-			if ( $this->subsys['wp'] == true ) {
-				$sid = session_id();
-				$connection_id = $sid ? $sid : $_SERVER['REMOTE_ADDR'];
+			if ( $this->subsys['log'] ) {
+
+				$session_id    = session_id();
+				$connection_id = $session_id ? $session_id : $_SERVER['REMOTE_ADDR'];
+
 				error_log( $connection_id . ' ' . $this->log_prefix . ' ' . $log_msg );
 			}
 		}
@@ -190,8 +201,8 @@ if ( ! class_exists( 'SucomDebug' ) ) {
 			}
 
 			$cur_stats = array(
-				'time' => microtime( true ),
-				'mem' => memory_get_usage( true ),
+				'mtime' => microtime( true ),
+				'mem'   => memory_get_usage(),
 			);
 
 			if ( null === $this->start_stats ) {
@@ -199,32 +210,44 @@ if ( ! class_exists( 'SucomDebug' ) ) {
 			}
 
 			if ( $id !== false ) {
-				$id_text = '- - - - - - ' . $id;
+
+				$append_text = '- - - - - - ' . $id;
+
 				if ( isset( $this->begin_marks[$id] ) ) {
-					$id_text .= ' end + ('.
-						$this->get_time_text( $cur_stats['time'] - $this->begin_marks[$id]['time'] ) . ' / ' . 
-						$this->get_mem_text( $cur_stats['mem'] - $this->begin_marks[$id]['mem'] ) . ')';
+
+					$mtime_diff = $cur_stats['mtime'] - $this->begin_marks[$id]['mtime'];
+					$mem_diff   = $cur_stats['mem'] - $this->begin_marks[$id]['mem'];
+					$stats_text = $this->get_time_text( $mtime_diff ) . ' / ' . $this->get_mem_text( $mem_diff );
+
+					$append_text .= ' end + (' . $stats_text . ')';
+
 					unset( $this->begin_marks[$id] );
+
 				} else {
-					$id_text .= ' begin';
-					$this->begin_marks[$id] = array(
-						'time' => $cur_stats['time'],
-						'mem' => $cur_stats['mem'],
+
+					$append_text .= ' begin';
+
+					$this->begin_marks[ $id ] = array(
+						'mtime' => $cur_stats['mtime'],
+						'mem'   => $cur_stats['mem'],
 					);
 				}
 			}
-			$this->log( 'mark ('.
-				$this->get_time_text( $cur_stats['time'] - $this->start_stats['time'] ) . ' / ' . 
-				$this->get_mem_text( $cur_stats['mem'] - $this->start_stats['mem'] ) . ')' . 
-				( $comment ? ' ' . $comment : '' ).
-				( $id !== false ? "\n\t" . $id_text : '' ), 2 );
+
+			$mtime_diff = $cur_stats['mtime'] - $this->start_stats['mtime'];
+			$mem_diff   = $cur_stats['mem'] - $this->start_stats['mem'];
+			$stats_text = $this->get_time_text( $mtime_diff ) . ' / ' . $this->get_mem_text( $mem_diff );
+
+			$this->log( 'mark (' . $stats_text . ')' . ( $comment ? ' ' . $comment : '' ) . ( $id !== false ? "\n\t" . $append_text : '' ), 2 );
 		}
 
 		private function get_time_text( $time ) {
+
 			return sprintf( '%f secs', $time );
 		}
 
 		private function get_mem_text( $mem ) {
+
 			if ( $mem < 1024 ) {
 				return $mem . ' bytes';
 			} elseif ( $mem < 1048576 ) {
@@ -235,9 +258,11 @@ if ( ! class_exists( 'SucomDebug' ) ) {
 		}
 
 		public function show_html( $data = null, $title = null ) {
+
 			if ( $this->is_enabled( 'html' ) !== true ) {
 				return;
 			}
+
 			echo $this->get_html( $data, $title, 2 );
 		}
 
@@ -251,8 +276,8 @@ if ( ! class_exists( 'SucomDebug' ) ) {
 				$function_idx = $class_idx;
 			}
 
-			$from = '';
-			$html = '<!-- ' . $this->display_name . ' debug';
+			$from  = '';
+			$html  = '<!-- ' . $this->display_name . ' debug';
 			$stack = debug_backtrace();
 
 			if ( ! empty( $stack[$class_idx]['class'] ) ) {
@@ -303,6 +328,7 @@ if ( ! class_exists( 'SucomDebug' ) ) {
 		}
 
 		public static function pretty_array( $mixed, $flatten = false ) {
+
 			$ret = '';
 
 			if ( is_array( $mixed ) ) {

@@ -16,6 +16,7 @@ if ( ! class_exists( 'WpssoStyle' ) ) {
 		private $p;
 
 		public function __construct( &$plugin ) {
+
 			$this->p =& $plugin;
 
 			if ( $this->p->debug->enabled ) {
@@ -34,7 +35,11 @@ if ( ! class_exists( 'WpssoStyle' ) ) {
 				$this->p->debug->log( 'screen base = ' . SucomUtil::get_screen_base() );
 			}
 
-			$css_file_ext = SucomUtil::get_const( 'WPSSO_DEV' ) ? 'css' : 'min.css';
+			/**
+			 * Do not use minified CSS if the DEV constant is defined.
+			 */
+			$doing_dev      = SucomUtil::get_const( 'WPSSO_DEV' );
+			$css_file_ext   = $doing_dev ? 'css' : 'min.css';
 			$plugin_version = WpssoConfig::get_version();
 
 			/**
@@ -223,18 +228,26 @@ if ( ! class_exists( 'WpssoStyle' ) ) {
 
 			$cache_id         = $cache_md5_pre . md5( $cache_salt );
 
-			$r_cache = SucomUtil::get_const( 'WPSSO_DEV' ) ? false : true;	// Read cache by default.
+			/**
+			 * Do not use transient cache if the DEV constant is defined.
+			 */
+			$doing_dev = SucomUtil::get_const( 'WPSSO_DEV' );
+			$use_cache = $doing_dev ? false : true;
 
 			wp_enqueue_style( 'sucom-admin-page',
 				$plugin_urlpath . 'css/com/admin-page.' . $css_file_ext,
 					array(), $plugin_version );
 
-			if ( $r_cache ) {
+			if ( $use_cache ) {
+
 				if ( $custom_style_css = get_transient( $cache_id ) ) {	// not empty
+
 					if ( $this->p->debug->enabled ) {
 						$this->p->debug->log( 'admin page style retrieved from cache' );
 					}
+
 					wp_add_inline_style( 'sucom-admin-page', $custom_style_css );
+
 					return;
 				}
 			}
@@ -250,14 +263,24 @@ if ( ! class_exists( 'WpssoStyle' ) ) {
 
 			$custom_style_css = '
 				@font-face {
-					font-family:"Star";
-					src:url("' . $plugin_urlpath . 'fonts/star.eot");
-					src:url("' . $plugin_urlpath . 'fonts/star.eot?#iefix") format("embedded-opentype"),
-					url("' . $plugin_urlpath . 'fonts/star.woff") format("woff"),
-					url("' . $plugin_urlpath . 'fonts/star.ttf") format("truetype"),
-					url("' . $plugin_urlpath . 'fonts/star.svg#star") format("svg");
+					font-family:"WpssoIcons";
 					font-weight:normal;
 					font-style:normal;
+					src:url("' . $plugin_urlpath . 'fonts/icons.eot?' . $plugin_version . '");
+					src:url("' . $plugin_urlpath . 'fonts/icons.eot?' . $plugin_version . '#iefix") format("embedded-opentype"),
+						url("' . $plugin_urlpath . 'fonts/icons.woff?' . $plugin_version . '") format("woff"),
+						url("' . $plugin_urlpath . 'fonts/icons.ttf?' . $plugin_version . '") format("truetype"),
+						url("' . $plugin_urlpath . 'fonts/icons.svg?' . $plugin_version . '#icons") format("svg");
+				}
+				@font-face {
+					font-family:"WpssoStar";
+					font-weight:normal;
+					font-style:normal;
+					src:url("' . $plugin_urlpath . 'fonts/star.eot?' . $plugin_version . '");
+					src:url("' . $plugin_urlpath . 'fonts/star.eot?' . $plugin_version . '#iefix") format("embedded-opentype"),
+						url("' . $plugin_urlpath . 'fonts/star.woff?' . $plugin_version . '") format("woff"),
+						url("' . $plugin_urlpath . 'fonts/star.ttf?' . $plugin_version . '") format("truetype"),
+						url("' . $plugin_urlpath . 'fonts/star.svg?' . $plugin_version . '#star") format("svg");
 				}
 				#wpadminbar #wp-toolbar #' . $this->p->lca . '-toolbar-notices-count {
 					display:none;
@@ -299,7 +322,7 @@ if ( ! class_exists( 'WpssoStyle' ) ) {
 				#adminmenu ul.wp-submenu div.' . $this->p->lca . '-menu-item.menu-item-label {
 					width:100%;
 				}
-				#adminmenu ul.wp-submenu div.' . $this->p->lca . '-menu-item.last-top-submenu-page.with-add-ons {
+				#adminmenu ul.wp-submenu div.' . $this->p->lca . '-menu-item.top-last-submenu-page.with-add-ons {
 					padding-bottom:12px;
 					border-bottom:1px solid;
 				}
@@ -353,8 +376,6 @@ if ( ! class_exists( 'WpssoStyle' ) ) {
 			if ( ! empty( $this->p->options['plugin_col_def_width'] ) ) {
 				$custom_style_css .= '
 					table.wp-list-table.pages > thead > tr > th,	/* default column width for posts and pages */
-					table.wp-list-table.pages > tbody > tr > td,
-					table.wp-list-table.posts > thead > tr > th,
 					table.wp-list-table.posts > tbody > tr > td {
 						width:'.$this->p->options['plugin_col_def_width'].';
 					}
@@ -371,59 +392,64 @@ if ( ! class_exists( 'WpssoStyle' ) ) {
 			}
 
 			$custom_style_css .= '
-				.wp-list-table th.column-cb,
-				.wp-list-table td.column-cb {
+				table.wp-list-table > thead > tr > td#cb,
+				table.wp-list-table > thead > tr > td.column-cb,
+				table.wp-list-table > thead > tr > td.check-column,
+				table.wp-list-table > tbody > tr > th.check-column,
+				table.wp-list-table > tbody > tr > th.column-cb {
 					width:2.2em;
 				}
-				.wp-list-table th.column-author,
-				.wp-list-table td.column-author {
+				table.wp-list-table > thead > tr > th.column-author,
+				table.wp-list-table > tbody > tr > td.column-author {
 					width:15%;
 				}
-				.wp-list-table th.column-categories,
-				.wp-list-table td.column-categories {
+				table.wp-list-table > thead > tr > th.column-categories,
+				table.wp-list-table > tbody > tr > td.column-categories {
 					width:15%;
 				}
-				.wp-list-table th.column-tags,
-				.wp-list-table td.column-tags {
+				table.wp-list-table > thead > tr > th.column-tags,
+				table.wp-list-table > tbody > tr > td.column-tags {
 					width:15%;
 				}
-				.wp-list-table th.column-comments,
-				.wp-list-table td.column-comments {
+				table.wp-list-table > thead > tr > th.column-comments,
+				table.wp-list-table > tbody > tr > td.column-comments {
 					width:40px;
 				}
-				.wp-list-table th.column-date,
-				.wp-list-table td.column-date,
-				.wp-list-table th.column-expirationdate,
-				.wp-list-table td.column-expirationdate {
-					width:15%;
+				table.wp-list-table > thead > tr > th.column-date,
+				table.wp-list-table > tbody > tr > td.column-date,
+				table.wp-list-table > thead > tr > th.column-expirationdate,
+				table.wp-list-table > tbody > tr > td.column-expirationdate {
+					width:7em;
 				}
-				.wp-list-table th.column-seotitle,	/* All In One SEO */
-				.wp-list-table td.column-seotitle,
-				.wp-list-table th.column-seodesc,
-				.wp-list-table td.column-seodesc {
+				table.wp-list-table > thead > tr > th.column-seotitle,	/* All In One SEO */
+				table.wp-list-table > tbody > tr > td.column-seotitle,
+				table.wp-list-table > thead > tr > th.column-seodesc,
+				table.wp-list-table > tbody > tr > td.column-seodesc {
 					width:20%;
 				}
-				.wp-list-table th.column-wpseo-links,	/* Yoast SEO */
-				.wp-list-table td.column-wpseo-links,
-				.wp-list-table th.column_wpseo_score,
-				.wp-list-table td.column_wpseo_score,
-				.wp-list-table th.column-wpseo-score-readability,
-				.wp-list-table td.column-wpseo-score-readability {
-					width:30px;
+				table.wp-list-table > thead > tr > th.column-wpseo-links,	/* Yoast SEO */
+				table.wp-list-table > tbody > tr > td.column-wpseo-links,
+				table.wp-list-table > thead > tr > th.column-wpseo-linked,
+				table.wp-list-table > tbody > tr > td.column-wpseo-linked,
+				table.wp-list-table > thead > tr > th.column-wpseo-score,
+				table.wp-list-table > tbody > tr > td.column-wpseo-score,
+				table.wp-list-table > thead > tr > th.column-wpseo-score-readability,
+				table.wp-list-table > tbody > tr > td.column-wpseo-score-readability {
+					width:40px;
 				}
-				.wp-list-table th.column-wpseo-title,	/* Yoast SEO */
-				.wp-list-table td.column-wpseo-title,
-				.wp-list-table th.column-wpseo-metadesc,
-				.wp-list-table td.column-wpseo-metadesc {
-					width:12%;
+				table.wp-list-table > thead > tr > th.column-wpseo-title,	/* Yoast SEO */
+				table.wp-list-table > tbody > tr > td.column-wpseo-title,
+				table.wp-list-table > thead > tr > th.column-wpseo-metadesc,
+				table.wp-list-table > tbody > tr > td.column-wpseo-metadesc {
+					width:15%;
 				}
-				.wp-list-table th.column-wpseo-focuskw,	/* Yoast SEO */
-				.wp-list-table td.column-wpseo-focuskw {
+				table.wp-list-table > thead > tr > th.column-wpseo-focuskw,	/* Yoast SEO */
+				table.wp-list-table > tbody > tr > td.column-wpseo-focuskw {
 					width:10%;
 				}
-				.wp-list-table th.column-template,
-				.wp-list-table td.column-template {
-				        width:9%;
+				table.wp-list-table > thead > tr > th.column-template,
+				table.wp-list-table > tbody > tr > td.column-template {
+				        width:10%;
 				}
 				.column-' . $this->p->lca . '_schema_type {
 					max-width:' . $sort_cols['schema_type']['width'] . ' !important;
@@ -456,7 +482,7 @@ if ( ! class_exists( 'WpssoStyle' ) ) {
 				td.column-' . $this->p->lca . '_og_type,
 				td.column-' . $this->p->lca . '_og_desc {
 					direction:ltr;
-					font-family:Helvetica;
+					font-family:"Helvetica";
 					text-align:left;
 					word-wrap:break-word;
 				}
@@ -471,8 +497,8 @@ if ( ! class_exists( 'WpssoStyle' ) ) {
 			foreach ( $sort_cols as $col_name => $col_info ) {
 				if ( isset( $col_info['width'] ) ) {
 					$custom_style_css .= '
-						.wp-list-table th.column-' . $this->p->lca . '_' . $col_name . ',
-						.wp-list-table td.column-' . $this->p->lca . '_' . $col_name . ' {
+						table.wp-list-table > thead > tr > th.column-' . $this->p->lca . '_' . $col_name . ',
+						table.wp-list-table > tbody > tr > td.column-' . $this->p->lca . '_' . $col_name . ' {
 							width:' . $col_info['width'] . ' !important;
 							min-width:' . $col_info['width'] . ' !important;
 						}
@@ -480,10 +506,12 @@ if ( ! class_exists( 'WpssoStyle' ) ) {
 				}
 			}
 
-			if ( $r_cache ) {
+			if ( $use_cache ) {
+
 				if ( method_exists( 'SucomUtil', 'minify_css' ) ) {
 					$custom_style_css = SucomUtil::minify_css( $custom_style_css, $this->p->lca );
 				}
+
 				set_transient( $cache_id, $custom_style_css, $cache_exp_secs );
 			}
 

@@ -97,30 +97,21 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 			return $this->must_be_extended( __METHOD__, self::$mod_defaults );
 		}
 
-		public function get_posts( array $mod, $posts_per_page = false, $paged = false, array $get_posts_args = array() ) {
+		public function get_posts_ids( array $mod, $ppp = false, $paged = false, array $posts_args = array() ) {
 			return $this->must_be_extended( __METHOD__, array() );	// Return an empty array.
 		}
 
-		public function get_posts_mods( array $mod, $posts_per_page = false, $paged = false, array $get_posts_args = array() ) {
+		public function get_posts_mods( array $mod, $ppp = false, $paged = false, array $posts_args = array() ) {
 
 			$posts_mods = array();
 
-			foreach ( $this->get_posts( $mod, $posts_per_page, $paged, $get_posts_args ) as $post_obj ) {
+			foreach ( $this->get_posts_ids( $mod, $ppp, $paged, $posts_args ) as $post_id ) {
 
-				if ( empty( $post_obj->ID ) ) {	// Just in case.
-
-					if ( $this->p->debug->enabled ) {
-						$this->p->debug->log( 'post object ID is empty' );
-					}
-
-				} else {
-
-					if ( $this->p->debug->enabled ) {
-						$this->p->debug->log( 'getting mod for post object ID ' . $post_obj->ID );
-					}
-
-					$posts_mods[] = $this->p->m['util']['post']->get_mod( $post_obj->ID );
+				if ( $this->p->debug->enabled ) {
+					$this->p->debug->log( 'getting mod for post object ID ' . $post_id );
 				}
+
+				$posts_mods[] = $this->p->m['util']['post']->get_mod( $post_id );
 			}
 
 			return $posts_mods;
@@ -162,7 +153,7 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 						'edit'     => _x( 'Customize', 'metabox tab', 'wpsso' ),
 						'media'    => _x( 'Priority Media', 'metabox tab', 'wpsso' ),
 						'preview'  => _x( 'Preview', 'metabox tab', 'wpsso' ),
-						'tags'     => _x( 'Head Tags', 'metabox tab', 'wpsso' ),
+						'head'     => _x( 'Head', 'metabox tab', 'wpsso' ),
 						'validate' => _x( 'Validate', 'metabox tab', 'wpsso' ),
 					);
 
@@ -186,19 +177,19 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 
 				case 'preview':
 
-					$table_rows = $this->get_rows_social_preview( $this->form, $head_info, $mod );
+					$table_rows = $this->get_rows_preview_tab( $this->form, $head_info, $mod );
 
 					break;
 
-				case 'tags':	
+				case 'head':	
 
-					$table_rows = $this->get_rows_head_tags( $this->form, $head_info, $mod );
+					$table_rows = $this->get_rows_head_tab( $this->form, $head_info, $mod );
 
 					break; 
 
 				case 'validate':
 
-					$table_rows = $this->get_rows_validate( $this->form, $head_info, $mod );
+					$table_rows = $this->get_rows_validate_tab( $this->form, $head_info, $mod );
 
 					break; 
 
@@ -207,17 +198,17 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 			return $table_rows;
 		}
 
-		public function get_rows_social_preview( $form, $head_info, $mod ) {
+		public function get_rows_preview_tab( $form, $head_info, $mod ) {
 
 			if ( $this->p->debug->enabled ) {
 				$this->p->debug->mark();
 			}
 
-			$table_rows    = array();
-			$prev_width    = 600;
-			$prev_height   = 315;
-			$refresh_cache = $this->p->util->is_force_regen( $mod, 'og' ) ? '?force_regen=' . time() : '';
-			$media_url     = SucomUtil::get_mt_media_url( $head_info ) . $refresh_cache;
+			$table_rows  = array();
+			$prev_width  = 600;
+			$prev_height = 315;
+			$force_regen = $this->p->util->is_force_regen( $mod, 'og' ) ? '?force_regen=' . time() : '';
+			$media_url   = SucomUtil::get_mt_media_url( $head_info ) . $force_regen;
 
 			$have_sizes = ( isset( $head_info['og:image:width'] ) && $head_info['og:image:width'] > 0 && 
 				isset( $head_info['og:image:height'] ) && $head_info['og:image:height'] > 0 ) ? true : false;
@@ -320,7 +311,7 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 			return $table_rows;
 		}
 
-		public function get_rows_head_tags( &$form, &$head_info, &$mod ) {
+		public function get_rows_head_tab( &$form, &$head_info, &$mod ) {
 
 			if ( $this->p->debug->enabled ) {
 				$this->p->debug->mark();
@@ -355,9 +346,9 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 					/**
 					 * Skip meta tags with reserved values but display empty values.
 					 */
-					if ( $parts[5] === WPSSO_UNDEF_INT || $parts[5] === (string) WPSSO_UNDEF_INT ) {
+					if ( $parts[5] === WPSSO_UNDEF || $parts[5] === (string) WPSSO_UNDEF ) {
 						if ( $this->p->debug->enabled ) {
-							$this->p->debug->log( $parts[3] . ' value is ' . WPSSO_UNDEF_INT . ' (skipped)' );
+							$this->p->debug->log( $parts[3] . ' value is ' . WPSSO_UNDEF . ' (skipped)' );
 						}
 						continue;
 					}
@@ -391,14 +382,16 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 			return $table_rows;
 		}
 
-		public function get_rows_validate( &$form, &$head_info, &$mod ) {
+		public function get_rows_validate_tab( &$form, &$head_info, &$mod ) {
 
 			if ( $this->p->debug->enabled ) {
 				$this->p->debug->mark();
 			}
 
 			$table_rows = array();
+
 			$sharing_url = $this->p->util->get_sharing_url( $mod, false );	// $add_page = false
+
 			$sharing_url_encoded = urlencode( $sharing_url );
 
 			$amp_url = $mod['is_post'] && function_exists( 'amp_get_permalink' ) ?
@@ -412,38 +405,38 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 			$w3c_url       = 'https://validator.w3.org/nu/?doc=' . $sharing_url_encoded;
 
 			// Facebook
-			$table_rows[] = $form->get_th_html( _x( 'Facebook Debugger', 'option label', 'wpsso' ), 'medium' ) . 
+			$table_rows['validate_facebook'] = $form->get_th_html( _x( 'Facebook Debugger', 'option label', 'wpsso' ), 'medium' ) . 
 			'<td class="validate">' . $this->p->msgs->get( 'info-meta-validate-facebook' ) . '</td>' . 
 			'<td class="validate">' . $form->get_button( _x( 'Validate Open Graph', 'submit button', 'wpsso' ),
 				'button-secondary', '', $facebook_url, true ) . '</td>';
 
 			// Google
-			$table_rows[] = $form->get_th_html( _x( 'Google Structured Data Testing Tool', 'option label', 'wpsso' ), 'medium' ) . 
+			$table_rows['validate_google'] = $form->get_th_html( _x( 'Google Structured Data Testing Tool', 'option label', 'wpsso' ), 'medium' ) . 
 			'<td class="validate">' . $this->p->msgs->get( 'info-meta-validate-google' ) . '</td>' . 
 			'<td class="validate">' . $form->get_button( _x( 'Validate Data Markup', 'submit button', 'wpsso' ),
 				'button-secondary', '', $google_url, true ) . '</td>';
 
 			// Pinterest
-			$table_rows[] = $form->get_th_html( _x( 'Pinterest Rich Pin Validator', 'option label', 'wpsso' ), 'medium' ) . 
+			$table_rows['validate_pinterest'] = $form->get_th_html( _x( 'Pinterest Rich Pin Validator', 'option label', 'wpsso' ), 'medium' ) . 
 			'<td class="validate">' . $this->p->msgs->get( 'info-meta-validate-pinterest' ) . '</td>' . 
 			'<td class="validate">' . $form->get_button( _x( 'Validate Rich Pins', 'submit button', 'wpsso' ),
 				'button-secondary', '', $pinterest_url, true ) . '</td>';
 
 			// Twitter
-			$table_rows[] = $form->get_th_html( _x( 'Twitter Card Validator', 'option label', 'wpsso' ), 'medium' ) . 
+			$table_rows['validate_twitter'] = $form->get_th_html( _x( 'Twitter Card Validator', 'option label', 'wpsso' ), 'medium' ) . 
 			'<td class="validate">' . $this->p->msgs->get( 'info-meta-validate-twitter' ) . $form->get_input_copy_clipboard( $sharing_url ) . '</td>' . 
 			'<td class="validate">' . $form->get_button( _x( 'Validate Twitter Card', 'submit button', 'wpsso' ),
 				'button-secondary', '', $twitter_url, true ) . '</td>';
 
 			// W3C
-			$table_rows[] = $form->get_th_html( _x( 'W3C Markup Validation', 'option label', 'wpsso' ), 'medium' ) . 
+			$table_rows['validate_w3c'] = $form->get_th_html( _x( 'W3C Markup Validation', 'option label', 'wpsso' ), 'medium' ) . 
 			'<td class="validate">' . $this->p->msgs->get( 'info-meta-validate-w3c' ) . '</td>' . 
 			'<td class="validate">' . $form->get_button( _x( 'Validate HTML Markup', 'submit button', 'wpsso' ),
 				'button-secondary', '', $w3c_url, true ) . '</td>';
 
 			// AMP
 			if ( $mod['is_post'] ) {
-				$table_rows[] = $form->get_th_html( _x( 'The AMP Validator', 'option label', 'wpsso' ), 'medium' ) . 
+				$table_rows['validate_amp'] = $form->get_th_html( _x( 'The AMP Validator', 'option label', 'wpsso' ), 'medium' ) . 
 				'<td class="validate">' . $this->p->msgs->get( 'info-meta-validate-amp' ) . '</td>' . 
 				'<td class="validate">' . $form->get_button( _x( 'Validate AMP Markup', 'submit button', 'wpsso' ),
 					'button-secondary', '', $amp_url, true, ( $amp_url ? false : true ) ) . '</td>';
@@ -575,8 +568,10 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 					'product_brand'     => '',
 					'product_color'     => '',
 					'product_condition' => 'none',
-					'product_currency'  => empty( $opts['plugin_def_currency'] ) ? 'USD' : $opts['plugin_def_currency'],
+					'product_material'  => '',
+					'product_sku'       => '',
 					'product_price'     => '0.00',
+					'product_currency'  => empty( $opts['plugin_def_currency'] ) ? 'USD' : $opts['plugin_def_currency'],
 					'product_size'      => '',
 					'product_gender'    => 'none',
 					/**
@@ -705,9 +700,9 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 			);
 
 			$cache_types['wp_cache'][] = array(
-				'id'   => $this->p->lca . '_c_' . md5( 'WpssoPage::get_content(' . $mod_salt . ')' ),
+				'id'   => $this->p->lca . '_c_' . md5( 'WpssoPage::get_the_content(' . $mod_salt . ')' ),
 				'pre'  => $this->p->lca . '_c_',
-				'salt' => 'WpssoPage::get_content(' . $mod_salt . ')',
+				'salt' => 'WpssoPage::get_the_content(' . $mod_salt . ')',
 			);
 
 			$deleted_count = 0;
@@ -759,39 +754,6 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 
 					$deleted_ids[$type_name][$cache_key] = $ret;
 				}
-			}
-
-			if ( $deleted_count > 0 && ( $this->p->debug->enabled || ! empty( $this->p->options['plugin_show_purge_count'] ) ) ) {
-
-				$inf_msg = sprintf( __( '%s key(s) cleared from the cache.', 'wpsso' ), $deleted_count );
-
-				/**
-				 * Show cache purge details if WP_DEBUG is true.
-				 */
-				if ( ! empty( $deleted_ids ) && SucomUtil::get_const( 'WP_DEBUG' ) ) {
-
-					$inf_msg .= ' ';
-					$inf_msg .= __( 'WP_DEBUG constant is enabled &ndash; the list of possible cache object names is included:', 'wpsso' ) . "\n";
-					$inf_msg .= '<ol>' . "\n";
-
-					foreach ( $deleted_ids as $type_name => $cache_keys ) {
-						foreach ( $cache_keys as $key => $ret ) {
-							if ( $ret ) {
-								$inf_msg .= '<li>' . $type_name . ' ' . $key . ' &mdash; ';
-								$inf_msg .= '<strong>' . _x( 'cleared', 'clear cache status', 'wpsso' ) . '</strong>';
-								$inf_msg .= '</li>' . "\n";
-							} else {
-								$inf_msg .= '<li style="opacity:0.33;">' . $type_name . ' ' . $key . ' &mdash; ';
-								$inf_msg .= _x( 'not cached', 'clear cache status', 'wpsso' );
-								$inf_msg .= '</li>' . "\n";
-							}
-						}
-					}
-
-					$inf_msg .= '</ol>' . "\n";
-				}
-
-				$this->p->notice->inf( $inf_msg, true, __FUNCTION__ . '_show_purge_count_' . $mod['name'], true );	// can be dismissed
 			}
 
 			return $deleted_count;
@@ -922,7 +884,7 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 				/**
 				 * Use strict comparison to manage conversion (don't allow string to integer conversion, for example).
 				 */
-				if ( $md_val === '' || $md_val === WPSSO_UNDEF_INT || $md_val === (string) WPSSO_UNDEF_INT || 
+				if ( $md_val === '' || $md_val === WPSSO_UNDEF || $md_val === (string) WPSSO_UNDEF || 
 					( isset( $md_defs[$md_idx] ) && ( $md_val === $md_defs[$md_idx] || $md_val === (string) $md_defs[$md_idx] ) ) ) {
 
 					unset( $md_opts[$md_idx] );
@@ -1246,8 +1208,8 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 					$img_height = $this->get_options( $mod['id'], $opt_pre . '_img_url:height' );
 
 					$mt_single_image[ $mt_pre . ':image:url' ]    = $url;
-					$mt_single_image[ $mt_pre . ':image:width' ]  = $img_width > 0 ? $img_width : WPSSO_UNDEF_INT;
-					$mt_single_image[ $mt_pre . ':image:height' ] = $img_height > 0 ? $img_height : WPSSO_UNDEF_INT;
+					$mt_single_image[ $mt_pre . ':image:width' ]  = $img_width > 0 ? $img_width : WPSSO_UNDEF;
+					$mt_single_image[ $mt_pre . ':image:height' ] = $img_height > 0 ? $img_height : WPSSO_UNDEF;
 				}
 
 				if ( ! empty( $mt_single_image[ $mt_pre . ':image:url' ] ) ) {
@@ -1351,8 +1313,8 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 
 					$args = array(
 						'url'      => $video_url,
-						'width'    => WPSSO_UNDEF_INT,
-						'height'   => WPSSO_UNDEF_INT,
+						'width'    => WPSSO_UNDEF,
+						'height'   => WPSSO_UNDEF,
 						'type'     => '',
 						'prev_url' => '',
 						'post_id'  => null,
@@ -1409,8 +1371,10 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 			 *		'plugin_cf_product_brand'       => 'product_brand',
 			 *		'plugin_cf_product_color'       => 'product_color',
 			 *		'plugin_cf_product_condition'   => 'product_condition',
-			 *		'plugin_cf_product_currency'    => 'product_currency',
+			 *		'plugin_cf_product_material'    => 'product_material',
+			 *		'plugin_cf_product_sku'         => 'product_sku',
 			 *		'plugin_cf_product_price'       => 'product_price',
+			 *		'plugin_cf_product_currency'    => 'product_currency',
 			 *		'plugin_cf_product_size'        => 'product_size',
 			 *		'plugin_cf_product_gender'      => 'product_gender',
 			 *		'plugin_cf_sameas_urls'         => 'schema_sameas_url',
@@ -1522,7 +1486,7 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 			return $this->must_be_extended( __METHOD__, array() );
 		}
 
-		public static function get_public_term_ids( $tax_name = false ) {
+		public static function get_public_term_ids( $tax_name = null ) {
 			return $this->must_be_extended( __METHOD__, array() );
 		}
 

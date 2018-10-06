@@ -18,7 +18,7 @@ $wfu_extension_blacklist = array( "2clk" => 1, "386" => 1, "3dfbat" => 1, "3dm" 
  *  @return bool whether any of the file extensions is blacklisted or not
  */
 function wfu_file_extension_blacklisted($filename) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	global $wfu_extension_blacklist;
 	//extract and check extensions from filename
 	$parts = explode(".", $filename);
@@ -43,7 +43,7 @@ function wfu_file_extension_blacklisted($filename) {
  *  @details Details
  */
 function wfu_file_extension_whitelisted($filename) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$whitelist = array( "1st" => 1, "264" => 1, "3g2" => 1, "3ga" => 1, "3gp" => 1, "aac" => 1, "abw" => 1, "ai" => 1, "aiff" => 1, "amr" => 1, "ape" => 1, "arf" => 1, "asf" => 1, "asx" => 1, "avi" => 1, "aww" => 1, "bik" => 1, "bmp" => 1, "cda" => 1, "cdr" => 1, "csv" => 1, "dash" => 1, "dat" => 1, "dds" => 1, "dib" => 1, "djvu" => 1, "dng" => 1, "doc" => 1, "docx" => 1, "drw" => 1, "dt2" => 1, "dvf" => 1, "dvr" => 1, "emf" => 1, "emz" => 1, "eng" => 1, "epub" => 1, "file" => 1, "flac" => 1, "gif" => 1, "gp4" => 1, "gp5" => 1, "gpx" => 1, "h264" => 1, "ind" => 1, "indd" => 1, "jpeg" => 1, "jpg" => 1, "key" => 1, "log" => 1, "logic" => 1, "lrc" => 1, "m2t" => 1, "m2ts" => 1, "m4a" => 1, "m4b" => 1, "m4p" => 1, "m4v" => 1, "midi" => 1, "mkv" => 1, "mov" => 1, "mp3" => 1, "mp4" => 1, "mpeg" => 1, "mpg" => 1, "mpp" => 1, "mpt" => 1, "mts" => 1, "nfo" => 1, "odf" => 1, "odg" => 1, "ods" => 1, "odt" => 1, "ogg" => 1, "ogv" => 1, "ott" => 1, "oxps" => 1, "pages" => 1, "pcm" => 1, "pdf" => 1, "pic" => 1, "plist" => 1, "pmd" => 1, "png" => 1, "pot" => 1, "potx" => 1, "pps" => 1, "ppsx" => 1, "ppt" => 1, "pptx" => 1, "prn" => 1, "ps" => 1, "psd" => 1, "psdx" => 1, "pts" => 1, "pub" => 1, "pwi" => 1, "raw" => 1, "rec" => 1, "rep" => 1, "rmvb" => 1, "rtf" => 1, "sdd" => 1, "sdw" => 1, "snd" => 1, "sng" => 1, "snp" => 1, "sub" => 1, "sxw" => 1, "tbl" => 1, "tga" => 1, "tif" => 1, "tiff" => 1, "tod" => 1, "tp" => 1, "ts" => 1, "txt" => 1, "uax" => 1, "vob" => 1, "vsd" => 1, "wav" => 1, "wbmp" => 1, "wdp" => 1, "wlmp" => 1, "wma" => 1, "wmv" => 1, "wpd" => 1, "wpl" => 1, "wps" => 1, "wri" => 1, "xls" => 1, "xlsx" => 1, "xps" => 1, "zab" => 1 );
 	//extract and check extension from filename
 	$ext = wfu_fileext($filename);
@@ -73,7 +73,7 @@ function wfu_file_extension_whitelisted($filename) {
  *  @return bool whether the pattern is wide or not
  */
 function wfu_is_pattern_wide($pattern) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$in_brackets = false;
 	$pos = -1;
 	$asterisk_count = 0;
@@ -166,7 +166,7 @@ function wfu_file_extension_matches_pattern($pattern, $filename) {
  *  @return bool whether this is a Denial-Of-Service (DOS) attack or not.
  */
 function wfu_check_DOS_attack() {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	global $wpdb;
 	$DOS_attack = false;
 	$now = time();

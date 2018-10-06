@@ -1,14 +1,14 @@
-<h1>WPSSO Core</h1><h3>Advanced Meta Tags and Schema Markup for Facebook, Pinterest, SEO and More</h3>
+<h1>WPSSO Core</h1><h3>Advanced Open Graph &amp; Schema Meta Tags for Facebook, Pinterest, LinkedIn, SEO and More</h3>
 
 <table>
 <tr><th align="right" valign="top" nowrap>Plugin Name</th><td>WPSSO Core [Main Plugin]</td></tr>
 <tr><th align="right" valign="top" nowrap>Summary</th><td>Easy, complete, accurate, and automatic - give social sites and search engines better information about your content, business and authors.</td></tr>
-<tr><th align="right" valign="top" nowrap>Stable Version</th><td>4.11.0</td></tr>
+<tr><th align="right" valign="top" nowrap>Stable Version</th><td>4.15.0</td></tr>
 <tr><th align="right" valign="top" nowrap>Requires At Least</th><td>WordPress 3.8</td></tr>
 <tr><th align="right" valign="top" nowrap>Tested Up To</th><td>WordPress 4.9.8</td></tr>
 <tr><th align="right" valign="top" nowrap>Contributors</th><td>jsmoriss</td></tr>
 <tr><th align="right" valign="top" nowrap>License</th><td><a href="https://www.gnu.org/licenses/gpl.txt">GPLv3</a></td></tr>
-<tr><th align="right" valign="top" nowrap>Tags / Keywords</th><td>facebook, pinterest, twitter, linkedin, schema, meta tags, open graph, social sharing, image, like, share, seo, local seo, knowledge graph, rich cards, rich pins, twitter cards, woocommerce, nextgen gallery</td></tr>
+<tr><th align="right" valign="top" nowrap>Tags / Keywords</th><td>facebook, pinterest, twitter, linkedin, meta tags, open graph, rich pins, rich cards, twitter cards, knowledge graph, schema, social sharing, share buttons, seo, woocommerce, nextgen gallery</td></tr>
 </table>
 
 <h2>Description</h2>
@@ -17,9 +17,13 @@
 
 <h3>What makes WPSSO Core better?</h3>
 
+<p><strong>Makes sure your WordPress content looks great - no matter how it's crawled, shared, re-shared, or posted!</strong></p>
+
+<p>WPSSO Core makes sure ALL social crawlers, search crawlers, web browser extensions, mail and messaging apps (Facebook Messenger, iMessage, Skype, WhatsApp, etc.), always get <em>optimized</em> and <em>accurate</em> information about your webpage content.</p>
+
 <p><strong>Uses your <em>existing content</em> for meta tags and Schema markup:</strong></p>
 
-<p>There's no need to manually re-enter descriptions, titles, product information, select images / videos, etc. &mdash; WPSSO Core reads all your existing WordPress content automatically, and you can optionally fine-tune and customize just about anything and everything. ;-)</p>
+<p>There's no need to manually re-enter descriptions, titles, product information, select images / videos, etc. &mdash; WPSSO Core reads your existing WordPress content automatically, and you can also fine-tune and customize just about anything and everything. ;-)</p>
 
 <p>WPSSO Core is language / locale aware, allowing you to customize your site information, social pages and Knowledge Graph for different languages!</p>
 
@@ -29,19 +33,18 @@
 
 <p><strong>Includes advanced <em>quality assurance</em> features and options:</strong></p>
 
-<p>WPSSO Core checks for minimum / maximum image dimensions and aspect ratios, shows notices for missing and required images, verifies webpages for duplicate meta tags, validates theme header templates for correct HTML markup, warns of any missing PHP modules, and checks 3rd party plugin settings for possible conflicts.</p>
+<ol>
+<li>Checks for minimum / maximum image dimensions and aspect ratios.</li>
+<li>Shows notices for missing and required images.</li>
+<li>Verifies webpages for duplicate meta tags.</li>
+<li>Validates theme header templates for correct HTML markup.</li>
+<li>Checks and warns of any missing PHP modules.</li>
+<li>Checks 3rd party plugin settings for possible conflicts.</li>
+</ol>
 
-<p><strong>Offers special meta tags and features for Pinterest:</strong></p>
+<p><strong>A reliable WordPress plugin for today <em>and</em> tomorrow:</strong></p>
 
-<p>WPSSO Core provides a specific image and image dimensions for the Pinterest Pin It button, excludes non-relevant images from being detected by Pinterest, and prevents conflicts between incompatible Pinterest and Facebook meta tag values.</p>
-
-<p><strong>Integrates and improves your favorite SEO plugin:</strong></p>
-
-<p>WPSSO Core specializes in providing all the meta tags and Schema markup social sites and search engines need &mdash; and, if you desire, you can continue to use your favorite SEO content / keyword analysis tools without any conflicts! The Pro version even comes with special integration modules for All in One SEO Pack, The SEO Framework, WP Meta SEO, Yoast SEO, and more.</p>
-
-<p><strong>A meta tag and Schema plugin for today <em>and</em> tomorrow:</strong></p>
-
-<p>WPSSO Core is 100% compatible with the upcoming <a href="https://wordpress.org/plugins/gutenberg/">Gutenberg block editor</a> in WordPress 5 (expected in August 2018)!</p>
+<p>WPSSO Core is <em>extremely fast</em> and 100% compatible with the new <a href="https://wordpress.org/plugins/gutenberg/">Gutenberg block editor</a> in the upcoming release of WordPress 5.</p>
 
 <h3>Users Love the WPSSO Core Plugin</h3>
 
@@ -49,36 +52,42 @@
 
 <p>&#x2605;&#x2605;&#x2605;&#x2605;&#x2605; &mdash; "What a fantastic plugin. If you want to fix all the errors in search console for structured data, this is the plugin to use. Love it." - <a href="https://wordpress.org/support/topic/makes-schema-so-easy/">goviral</a></p>
 
-<p>&#x2605;&#x2605;&#x2605;&#x2605;&#x2605; &mdash; "I've tried a number of WP SEO platforms and find this to be the most relevant and most completely thought-out platform for maximising web and social search results and presentation. Really impressed. Great support too!" - <a href="https://wordpress.org/support/topic/best-seo-platform-on-the-market/">pixmoto</a></p>
+<p>&#x2605;&#x2605;&#x2605;&#x2605;&#x2605; &mdash; "This plugin saves me so much time, and it has really lifted my SERP rankings. Most of my keywords I now rank 1-3 position. I also noticed after about a week that my impressions have gone up at least 75%. I upgraded to the pro version which gave me even more options." - <a href="https://wordpress.org/support/topic/excellent-plugin-and-support-200/">playnstocks</a></p>
 
-<p>&#x2605;&#x2605;&#x2605;&#x2605;&#x2605; &mdash; "Yoast on steroids! As an SEO marketer, I love using Yoast for my basic on-page SEO. But Yoast only allows you to enter basic Open Graph social settings. This plugin gives you SO many more options on completing the Open Graph for Facebook, Twitter cards, Pinterest etc. If you use WordPress, I totally recommend using this SEO plugin to help with better rankings in the SERPS!" - <a href="https://wordpress.org/support/topic/yoast-on-steroids/">gregmontag</a></p>
+<p>&#x2605;&#x2605;&#x2605;&#x2605;&#x2605; &mdash; "Yoast on steroids! As an SEO marketer, I love using Yoast for my basic on-page SEO. But Yoast only allows you to enter basic Open Graph social settings. This plugin gives you SO many more options on completing the Open Graph for Facebook, Twitter cards, Pinterest etc. If you use WordPress, I totally recommend using this plugin to help with better rankings in the SERPS!" - <a href="https://wordpress.org/support/topic/yoast-on-steroids/">gregmontag</a></p>
 
 <h3>WPSSO Core Standard Features</h3>
 
 <ul>
-<li><p>Creates complete and accurate meta tags for:</p>
+<li><p>Complete and accurate meta tags for ALL social sites, search engines, and messaging apps:</p>
 
 <ul>
+<li>Buffer</li>
 <li>Facebook / Open Graph</li>
 <li>Google+</li>
 <li>Google's Knowledge Graph</li>
 <li>Google's Rich Card SEO</li>
 <li>LinkedIn</li>
+<li>ManageWP</li>
 <li>Pinterest Rich Pins</li>
+<li>Pocket</li>
+<li>Skype</li>
 <li>Twitter Cards</li>
-<li>Weibo and many more.</li>
+<li>WhatsApp</li>
+<li>Weibo</li>
+<li><strong>And many more.</strong> :)</li>
 </ul></li>
-<li><p>Offers Pinterest-specific Rich Pin meta tags and <a href="https://developers.google.com/search/docs/guides/intro-structured-data">Structured Data</a> Schema markup for Google.</p></li>
-<li><p>Provides settings for robots noindex, nofollow, noarchive, and nosnippet for each post / page.</p></li>
-<li><p>Includes support for custom post types, custom taxonomy / terms, user profile pages, and attachment pages.</p></li>
-<li><p>Uses images from a variety of sources, including featured, attached, gallery shortcode, images from HTML tags in the content, or a custom fallback image.</p></li>
-<li><p>Features customizable image dimensions for Facebook / Open Graph, Schema markup, Google Rich Card SEO, Pinterest Rich Pins, and Twitter Cards.</p></li>
-<li><p>Configurable maximum title and description lengths, including both hard and soft limits.</p></li>
-<li><p>Contextual help for <em>every</em> plugin option and <a href="https://wpsso.com/docs/plugins/wpsso/">comprehensive online documentation</a>.</p></li>
+<li><p>Pinterest Rich Pin meta tags and <a href="https://developers.google.com/search/docs/guides/intro-structured-data">Structured Data</a> Schema markup for Google.</p></li>
 <li><p>Configurable website / business social accounts for Schema markup and Google's Knowledge Graph.</p></li>
 <li><p>Adds author, publisher, and website markup using Schema JSON-LD for Google's Knowledge Graph.</p></li>
-<li><p>Adds markup for the <a href="https://developers.google.com/search/docs/data-types/sitelinks-searchbox">Google Sitelinks Searchbox</a>.</p></li>
 <li><p>User profile contact fields for Facebook / Open Graph, Twitter Cards, Schema markup, and Google's Knowledge Graph.</p></li>
+<li><p>Adds markup for the <a href="https://developers.google.com/search/docs/data-types/sitelinks-searchbox">Google Sitelinks Searchbox</a>.</p></li>
+<li><p>Includes meta tags and markup for custom post types, custom taxonomy / terms, user profile pages, and attachment pages.</p></li>
+<li><p>Uses images from several sources, including featured, attached, gallery shortcode, images from HTML tags in the content, or a custom fallback image.</p></li>
+<li><p>Features customizable image dimensions for Facebook / Open Graph, Schema markup, Google Rich Card SEO, Pinterest Rich Pins, and Twitter Cards.</p></li>
+<li><p>Configurable maximum title and description lengths, including both hard and soft limits.</p></li>
+<li><p>Optional settings for robots noindex, nofollow, noarchive, and nosnippet for each post / page.</p></li>
+<li><p>Contextual help for <em>every</em> plugin option and <a href="https://wpsso.com/docs/plugins/wpsso/">comprehensive online documentation</a>.</p></li>
 <li><p>Built-in support for <a href="https://wordpress.org/plugins/amp/">Accelerated Mobile Pages (AMP)</a> and <a href="https://wordpress.org/plugins/accelerated-mobile-pages/">AMP for WP - Accelerated Mobile Pages</a> plugins.</p></li>
 <li><p>Supports advanced WordPress configurations, including WordPress Network / Multisite installations and WordPress MU Domain Mapping.</p></li>
 <li><p>And even includes an option to hide the preview of all Pro settings and features. ;-)</p></li>
@@ -114,10 +123,16 @@
 <li><p>Support for embedded videos from Facebook, Slideshare, Vimeo, Wistia, and Youtube in content text.</p></li>
 <li><p>Additional Facebook / Open Graph / Rich Pin meta tags and Schema markup for videos and eCommerce products.</p></li>
 <li><p>Twitter <a href="https://dev.twitter.com/cards/types/player">Player Card</a> meta tags for embedded videos from Facebook, Slideshare, Vimeo, Wistia, and Youtube.</p></li>
-<li><p>Include or exclude individual Facebook / Open Graph / Google / SEO / Twitter Card / Schema meta tag from the webpage head section.</p></li>
+<li><p>Include or exclude individual Facebook, Open Graph, Twitter Card, Pinterest, Schema, and SEO meta tag from the webpage head section.</p></li>
 <li><p>Allows customization of field names, labels, and add / remove contacts on user profile pages and Co-Authors Plus guest author profiles.</p></li>
 <li><p>Optional URL shortening with Bitly, DLMY.App, Google, Ow.ly, TinyURL, or YOURLS.</p></li>
-<li><p>Integrates with 3rd party plugins and services for additional image, video, eCommerce product details, SEO settings, and more.</p></li>
+<li><p>Integrates with 3rd party plugins and services for additional image, video, eCommerce product details, SEO settings, and more.</p>
+
+<p><strong>Optionally integrates and improves your favorite SEO plugin:</strong></p>
+
+<p>WPSSO Core specializes in providing all the meta tags and Schema markup social sites and search engines need &mdash; and, if you desire, you can continue to use your favorite SEO content / keyword analysis tools without any conflicts!</p>
+
+<p><em>The Pro version comes with special integration modules for All in One SEO Pack, The SEO Framework, WP Meta SEO, Yoast SEO, and more.</em></p></li>
 <li><p>The following modules are included with the Pro version, and are automatically loaded if/when the supported plugins and/or services are required.</p>
 
 <ul>

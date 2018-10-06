@@ -65,7 +65,7 @@ if ( ! class_exists( 'WpssoOptionsUpgrade' ) && class_exists( 'WpssoOptions' ) )
 					'plugin_schema_type_id_col_term' => 'plugin_schema_type_col_term',
 					'plugin_schema_type_id_col_user' => 'plugin_schema_type_col_user',
 					'plugin_auto_img_resize'         => 'plugin_create_wp_sizes',
-					'plugin_cache_info'              => 'plugin_show_purge_count',
+					'plugin_cache_info'              => '',
 					'tc_sum_width'                   => 'tc_sum_img_width',
 					'tc_sum_height'                  => 'tc_sum_img_height',
 					'tc_sum_crop'                    => 'tc_sum_img_crop',
@@ -101,7 +101,7 @@ if ( ! class_exists( 'WpssoOptionsUpgrade' ) && class_exists( 'WpssoOptions' ) )
 				),
 				514 => array(
 					'rp_publisher_url' => 'p_publisher_url',
-					'rp_author_name'   => 'p_author_name',
+					'rp_author_name'   => '',
 					'rp_img_width'     => 'p_img_width',
 					'rp_img_height'    => 'p_img_height',
 					'rp_img_crop'      => 'p_img_crop',
@@ -178,15 +178,19 @@ if ( ! class_exists( 'WpssoOptionsUpgrade' ) && class_exists( 'WpssoOptions' ) )
 					'add_meta_property_product:rating:worst'   => '',	// Non-standard / internal meta tag.
 					'add_meta_property_product:rating:best'    => '',	// Non-standard / internal meta tag.
 				),
+				599 => array(
+					'plugin_add_person_role' => 'plugin_new_user_is_person',
+				),
+				602 => array(
+					'plugin_preserve' => '',
+				),
+				609 => array(
+					'p_author_name' => '',
+				),
 			),
 			'wpssoorg' => array(	// WPSSO ORG
 				2 => array(
 					'org_alt_name' => 'org_name_alt',
-				),
-			),
-			'wpssoplm' => array(	// WPSSO PLM
-				16 => array(
-					'plm_addr_alt_name' => 'plm_addr_name_alt',
 				),
 			),
 			'wpssossb' => array(	// WPSSO SSB
@@ -210,7 +214,7 @@ if ( ! class_exists( 'WpssoOptionsUpgrade' ) && class_exists( 'WpssoOptions' ) )
 					'plugin_ignore_small_img' => 'plugin_check_img_dims',
 					'plugin_file_cache_exp'   => 'plugin_social_file_cache_exp',
 					'plugin_object_cache_exp' => '',
-					'plugin_cache_info'       => 'plugin_show_purge_count',
+					'plugin_cache_info'       => '',
 					'plugin_verify_certs'     => '',
 				),
 				539 => array(
@@ -220,12 +224,16 @@ if ( ! class_exists( 'WpssoOptionsUpgrade' ) && class_exists( 'WpssoOptions' ) )
 					'plugin_shortcodes' => '',
 					'plugin_widgets'    => '',
 				),
+				602 => array(
+					'plugin_preserve' => '',
+				),
 			),
 		);
 
 		protected $p;
 
 		public function __construct( &$plugin ) {
+
 			$this->p =& $plugin;
 
 			if ( $this->p->debug->enabled ) {
@@ -260,6 +268,17 @@ if ( ! class_exists( 'WpssoOptionsUpgrade' ) && class_exists( 'WpssoOptions' ) )
 
 				$this->p->util->rename_opts_by_ext( $opts, apply_filters( $this->p->lca . '_rename_options_keys',
 					self::$rename_options_keys ) );
+
+				/**
+				 * Check for schema type IDs to be renamed.
+				 */
+				$keys_preg = 'schema_type_.*|site_org_type|org_type|plm_place_schema_type';
+
+				foreach ( SucomUtil::preg_grep_keys( '/^(' . $keys_preg . ')(_[0-9]+)?$/', $opts ) as $key => $val ) {
+					if ( ! empty( $this->p->cf['head']['schema_renamed'][$val] ) ) {
+						$opts[$key] = $this->p->cf['head']['schema_renamed'][$val];
+					}
+				}
 
 				if ( $prev_version > 0 && $prev_version <= 270 ) {
 
@@ -328,19 +347,9 @@ if ( ! class_exists( 'WpssoOptionsUpgrade' ) && class_exists( 'WpssoOptions' ) )
 				}
 
 				/**
-				 * Check for schema type id values to be renamed.
+				 * Enable og:image and og:video meta tags, and disable the og:image:url
+				 * and og:video:url meta tags, which are functionally identical.
 				 */
-				if ( $prev_version > 0 && $prev_version <= 566 ) {
-
-					$keys_preg = 'schema_type_.*|schema_review_item_type|site_org_type|org_type|plm_addr_business_type';
-
-					foreach ( SucomUtil::preg_grep_keys( '/^(' . $keys_preg . ')(_[0-9]+)?$/', $opts ) as $key => $val ) {
-						if ( ! empty( $this->p->cf['head']['schema_renamed'][$val] ) ) {
-							$opts[$key] = $this->p->cf['head']['schema_renamed'][$val];
-						}
-					}
-				}
-
 				if ( $prev_version > 0 && $prev_version <= 591 ) {
 					foreach ( array( 'og:image', 'og:video' ) as $mt_name ) {
 						$opts['add_meta_property_' . $mt_name] = 1;
@@ -348,7 +357,20 @@ if ( ! class_exists( 'WpssoOptionsUpgrade' ) && class_exists( 'WpssoOptions' ) )
 					}
 				}
 
+				/**
+				 * Remove the 'person' role from all subscribers.
+				 */
+				if ( $prev_version > 0 && $prev_version <= 599 ) {
+					if ( empty( $this->p->options['plugin_new_user_is_person'] ) ) {
+						foreach ( SucomUtil::get_user_ids_by_roles( array( 'subscriber' ) ) as $user_id ) {
+							$user_obj = get_user_by( 'ID', $user_id );
+							$user_obj->remove_role( 'person' );
+						}
+					}
+				}
+
 			} elseif ( $options_name === constant( 'WPSSO_SITE_OPTIONS_NAME' ) ) {
+
 				$this->p->util->rename_opts_by_ext( $opts, apply_filters( $this->p->lca . '_rename_site_options_keys',
 					self::$rename_site_options_keys ) );
 			}

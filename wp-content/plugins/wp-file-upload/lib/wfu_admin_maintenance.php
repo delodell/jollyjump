@@ -191,7 +191,7 @@ function wfu_clean_log_prompt($nonce, $data_enc) {
 }
 
 function wfu_clean_log() {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	global $wpdb;
 
 	if ( !current_user_can( 'manage_options' ) ) return -1;
@@ -232,7 +232,7 @@ function wfu_clean_log() {
 
 
 function wfu_process_all_transfers($clearfiles = false) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	global $wpdb;
 	if ( $clearfiles ) {
 		$table_name1 = $wpdb->prefix . "wfu_log";

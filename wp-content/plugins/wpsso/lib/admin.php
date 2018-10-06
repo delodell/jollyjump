@@ -30,6 +30,7 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 		public $submenu = array();
 
 		public function __construct( &$plugin ) {
+
 			$this->p =& $plugin;
 
 			if ( $this->p->debug->enabled ) {
@@ -85,16 +86,18 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 				add_action( 'admin_init', array( $this, 'register_setting' ) );
 
 				/**
-				 * Hook in_admin_header to allow for setting changes, plugin activation / loading, etc.
+				 * Hook admin_head to allow for setting changes, plugin activation / loading, etc.
 				 */
-				add_action( 'in_admin_header', array( $this, 'conflict_warnings' ), 10 );
-				add_action( 'in_admin_header', array( $this, 'required_notices' ), 20 );
-				add_action( 'in_admin_header', array( $this, 'update_count_notice' ), 30 );
+				if ( ! SucomUtil::is_doing_block_editor() ) {
+					add_action( 'admin_head', array( $this, 'conflict_warnings' ), -1000 );
+					add_action( 'admin_head', array( $this, 'required_notices' ), -500 );
+					add_action( 'admin_head', array( $this, 'update_count_notice' ), 0 );
+				}
 
 				/**
 				 * WPSSO_TOOLBAR_NOTICES can be true, false, or an array of notice types to include in the menu.
 				 */
-				if ( SucomUtil::get_const( 'WPSSO_TOOLBAR_NOTICES', false ) ) {	// Returns false if not defined.
+				if ( SucomUtil::get_const( 'WPSSO_TOOLBAR_NOTICES' ) ) {
 					add_action( 'admin_bar_menu', array( $this, 'add_admin_tb_notices_menu_item' ), WPSSO_TB_NOTICE_MENU_ORDER );
 				}
 
@@ -186,23 +189,23 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 			}
 
 			$has_pdir = $this->p->avail['*']['p_dir'];
-			$has_aop = $this->p->check->aop( $this->p->lca, true, $has_pdir );
+			$has_pp   = $this->p->check->pp( $this->p->lca, true, $has_pdir );
 
 			foreach ( $this->p->cf['plugin'] as $ext => $info ) {
 
-				self::$pkg[$ext]['pdir'] = $this->p->check->aop( $ext, false, $has_pdir );
+				self::$pkg[$ext]['pdir'] = $this->p->check->pp( $ext, false, $has_pdir );
 
-				self::$pkg[$ext]['aop'] = ! empty( $this->p->options['plugin_' . $ext . '_tid'] ) &&
-					$has_aop && $this->p->check->aop( $ext, true, WPSSO_UNDEF_INT ) === WPSSO_UNDEF_INT ? true : false;
+				self::$pkg[$ext]['pp'] = ! empty( $this->p->options['plugin_' . $ext . '_tid'] ) &&
+					$has_pp && $this->p->check->pp( $ext, true, WPSSO_UNDEF ) === WPSSO_UNDEF ? true : false;
 
-				self::$pkg[$ext]['type'] = self::$pkg[$ext]['aop'] ?
+				self::$pkg[$ext]['type'] = self::$pkg[$ext]['pp'] ?
 					_x( 'Pro', 'package type', 'wpsso' ) : _x( 'Free', 'package type', 'wpsso' );
 
 				self::$pkg[$ext]['short'] = $info['short'] . ' ' . self::$pkg[$ext]['type'];
 
 				self::$pkg[$ext]['name'] = SucomUtil::get_pkg_name( $info['name'], self::$pkg[$ext]['type'] );
 
-				self::$pkg[$ext]['status'] = self::$pkg[$ext]['aop'] ? 'L' : ( self::$pkg[$ext]['pdir'] ? 'U' : 'F' );
+				self::$pkg[$ext]['status'] = self::$pkg[$ext]['pp'] ? 'L' : ( self::$pkg[$ext]['pdir'] ? 'U' : 'F' );
 
 				self::$pkg[$ext]['gen'] = $info['short'] . ' ' . ( isset( $info['version'] ) ?
 					$info['version'] . '/' . self::$pkg[$ext]['status'] : '' );
@@ -246,10 +249,10 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 			$sorted_menu   = array();
 			$unsorted_menu = array();
 
-			$first_top_id = false;
-			$last_top_id  = false;
-			$first_ext_id = false;
-			$last_ext_id  = false;
+			$top_first_id = false;
+			$top_last_id  = false;
+			$ext_first_id = false;
+			$ext_last_id  = false;
 
 			foreach ( $this->p->cf['plugin'] as $ext => $info ) {
 
@@ -266,21 +269,21 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 
 						$unsorted_menu[] = array( $parent_slug, $menu_id, $menu_name, $menu_lib, $ext );
 
-						if ( false === $first_top_id ) {
-							$first_top_id = $menu_id;
+						if ( false === $top_first_id ) {
+							$top_first_id = $menu_id;
 						}
 
-						$last_top_id = $menu_id;
+						$top_last_id = $menu_id;
 
 					} else {
 
 						$sorted_menu[$ksort_key] = array( $parent_slug, $menu_id, $menu_name, $menu_lib, $ext );
 
-						if ( false === $first_ext_id ) {
-							$first_ext_id = $menu_id;
+						if ( false === $ext_first_id ) {
+							$ext_first_id = $menu_id;
 						}
 
-						$last_ext_id = $menu_id;
+						$ext_last_id = $menu_id;
 					}
 				}
 			}
@@ -289,20 +292,30 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 
 			foreach ( array_merge( $unsorted_menu, $sorted_menu ) as $key => $arg ) {
 
-				if ( $arg[1] === $first_top_id ) {
-					$css_class = 'first-top-submenu-page';
-				} elseif ( $arg[1] === $last_top_id ) {
-					$css_class = 'last-top-submenu-page';
-					if ( empty( $first_ext_id ) ) {
+				if ( $arg[1] === $top_first_id ) {
+
+					$css_class = 'top-first-submenu-page';
+
+				} elseif ( $arg[1] === $top_last_id ) {
+
+					$css_class = 'top-last-submenu-page';	// Underlined with add-ons.
+
+					if ( empty( $ext_first_id ) ) {
 						$css_class .= ' no-add-ons';
 					} else {
 						$css_class .= ' with-add-ons';
 					}
-				} elseif ( $arg[1] === $first_ext_id ) {
-					$css_class = 'first-ext-submenu-page';
-				} elseif ( $arg[1] === $last_ext_id ) {
-					$css_class = 'last-ext-submenu-page';
+
+				} elseif ( $arg[1] === $ext_first_id ) {
+
+					$css_class = 'ext-first-submenu-page';
+
+				} elseif ( $arg[1] === $ext_last_id ) {
+
+					$css_class = 'ext-last-submenu-page';
+
 				} else {
+
 					$css_class = '';
 				}
 
@@ -370,20 +383,28 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 		}
 
 		protected function &get_form_object( $menu_ext ) {	// $menu_ext required for text_domain
+
 			if ( $this->p->debug->enabled ) {
 				$this->p->debug->mark();
 			}
+
 			if ( ! isset( $this->form ) ) {
+
 				if ( $this->p->debug->enabled ) {
 					$this->p->debug->log( 'form object not defined' );
 				}
+
 				$this->set_form_object( $menu_ext );
+
 			} elseif ( $this->form->get_menu_ext() !== $menu_ext ) {
+
 				if ( $this->p->debug->enabled ) {
 					$this->p->debug->log( 'form object text domain does not match' );
 				}
+
 				$this->set_form_object( $menu_ext );
 			}
+
 			return $this->form;
 		}
 
@@ -581,7 +602,7 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 						_x( 'Documentation', 'plugin action link', 'wpsso' ) . '</a>';
 			}
 
-			if ( ! empty( $info['url']['support'] ) && self::$pkg[$ext]['aop'] ) {
+			if ( ! empty( $info['url']['support'] ) && self::$pkg[$ext]['pp'] ) {
 				$action_links[] = '<a href="' . $info['url']['support'] . '"' .
 					( $tabindex !== false ? ' tabindex="' . ++$tabindex . '"' : '' ) . '>' .
 						_x( 'Pro Support', 'plugin action link', 'wpsso' ) . '</a>';
@@ -705,20 +726,20 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 
 			foreach ( array(
 				// readme array => plugin object
-				'plugin_name' => 'name',
-				'plugin_slug' => 'slug',
-				'base' => 'plugin',
-				'stable_tag' => 'version',
-				'tested_up_to' => 'tested',
+				'plugin_name'       => 'name',
+				'plugin_slug'       => 'slug',
+				'base'              => 'plugin',
+				'stable_tag'        => 'version',
+				'tested_up_to'      => 'tested',
 				'requires_at_least' => 'requires',
-				'home' => 'homepage',
-				'latest' => 'download_link',
-				'author' => 'author',
-				'upgrade_notice' => 'upgrade_notice',
-				'last_updated' => 'last_updated',
-				'sections' => 'sections',
+				'home'              => 'homepage',
+				'latest'            => 'download_link',
+				'author'            => 'author',
+				'upgrade_notice'    => 'upgrade_notice',
+				'last_updated'      => 'last_updated',
+				'sections'          => 'sections',
 				'remaining_content' => 'other_notes',	// added to sections
-				'banners' => 'banners',
+				'banners'           => 'banners',
 			) as $key_name => $prop_name ) {
 				switch ( $key_name ) {
 					case 'base':	// from plugin config
@@ -766,19 +787,26 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 			$network = false;
 
 			if ( ! is_array( $opts ) ) {
+
 				add_settings_error( WPSSO_OPTIONS_NAME, 'notarray', '<b>' . strtoupper( $this->p->lca ) . ' Error</b> : ' .
 					__( 'Submitted options are not an array.', 'wpsso' ), 'error' );
+
 				return $opts;
 			}
 
 			$def_opts = $this->p->opt->get_defaults();	// Get default values, including css from default stylesheets.
 
-			$this->p->notice->trunc();	// Clear all messages before sanitation checks.
+			/**
+			 * Clear any old notices for the current user before sanitation checks.
+			 */
+			$this->p->notice->clear();
 
 			$opts = SucomUtil::restore_checkboxes( $opts );
 			$opts = array_merge( $this->p->options, $opts );
 			$opts = $this->p->opt->sanitize( $opts, $def_opts, $network );	// Sanitation updates image width/height info.
 			$opts = apply_filters( $this->p->lca . '_save_options', $opts, WPSSO_OPTIONS_NAME, $network, false );	// $doing_upgrade is false.
+
+			$this->p->options = $opts;	// Update the options with any changes.
 
 			if ( empty( $this->p->options['plugin_clear_on_save'] ) ) {
 
@@ -788,26 +816,29 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 				$clear_cache_link = $this->p->util->get_admin_url( wp_nonce_url( '?' . $this->p->lca . '-action=clear_all_cache',
 					WpssoAdmin::get_nonce_action(), WPSSO_NONCE_NAME ), _x( 'Clear All Caches', 'submit button', 'wpsso' ) );
 	
-				$this->p->notice->upd( '<strong>' . __( 'Plugin settings have been saved.', 'wpsso' ) . '</strong> <em>' .
-					__( 'Please note that webpage content may take several days to reflect changes.', 'wpsso' ) . ' ' .
-						sprintf( __( '%s now to force a refresh.', 'wpsso' ), $clear_cache_link ) . '</em>' );
+				$this->p->notice->upd( '<strong>' . __( 'Plugin settings have been saved.', 'wpsso' ) . '</strong> ' .
+					sprintf( __( 'Note that some caches may take several days to expire and reflect these changes (or %s now).',
+						'wpsso' ), $clear_cache_link ) );
 
 			} else {
 
-				$dismiss_key = 'settings-saved-clear-all-cache-and-external';
-
-				$this->p->util->clear_all_cache( true, null, null, $dismiss_key );
+				$settings_page_link = $this->p->util->get_admin_url( 'advanced#sucom-tabset_plugin-tab_cache',
+					_x( 'Clear All Caches on Save Settings', 'option label', 'wpsso' ) );
 
 				$this->p->notice->upd( '<strong>' . __( 'Plugin settings have been saved.', 'wpsso' ) . '</strong> ' .
-					sprintf( __( 'All caches have been cleared (the %s option is enabled).', 'wpsso' ),
-						$this->p->util->get_admin_url( 'advanced#sucom-tabset_plugin-tab_cache',
-							_x( 'Clear All Caches on Save Settings', 'option label', 'wpsso' ) ) ) );
+					sprintf( __( 'A background task will begin shortly to clear all caches (the %s option is enabled).',
+						'wpsso' ), $settings_page_link ) );
+
+				$this->p->util->schedule_clear_all_cache( $user_id = get_current_user_id(), $clear_other = true );
+
 			}
 
 			if ( empty( $opts['plugin_filter_content'] ) ) {
-				$message_key = 'notice-content-filters-disabled';
-				$dismiss_key = $message_key . '-reminder';
-				$this->p->notice->warn( $this->p->msgs->get( $message_key ), true, $dismiss_key, true );	// can be dismissed
+
+				$get_msg_key = 'notice-content-filters-disabled';
+				$notice_key  = $get_msg_key . '-reminder';
+
+				$this->p->notice->warn( $this->p->msgs->get( $get_msg_key ), null, $notice_key, true );	// Can be dismissed.
 			}
 
 			$this->check_tmpl_head_attributes();
@@ -824,22 +855,36 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 			}
 
 			if ( empty( $_POST[ WPSSO_NONCE_NAME ] ) ) {	// WPSSO_NONCE_NAME is an md5() string
+
 				if ( $this->p->debug->enabled ) {
 					$this->p->debug->log( 'nonce token validation post field missing' );
 				}
+
 				wp_redirect( $this->p->util->get_admin_url( $page ) );
+
 				exit;
+
 			} elseif ( ! wp_verify_nonce( $_POST[ WPSSO_NONCE_NAME ], WpssoAdmin::get_nonce_action() ) ) {
+
 				$this->p->notice->err( __( 'Nonce token validation failed for network options (update ignored).', 'wpsso' ) );
+
 				wp_redirect( $this->p->util->get_admin_url( $page ) );
+
 				exit;
+
 			} elseif ( ! current_user_can( 'manage_network_options' ) ) {
+
 				$this->p->notice->err( __( 'Insufficient privileges to modify network options.', 'wpsso' ) );
+
 				wp_redirect( $this->p->util->get_admin_url( $page ) );
+
 				exit;
 			}
 
-			$this->p->notice->trunc();	// Clear all notices before sanitation checks.
+			/**
+			 * Clear any old notices for the current user before sanitation checks.
+			 */
+			$this->p->notice->clear();
 
 			$def_opts = $this->p->opt->get_site_defaults();
 
@@ -866,6 +911,7 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 			if ( ! empty( $_GET[$action_query] ) ) {
 
 				$_SERVER['REQUEST_URI'] = remove_query_arg( array( $action_query, WPSSO_NONCE_NAME ) );
+
 				$action_name = SucomUtil::sanitize_hookname( $_GET[$action_query] );
 
 				if ( empty( $_GET[ WPSSO_NONCE_NAME ] ) ) {	// WPSSO_NONCE_NAME is an md5() string
@@ -885,33 +931,45 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 
 						case 'clear_all_cache':
 
-							$this->p->util->clear_all_cache( true );	// $clear_external is true.
+							$this->p->notice->upd( __( 'A background task will begin shortly to clear all caches.', 'wpsso' ) );
+
+							$this->p->util->schedule_clear_all_cache( get_current_user_id(), true );
+
 							break;
 
 						case 'clear_all_cache_and_short_urls':
 
-							$this->p->util->clear_all_cache( true, true );	// $clear_external is true.
+							$this->p->notice->upd( __( 'A background task will begin shortly to clear all caches and short URLs.', 'wpsso' ) );
+
+							$this->p->util->schedule_clear_all_cache( get_current_user_id(), true, true );
+
 							break;
 
 						case 'clear_metabox_prefs':
 
-							$user_id = get_current_user_id();
-							$user = get_userdata( $user_id );
-							$user_name = $user->display_name;
+							$user_id   = get_current_user_id();
+							$user_obj  = get_userdata( $user_id );
+							$user_name = $user_obj->display_name;
+
 							WpssoUser::delete_metabox_prefs( $user_id );
+
 							$this->p->notice->upd( sprintf( __( 'Metabox layout preferences for user ID #%d "%s" have been reset.',
 								'wpsso' ), $user_id, $user_name ) );
+
 							break;
 
 						case 'clear_hidden_notices':
 
-							$user_id = get_current_user_id();
-							$user = get_userdata( $user_id );
-							$user_name = $user->display_name;
+							$user_id   = get_current_user_id();
+							$user_obj  = get_userdata( $user_id );
+							$user_name = $user_obj->display_name;
+
 							delete_user_option( $user_id, WPSSO_DISMISS_NAME, false );	// $global = false
 							delete_user_option( $user_id, WPSSO_DISMISS_NAME, true );	// $global = true
+
 							$this->p->notice->upd( sprintf( __( 'Hidden notices for user ID #%d "%s" have been cleared.',
 								'wpsso' ), $user_id, $user_name ) );
+
 							break;
 
 						case 'change_show_options':
@@ -919,32 +977,40 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 							$_SERVER['REQUEST_URI'] = remove_query_arg( array( 'show-opts' ) );
 
 							if ( isset( $this->p->cf['form']['show_options'][$_GET['show-opts']] ) ) {
+
 								$this->p->notice->upd( sprintf( __( 'Option preference saved &mdash; viewing "%s" by default.',
 									'wpsso' ), $this->p->cf['form']['show_options'][$_GET['show-opts']] ) );
+
 								WpssoUser::save_pref( array( 'show_opts' => $_GET['show-opts'] ) );
 							}
+
 							break;
 
 						case 'modify_tmpl_head_attributes':
 
 							$this->modify_tmpl_head_attributes();
+
 							break;
 
 						case 'reload_default_sizes':
 
-							$opts =& $this->p->options;	// Update the existing options array.
+							$opts     =& $this->p->options;	// Update the existing options array.
 							$def_opts = $this->p->opt->get_defaults();
 							$img_opts = SucomUtil::preg_grep_keys( '/_img_(width|height|crop|crop_x|crop_y)$/', $def_opts );
-							$opts = array_merge( $this->p->options, $img_opts );
+							$opts     = array_merge( $this->p->options, $img_opts );
+
 							$this->p->opt->save_options( WPSSO_OPTIONS_NAME, $opts );
+
 							$this->p->notice->upd( __( 'All image dimensions have been reloaded with their default value and saved.',
 								'wpsso' ) );
+
 							break;
 
 						default:
 
 							do_action( $this->p->lca . '_load_setting_page_' . $action_name,
 								$this->pagehook, $this->menu_id, $this->menu_name, $this->menu_lib );
+
 							break;
 					}
 				}
@@ -966,11 +1032,15 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 		}
 
 		protected function add_side_meta_boxes() {
-			if ( ! self::$pkg[$this->p->lca]['aop'] ) {
+
+			if ( ! self::$pkg[$this->p->lca]['pp'] ) {
+
 				add_meta_box( $this->pagehook . '_purchase_pro', _x( 'Pro Version Available', 'metabox title', 'wpsso' ),
 					array( $this, 'show_metabox_purchase_pro' ), $this->pagehook, 'side_fixed' );
+
 				add_meta_box( $this->pagehook . '_status_pro', _x( 'Pro Version Features', 'metabox title', 'wpsso' ),
 					array( $this, 'show_metabox_status_pro' ), $this->pagehook, 'side' );
+
 				WpssoUser::reset_metabox_prefs( $this->pagehook, array( 'purchase_pro' ), '', '', true );
 			}
 		}
@@ -993,9 +1063,9 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 
 			if ( $current_locale && $default_locale && $current_locale !== $default_locale ) {
 
-				$dismiss_key = $this->menu_id . '-language-notice-current-' . $current_locale . '-default-' . $default_locale;
+				$notice_key = $this->menu_id . '-language-notice-current-' . $current_locale . '-default-' . $default_locale;
 
-				$this->p->notice->inf( sprintf( __( 'Please note that your current language is different from the default site language (%s).', 'wpsso' ), $default_locale ) . ' ' . sprintf( __( 'Localized option values (%s) are used for webpages and content in that language only (not for the default language, or any other language).', 'wpsso' ), $current_locale ), true, $dismiss_key, true );
+				$this->p->notice->inf( sprintf( __( 'Please note that your current language is different from the default site language (%s).', 'wpsso' ), $default_locale ) . ' ' . sprintf( __( 'Localized option values (%s) are used for webpages and content in that language only (not for the default language, or any other language).', 'wpsso' ), $current_locale ), null, $notice_key, true );
 			}
 		}
 
@@ -1020,7 +1090,7 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 			echo $this->menu_name;
 			echo '</span></h1>' . "\n";
 
-			if ( ! self::$pkg[$this->p->lca]['aop'] ) {
+			if ( ! self::$pkg[$this->p->lca]['pp'] ) {
 				echo '<div id="poststuff" class="metabox-holder has-right-sidebar">' . "\n";
 				echo '<div id="side-info-column" class="inner-sidebar">' . "\n";
 
@@ -1081,12 +1151,12 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 
 			if ( $this->menu_lib === 'profile' ) {
 
-				$user_id = get_current_user_id();
-				$profileuser = get_user_to_edit( $user_id );
-				$current_color = get_user_option( 'admin_color', $user_id );
+				$user_id     = get_current_user_id();
+				$user_obj    = get_user_to_edit( $user_id );
+				$admin_color = get_user_option( 'admin_color', $user_id );
 
-				if ( empty( $current_color ) ) {
-					$current_color = 'fresh';
+				if ( empty( $admin_color ) ) {
+					$admin_color = 'fresh';
 				}
 
 				// match WordPress behavior (users page for admins, profile page for everyone else)
@@ -1098,11 +1168,11 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 				echo '<input type="hidden" name="wp_http_referer" value="' . $referer_admin_url . '" />' . "\n";
 				echo '<input type="hidden" name="action" value="update" />' . "\n";
 				echo '<input type="hidden" name="user_id" value="' . $user_id . '" />' . "\n";
-				echo '<input type="hidden" name="nickname" value="' . $profileuser->nickname . '" />' . "\n";
-				echo '<input type="hidden" name="email" value="' . $profileuser->user_email . '" />' . "\n";
-				echo '<input type="hidden" name="admin_color" value="' . $current_color . '" />' . "\n";
-				echo '<input type="hidden" name="rich_editing" value="' . $profileuser->rich_editing . '" />' . "\n";
-				echo '<input type="hidden" name="comment_shortcuts" value="' . $profileuser->comment_shortcuts . '" />' . "\n";
+				echo '<input type="hidden" name="nickname" value="' . $user_obj->nickname . '" />' . "\n";
+				echo '<input type="hidden" name="email" value="' . $user_obj->user_email . '" />' . "\n";
+				echo '<input type="hidden" name="admin_color" value="' . $admin_color . '" />' . "\n";
+				echo '<input type="hidden" name="rich_editing" value="' . $user_obj->rich_editing . '" />' . "\n";
+				echo '<input type="hidden" name="comment_shortcuts" value="' . $user_obj->comment_shortcuts . '" />' . "\n";
 				echo '<input type="hidden" name="admin_bar_front" value="' . _get_admin_bar_pref( 'front', $user_id ) . '" />' . "\n";
 
 				wp_nonce_field( 'update-user_' . $user_id );
@@ -1169,12 +1239,12 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 
 			$action_buttons = apply_filters( $this->p->lca . '_action_buttons', array(
 				array(
-					'submit' => $submit_label_transl,
+					'submit'                                          => $submit_label_transl,
 					'change_show_options&show-opts=' . $view_next_key => $view_label_transl,
 				),
 				array(
-					'clear_all_cache' => $clear_label_transl,
-					'clear_metabox_prefs' => _x( 'Reset Metabox Layout', 'submit button', 'wpsso' ),
+					'clear_all_cache'      => $clear_label_transl,
+					'clear_metabox_prefs'  => _x( 'Reset Metabox Layout', 'submit button', 'wpsso' ),
 					'clear_hidden_notices' => _x( 'Reset Hidden Notices', 'submit button', 'wpsso' ),
 				),
 			), $this->menu_id, $this->menu_name, $this->menu_lib );
@@ -1182,17 +1252,23 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 			$submit_buttons = '';
 
 			foreach ( $action_buttons as $row => $row_buttons ) {
+
 				$css_class = $row ? 'button-secondary' : 'button-secondary button-highlight';	// highlight the first row
 
 				foreach ( $row_buttons as $action_arg => $button_label ) {
+
 					if ( $action_arg === 'submit' ) {
+
 						$submit_buttons .= '<input type="' . $action_arg . '" class="button-primary" value="' . $button_label . '" />';
+
 					} else {
-						$button_url = wp_nonce_url( $this->p->util->get_admin_url( '?' . $this->p->lca . '-action=' . $action_arg ),
-							WpssoAdmin::get_nonce_action(), WPSSO_NONCE_NAME );
+						$action_url = $this->p->util->get_admin_url( '?' . $this->p->lca . '-action=' . $action_arg );
+						$button_url = wp_nonce_url( $action_url, WpssoAdmin::get_nonce_action(), WPSSO_NONCE_NAME );
+
 						$submit_buttons .= $this->form->get_button( $button_label, $css_class, '', $button_url );
 					}
 				}
+
 				$submit_buttons .= '<br/>';
 			}
 
@@ -1201,16 +1277,16 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 			if ( ! $using_external_cache && $this->p->options['plugin_shortener'] !== 'none' ) {
 
 				$settings_page_link = $this->p->util->get_admin_url( 'advanced#sucom-tabset_plugin-tab_cache',
-					_x( 'Clear Short URLs on Clear All Caches', 'option label', 'wpsso' ) );
+					_x( 'Refresh Short URLs on Clear Cache', 'option label', 'wpsso' ) );
 
 				$html .= '<p><small>[*] ';
+
 				if ( empty( $this->p->options['plugin_clear_short_urls'] ) ) {
-					$html .= sprintf( __( '%1$s option is unchecked - shortened URL cache will be preserved.',
-						'wpsso' ), $settings_page_link );
+					$html .= sprintf( __( '%1$s option is unchecked - the shortened URL cache will be preserved.', 'wpsso' ), $settings_page_link );
 				} else {
-					$html .= sprintf( __( '%1$s option is checked - shortened URL cache will be refreshed.',
-						'wpsso' ), $settings_page_link );
+					$html .= sprintf( __( '%1$s option is checked - the shortened URL cache will be cleared.', 'wpsso' ), $settings_page_link );
 				}
+
 				$html .= '</small></p>';
 			}
 
@@ -1286,8 +1362,8 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 
 			do_action( $this->p->lca . '_column_metabox_cache_status_table_rows', $table_cols, $this->form, $transient_keys );
 
-			$clear_admin_url = $this->p->util->get_admin_url( '?' . $this->p->lca . '-action=clear_all_cache' );
-			$clear_admin_url = wp_nonce_url( $clear_admin_url, WpssoAdmin::get_nonce_action(), WPSSO_NONCE_NAME );
+			$clear_admin_url    = $this->p->util->get_admin_url( '?' . $this->p->lca . '-action=clear_all_cache' );
+			$clear_admin_url    = wp_nonce_url( $clear_admin_url, WpssoAdmin::get_nonce_action(), WPSSO_NONCE_NAME );
 			$clear_label_transl = _x( 'Clear All Caches', 'submit button', 'wpsso' );
 
 			if ( ! $using_external_cache && $this->p->options['plugin_shortener'] !== 'none' ) {
@@ -1307,8 +1383,8 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 			if ( $short_urls_count || ( ! $using_external_cache && $this->p->options['plugin_shortener'] !== 'none' && 
 				empty( $this->p->options['plugin_clear_short_urls'] ) ) ) {
 
-				$clear_admin_url = $this->p->util->get_admin_url( '?' . $this->p->lca . '-action=clear_all_cache_and_short_urls' );
-				$clear_admin_url = wp_nonce_url( $clear_admin_url, WpssoAdmin::get_nonce_action(), WPSSO_NONCE_NAME );
+				$clear_admin_url    = $this->p->util->get_admin_url( '?' . $this->p->lca . '-action=clear_all_cache_and_short_urls' );
+				$clear_admin_url    = wp_nonce_url( $clear_admin_url, WpssoAdmin::get_nonce_action(), WPSSO_NONCE_NAME );
 				$clear_label_transl = _x( 'Clear All Caches and Short URLs', 'submit button', 'wpsso' );
 
 				echo $this->form->get_button( $clear_label_transl, 'button-secondary', '', $clear_admin_url );
@@ -1317,7 +1393,7 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 			echo '</td></tr>';
 
 			if ( $have_filtered_exp ) {
-				if ( self::$pkg[$this->p->lca]['aop'] ) {
+				if ( self::$pkg[$this->p->lca]['pp'] ) {
 					echo '<tr><td colspan="' . $table_cols . '"><small>[F] ' .
 						__( 'Expiration option value has been modified by a filter.',
 							'wpsso' ) . '</small></em></td></tr>';
@@ -1437,7 +1513,7 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 
 				if ( $ext === $this->p->lca ) {	// features for this plugin
 					$features = array(
-						'(tool) Debug Logging Enabled' => array(
+						'(feature) Debug Logging Enabled' => array(
 							'classname' => 'SucomDebug',
 						),
 						'(code) Facebook / Open Graph Meta Tags' => array(
@@ -1515,19 +1591,23 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 
 						/**
 						 * Example:
-						 *	'article' => 'Item Type Article',
+						 *	'article'              => 'Item Type Article',
 						 *	'article#news:no_load' => 'Item Type NewsArticle',
 						 *	'article#tech:no_load' => 'Item Type TechArticle',
 						 */
 						list( $id, $stub, $action ) = SucomUtil::get_lib_stub_action( $id_key );
 
-						$classname  = SucomUtil::sanitize_classname( $ext . 'pro' . $sub.$id, false );	// $underscore is false.
-						$status_off = $this->p->avail[$sub][$id] ? 'rec' : 'off';
+						$classname  = SucomUtil::sanitize_classname( $ext . 'pro' . $sub . $id, $allow_underscore = false );
+						$status_off = $this->p->avail[ $sub ][ $id ] ? 'rec' : 'off';
 
 						$features[$label] = array(
-							'td_class' => self::$pkg[$ext]['aop'] ? '' : 'blank',
+							'sub'      => $sub,
+							'lib'      => $id,
+							'stub'     => $stub,
+							'action'   => $action,
+							'td_class' => self::$pkg[$ext]['pp'] ? '' : 'blank',
 							'purchase' => self::$pkg[$ext]['purchase'],
-							'status' => class_exists( $classname ) ? ( self::$pkg[$ext]['aop'] ? 'on' : $status_off ) : $status_off,
+							'status'   => class_exists( $classname ) ? ( self::$pkg[$ext]['pp'] ? 'on' : $status_off ) : $status_off,
 						);
 					}
 				}
@@ -1588,25 +1668,41 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 					$purchase_url = $status_key === 'rec' && ! empty( $arr['purchase'] ) ? $arr['purchase'] : '';
 
 					switch ( $icon_type ) {
+
 						case 'api':
-							$icon_type = 'controls-repeat';
+
+							$icon_type  = 'cloud';
 							$icon_title = __( 'Service API module', 'wpsso' );
+
 							break;
+
 						case 'code':
-							$icon_type = 'editor-code';
+
+							$icon_type  = 'editor-code';
 							$icon_title = __( 'Meta tag and markup module', 'wpsso' );
+
 							break;
+
 						case 'plugin':
-							$icon_type = 'admin-plugins';
+
+							$icon_type  = 'admin-plugins';
 							$icon_title = __( 'Plugin integration module', 'wpsso' );
+
 							break;
+
 						case 'sharing':
-							$icon_type = 'screenoptions';
+
+							$icon_type  = 'screenoptions';
 							$icon_title = __( 'Sharing functionality module', 'wpsso' );
+
 							break;
-						case 'tool':
-							$icon_type = 'admin-tools';
+
+						case 'tool':	// Deprecated on 2018/10/02.
+						case 'feature':
+
+							$icon_type  = 'admin-generic';
 							$icon_title = __( 'Additional functionality module', 'wpsso' );
+
 							break;
 					}
 
@@ -1626,12 +1722,13 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 		}
 
 		private static function sort_plugin_features( $feature_a, $feature_b ) {
-			return strcasecmp( self::feature_priority( $feature_a ),
-				self::feature_priority( $feature_b ) );
+
+			return strcasecmp( self::feature_priority( $feature_a ), self::feature_priority( $feature_b ) );
 		}
 
 		private static function feature_priority( $feature ) {
-			if ( strpos( $feature, '(tool)' ) === 0 ) {
+
+			if ( strpos( $feature, '(feature)' ) === 0 ) {
 				return '(10) ' . $feature;
 			} else {
 				return $feature;
@@ -1670,10 +1767,6 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 
 			echo '<table class="sucom-settings ' . $this->p->lca . ' column-metabox"><tr><td>';
 
-			//$this->show_follow_icons();
-
-			//echo $this->p->msgs->get( 'column-help-support' );
-
 			foreach ( $this->p->cf['plugin'] as $ext => $info ) {
 
 				if ( empty( $info['version'] ) ) {	// filter out add-ons that are not installed
@@ -1690,7 +1783,7 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 					$action_links[] = sprintf( __( '<a href="%s">Documentation and Notes</a>', 'wpsso' ), $info['url']['notes'] );
 				}
 
-				if ( ! empty( $info['url']['support'] ) && self::$pkg[$ext]['aop'] ) {
+				if ( ! empty( $info['url']['support'] ) && self::$pkg[$ext]['pp'] ) {
 					$action_links[] = sprintf( __( '<a href="%s">Priority Support Ticket</a>', 'wpsso' ), $info['url']['support'] ) .
 						' (' . __( 'Pro version', 'wpsso' ) . ')';
 				} elseif ( ! empty( $info['url']['forum'] ) ) {
@@ -1730,20 +1823,6 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 			}
 
 			echo '</td></tr></table>';
-		}
-
-		protected function show_follow_icons() {
-
-			echo '<div class="follow-icons">';
-
-			$img_size = $this->p->cf['follow']['size'];
-
-			foreach ( $this->p->cf['follow']['src'] as $img_rel => $url ) {
-				echo '<a href="' . $url . '"><img src="' . WPSSO_URLPATH.$img_rel . '"
-					width="' . $img_size . '" height="' . $img_size . '" border="0" /></a>';
-			}
-
-			echo '</div>';
 		}
 
 		/**
@@ -1796,7 +1875,7 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 			foreach ( $ext_sorted as $ext => $info ) {
 
 				$ext_num++;
-				$ext_links = $this->get_ext_action_links( $ext, $info, $tabindex );
+				$ext_links  = $this->get_ext_action_links( $ext, $info, $tabindex );
 				$table_rows = array();
 
 				/**
@@ -1808,7 +1887,7 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 					'' : '<p>' . htmlentities( _x( $info['desc'], 'plugin description', 'wpsso' ),
 						ENT_QUOTES, $charset, false ) . '</p>';
 
-				$table_rows['plugin_name'] = '<td colspan="2" class="ext-info-plugin-name" id="ext-info-plugin-name-' . $ext . '">' .
+				$table_rows['plugin_name'] = '<td class="ext-info-plugin-name" id="ext-info-plugin-name-' . $ext . '">' .
 					$plugin_name_html . $plugin_desc_html . ( empty( $ext_links ) ? '' : '<div class="row-actions visible">' .
 						implode( ' | ', $ext_links ) . '</div>' ) . '</td>';
 
@@ -1816,7 +1895,7 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 				 * Plugin separator.
 				 */
 				if ( $ext_num < $ext_total ) {
-					$table_rows['dotted_line'] = '<td colspan="2" class="ext-info-plugin-separator"></td>';
+					$table_rows['dotted_line'] = '<td class="ext-info-plugin-separator"></td>';
 				} else {
 					$table_rows[] = '<td></td>';
 				}
@@ -1834,11 +1913,12 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 
 						echo '<td class="ext-info-plugin-icon" id="ext-info-plugin-icon-' . $ext . '"' .
 							' width="168" rowspan="' . $span_rows . '" valign="top" align="left">' . "\n";
+						echo '<a class="ext-anchor" id="' . $ext . '"></a>' . "\n";	// Add an anchor for the add-on.
 						echo $this->get_ext_img_icon( $ext );
 						echo '</td>';
 					}
 
-					echo $row . '</tr>';
+					echo $row . '</tr>' . "\n";
 				}
 			}
 
@@ -1884,7 +1964,7 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 				$table_rows['plugin_tid'] = $this->form->get_th_html( sprintf( _x( '%s Authentication ID',
 					'option label', 'wpsso' ), $info['short'] ), 'medium nowrap' );
 
-				if ( $this->p->lca === $ext || self::$pkg[$this->p->lca]['aop'] ) {
+				if ( $this->p->lca === $ext || self::$pkg[$this->p->lca]['pp'] ) {
 
 					$table_rows['plugin_tid'] .= '<td width="100%">' .
 						$this->form->get_input( 'plugin_' . $ext . '_tid', 'tid mono', '', 0, 
@@ -1918,7 +1998,7 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 							} elseif ( $key === 'qty_used' ) {
 
 								/**
-								 * The default 'qty_used' value is a '#/#' string.
+								 * The default 'qty_used' value is a 'n/n' string.
 								 */
 								$val = sprintf( __( '%s site addresses registered', 'wpsso' ), $val );
 
@@ -1969,8 +2049,8 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 					$table_rows['plugin_tid'] .= '<td width="100%" class="blank">' .
 						( empty( $this->p->options['plugin_' . $ext . '_tid'] ) ?
 							$this->form->get_no_input( 'plugin_' . $ext . '_tid', 'tid mono' ) :
-							$this->form->get_input( 'plugin_' . $ext . '_tid', 'tid mono',
-								'', 0, '', false, ++$tabindex ) ) . '</td>';
+							$this->form->get_input( 'plugin_' . $ext . '_tid', 'tid mono', '', 0, '', false, ++$tabindex ) ) .
+						'</td>';
 
 					$table_rows[] = '<th class="medium nowrap">&nbsp;</th><td width="100%">&nbsp;</td>';
 				}
@@ -2154,10 +2234,11 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 					$this->p->debug->log( 'blog_public option is disabled' );
 				}
 
-				$dismiss_key = 'wordpress-search-engine-visibility-disabled';
+				$notice_key = 'wordpress-search-engine-visibility-disabled';
 
-				if ( $this->p->notice->is_admin_pre_notices( $dismiss_key ) ) { // Don't bother if already dismissed.
-					$this->p->notice->warn( sprintf( __( 'The WordPress <a href="%s">Search Engine Visibility</a> option is set to discourage search engine and social crawlers from indexing this site. This is not compatible with the purpose of sharing content on social sites &mdash; please uncheck the option to allow search engines and social crawlers to access your content.', 'wpsso' ), get_admin_url( null, 'options-reading.php' ) ), true, $dismiss_key, MONTH_IN_SECONDS * 3 );
+				if ( $this->p->notice->is_admin_pre_notices( $notice_key ) ) { // Don't bother if already dismissed.
+
+					$this->p->notice->warn( sprintf( __( 'The WordPress <a href="%s">Search Engine Visibility</a> option is set to discourage search engine and social crawlers from indexing this site. This is not compatible with the purpose of sharing content on social sites &mdash; please uncheck the option to allow search engines and social crawlers to access your content.', 'wpsso' ), get_admin_url( null, 'options-reading.php' ) ), null, $notice_key, MONTH_IN_SECONDS * 3 );
 				}
 			}
 		}
@@ -2340,12 +2421,15 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 			 */
 			if ( $this->p->avail['seo']['autodescription'] ) {
 
-				$the_seo_framework = the_seo_framework();
+				$tsf = the_seo_framework();
+
+				$opts = $tsf->get_all_options();
 
 				/**
 				 * The SEO Framework > Social Meta Settings Metabox
 				 */
 				$settings_url = get_admin_url( null, 'admin.php?page=theseoframework-settings' );
+
 				$settings_link = '<a href="' . $settings_url . '">' .
 					// translators: please ignore - translation uses a 3rd party text domain
 					__( 'The SEO Framework', 'autodescription' ) . ' &gt; ' .
@@ -2370,7 +2454,7 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 						'article:modified_time', $posts_i18n ) . '</strong>',
 				) as $opt_key => $label_transl ) {
 
-					if ( $the_seo_framework->is_option_checked( $opt_key ) ) {
+					if ( ! empty( $opts[ $opt_key ] ) ) {
 
 						if ( $this->p->debug->enabled ) {
 							$this->p->debug->log( $log_pre . 'autodescription ' . $opt_key . ' option is checked' );
@@ -2390,7 +2474,7 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 					// translators: please ignore - translation uses a 3rd party text domain
 					__( 'Schema Settings', 'autodescription' ) . '</a>';
 
-				if ( $the_seo_framework->is_option_checked( 'knowledge_output' ) ) {
+				if ( ! empty( $opts[ 'knowledge_output' ] ) ) {
 
 					// translators: please ignore - translation uses a 3rd party text domain
 					$label_transl = '<strong>' . __( 'Output Authorized Presence?', 'autodescription' ) . '</strong>';
@@ -2667,16 +2751,16 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 
 			foreach ( $this->p->cf['plugin'] as $ext => $info ) {
 
-				$dismiss_key  = 'timed-notice-' . $ext . '-plugin-review';
+				$notice_key   = 'timed-notice-' . $ext . '-plugin-review';
 				$dismiss_time = true;
-				$showing_ext  = get_transient( $cache_id );				// Returns empty string or $dismiss_key value. 
+				$showing_ext  = get_transient( $cache_id );				// Returns empty string or $notice_key value. 
 
 				if ( empty( $info['version'] ) ) {					// Plugin not installed.
 					continue;
 				} elseif ( empty( $info['url']['review'] ) ) {				// Must be hosted on wordpress.org.
 					continue;
-				} elseif ( $this->p->notice->is_dismissed( $dismiss_key, $user_id ) ) {	// User has dismissed.
-					if ( $showing_ext === $dismiss_key ) {				// Notice was dismissed $cache_exp_secs ago.
+				} elseif ( $this->p->notice->is_dismissed( $notice_key, $user_id ) ) {	// User has dismissed.
+					if ( $showing_ext === $notice_key ) {				// Notice was dismissed $cache_exp_secs ago.
 						break;							// Stop here.
 					}
 					continue;							// Get the next plugin.
@@ -2685,8 +2769,8 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 				} elseif ( $all_times[$ext . '_activate_time'] > $one_week_ago_secs ) {	// Activated less than time ago.
 					continue;
 				} elseif ( empty( $showing_ext ) || $showing_ext === '1' ) {		// Show this notice for $cache_exp_secs.
-					set_transient( $cache_id, $dismiss_key, $cache_exp_secs );
-				} elseif ( $showing_ext !== $dismiss_key ) {				// We're not showing this plugin right now.
+					set_transient( $cache_id, $notice_key, $cache_exp_secs );
+				} elseif ( $showing_ext !== $notice_key ) {				// We're not showing this plugin right now.
 					continue;							// Get the next plugin.
 				}
 
@@ -2697,7 +2781,7 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 				/**
 				 * The action buttons.
 				 */
-				$rate_plugin_label   = sprintf( __( 'Yes! Contribute and rate %s 5 stars!', 'wpsso' ), $info['short'] );
+				$rate_plugin_label   = sprintf( __( 'Yes! Rate %s 5 stars!', 'wpsso' ), $info['short'] );
 				$rate_plugin_clicked = sprintf( __( 'Thank you for rating the %s plugin! You\'re awesome!', 'wpsso' ), $info['short'] );
 				$rate_plugin_button  = '<div style="display:inline-block;vertical-align:top;margin:1.2em 0.8em 0.8em 0;">' .
 					$this->form->get_button( $rate_plugin_label, 'button-primary dismiss-on-click', '', $info['url']['review'],
@@ -2753,18 +2837,18 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 				/**
 				 * The notice provides it's own dismiss button, so do not show the dismiss 'Forever' link.
 				 */
-				$this->p->notice->log( 'inf', $notice_msg, $user_id, $dismiss_key, $dismiss_time, array( 'dismiss_diff' => false ) );
+				$this->p->notice->log( 'inf', $notice_msg, $user_id, $notice_key, $dismiss_time, array( 'dismiss_diff' => false ) );
 
 				return;	// Show only one notice at a time.
 			}
 
-			if ( ! self::$pkg[$lca]['aop'] ) {
+			if ( ! self::$pkg[$lca]['pp'] ) {
 
 				if ( ! empty( $all_times[$lca . '_install_time'] ) && $all_times[$lca . '_install_time'] < $six_months_ago_secs ) {
 
 					$info         = $this->p->cf['plugin'][$lca];
 					$purchase_url = add_query_arg( 'utm_source', 'pro-purchase-notice', $info['url']['purchase'] );
-					$dismiss_key  = 'timed-notice-' . $lca . '-pro-purchase-notice';
+					$notice_key   = 'timed-notice-' . $lca . '-pro-purchase-notice';
 					$dismiss_time = 3 * MONTH_IN_SECONDS;
 
 					$purchase_label   = __( 'Yes! Get the Pro update in just moments!', 'wpsso' );
@@ -2803,7 +2887,7 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 					/**
 					 * The notice provides it's own dismiss button, so do not show the dismiss 'Forever' link.
 					 */
-					$this->p->notice->log( 'inf', $notice_msg, $user_id, $dismiss_key, $dismiss_time, array( 'dismiss_diff' => false ) );
+					$this->p->notice->log( 'inf', $notice_msg, $user_id, $notice_key, $dismiss_time, array( 'dismiss_diff' => false ) );
 
 					return;	// Show only one notice at a time.
 				}
@@ -2887,22 +2971,22 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 								continue 2;
 						}
 
-						$app_label = WpssoConfig::$cf[$key]['label'];
+						$app_label   = WpssoConfig::$cf[$key]['label'];
 						$rec_version = WpssoConfig::$cf[$key]['rec_version'];
 
 						if ( version_compare( $app_version, $rec_version, '<' ) ) {
 
 							$warn_msg = $this->p->msgs->get( 'notice-recommend-version', array(
-								'app_label' => $app_label,
+								'app_label'   => $app_label,
 								'app_version' => $app_version,
 								'rec_version' => WpssoConfig::$cf[$key]['rec_version'],
 								'version_url' => WpssoConfig::$cf[$key]['version_url'],
 							) );
 
-							$dismiss_key  = 'notice-recommend-version-' . $this->p->lca . '-' . $version . '-' . $app_label . '-' . $app_version;
+							$notice_key   = 'notice-recommend-version-' . $this->p->lca . '-' . $version . '-' . $app_label . '-' . $app_version;
 							$dismiss_time = MONTH_IN_SECONDS;
 
-							$this->p->notice->warn( $warn_msg, true, $dismiss_key, $dismiss_time, true );	// $no_unhide is true
+							$this->p->notice->warn( $warn_msg, null, $notice_key, $dismiss_time );
 						}
 					}
 				}
@@ -2924,11 +3008,11 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 
 			if ( $update_count > 0 ) {
 
-				$info = $this->p->cf['plugin'][$this->p->lca];
-				$link_url = self_admin_url( 'update-core.php' );
-				$dismiss_key = 'have-updates-for-' . $this->p->lca;
+				$info       = $this->p->cf['plugin'][$this->p->lca];
+				$link_url   = self_admin_url( 'update-core.php' );
+				$notice_key = 'have-updates-for-' . $this->p->lca;
 
-				$this->p->notice->inf( sprintf( _n( 'There is <a href="%1$s">%2$d pending update for the %3$s plugin and/or its add-on(s)</a>.', 'There are <a href="%1$s">%2$d pending updates for the %3$s plugin and/or its add-on(s)</a>.', $update_count, 'wpsso' ), $link_url, $update_count, $info['short'] ) . ' ' . _n( 'Please install this update at your earliest convenience.', 'Please install these updates at your earliest convenience.', $update_count, 'wpsso' ), true, $dismiss_key, DAY_IN_SECONDS * 3 );
+				$this->p->notice->inf( sprintf( _n( 'There is <a href="%1$s">%2$d pending update for the %3$s plugin and/or its add-on(s)</a>.', 'There are <a href="%1$s">%2$d pending updates for the %3$s plugin and/or its add-on(s)</a>.', $update_count, 'wpsso' ), $link_url, $update_count, $info['short'] ) . ' ' . _n( 'Please install this update at your earliest convenience.', 'Please install these updates at your earliest convenience.', $update_count, 'wpsso' ), null, $notice_key, DAY_IN_SECONDS * 3 );
 			}
 		}
 
@@ -2962,9 +3046,11 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 				} elseif ( strpos( $html_stripped, '<head>' ) !== false ) {
 
 					if ( $this->p->notice->is_admin_pre_notices() ) {
-						$error_msg = $this->p->msgs->get( 'notice-header-tmpl-no-head-attr' );
-						$dismiss_key = 'notice-header-tmpl-no-head-attr-' . SucomUtil::get_theme_slug_version();
-						$this->p->notice->warn( $error_msg, true, $dismiss_key, true );
+
+						$error_msg  = $this->p->msgs->get( 'notice-header-tmpl-no-head-attr' );
+						$notice_key = 'notice-header-tmpl-no-head-attr-' . SucomUtil::get_theme_slug_version();
+
+						$this->p->notice->warn( $error_msg, null, $notice_key, true );
 					}
 
 					break;
@@ -2979,8 +3065,10 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 			$head_action_php = '<head <?php do_action( \'add_head_attributes\' ); ?' . '>>';	// breakup closing php for vim
 
 			if ( empty( $header_files ) ) {
+
 				$this->p->notice->err( __( 'No header templates found in the parent or child theme directories.', 'wpsso' ) );
-				return;	// exit early
+
+				return;	// Exit early.
 			}
 
 			foreach ( $header_files as $tmpl_file ) {
@@ -3029,9 +3117,11 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 
 			if ( $have_changes ) {
 
-				$dismiss_key = 'notice-header-tmpl-no-head-attr-' . SucomUtil::get_theme_slug_version();
+				$notice_key  = 'notice-header-tmpl-no-head-attr-' . SucomUtil::get_theme_slug_version();
+				$admin_roles = $this->p->cf['wp']['roles']['admin'];
+				$user_ids    = SucomUtil::get_user_ids_by_roles( $admin_roles );
 
-				$this->p->notice->trunc_key( $dismiss_key, 'all' );	// Just in case.
+				$this->p->notice->clear_key( $notice_key, $user_ids );	// Just in case.
 			}
 		}
 
@@ -3041,7 +3131,7 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 		protected function add_og_types_table_rows( array &$table_rows, array $hide_in_view = array(), $og_types = null ) {
 
 			if ( ! is_array( $og_types ) ) {
-				$og_types = $this->p->og->get_og_types_select( true );	// $add_none is true
+				$og_types = $this->p->og->get_og_types_select( $add_none = true );
 			}
 
 			foreach ( array( 
@@ -3055,11 +3145,13 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 				$tr_html = '';
 				$opt_key = 'og_type_for_' . $type_name;
 
-				if ( ! empty( $hide_in_view[$opt_key] ) ) {
-					$tr_html = $this->form->get_tr_hide( $hide_in_view[$opt_key], $opt_key );
+				if ( ! empty( $hide_in_view[ $opt_key ] ) ) {
+					$tr_html = $this->form->get_tr_hide( $hide_in_view[ $opt_key ], $opt_key );
 				}
 
-				$table_rows[$opt_key] = $tr_html.$this->form->get_th_html( $th_label, '', $opt_key ).
+				$table_rows[$opt_key] = $tr_html . 
+				$this->form->get_th_html( $th_label, '', $opt_key ) . 
+
 				'<td>' . $this->form->get_select( $opt_key, $og_types, 'og_type' ) . '</td>';
 			}
 
@@ -3073,25 +3165,24 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 
 				$type_opt_keys[] = $opt_key = 'og_type_for_' . $pt->name;
 
-				$type_select .= '<p>' . $this->form->get_select( $opt_key, $og_types, 'og_type' ) .
-					' ' . sprintf( _x( 'for %s', 'option comment', 'wpsso' ), $pt->label ) . '</p>' . "\n";
+				$type_select .= '<p>' . $this->form->get_select( $opt_key, $og_types, 'og_type' ) . ' ' .
+					sprintf( _x( 'for %s', 'option comment', 'wpsso' ), $pt->label ) . '</p>' . "\n";
 			}
 
 			$type_opt_keys[] = $opt_key = 'og_type_for_post_archive';
 
-			$type_select .= '<p>' . $this->form->get_select( $opt_key, $og_types, 'og_type' ) .
-				' ' . sprintf( _x( 'for %s', 'option comment', 'wpsso' ),
-					_x( '(Post Type) Archive Page', 'option comment', 'wpsso' ) ) . '</p>' . "\n";
+			$type_select .= '<p>' . $this->form->get_select( $opt_key, $og_types, 'og_type' ) . ' ' .
+				sprintf( _x( 'for %s', 'option comment', 'wpsso' ), _x( '(Post Type) Archive Page', 'option comment', 'wpsso' ) ) . '</p>' . "\n";
 
 			$tr_html  = '';
 			$tr_key   = 'og_type_for_ptn';
 			$th_label = _x( 'Type by Post Type', 'option label', 'wpsso' );
 
-			if ( ! empty( $hide_in_view[$tr_key] ) ) {
-				$tr_html = $this->form->get_tr_hide( $hide_in_view[$tr_key], $type_opt_keys );
+			if ( ! empty( $hide_in_view[ $tr_key ] ) ) {
+				$tr_html = $this->form->get_tr_hide( $hide_in_view[ $tr_key ], $type_opt_keys );
 			}
 
-			$table_rows[$tr_key] = $tr_html.$this->form->get_th_html( $th_label, '', $tr_key ).
+			$table_rows[$tr_key] = $tr_html . $this->form->get_th_html( $th_label, '', $tr_key ) .
 			'<td>' . $type_select . '</td>';
 
 			unset( $type_select, $type_opt_keys );	// Just in case.
@@ -3106,19 +3197,20 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 
 				$type_opt_keys[] = $opt_key = 'og_type_for_tax_' . $tax->name;
 
-				$type_select .= '<p>' . $this->form->get_select( $opt_key, $og_types, 'og_type' ) .
-					' ' . sprintf( _x( 'for %s', 'option comment', 'wpsso' ), $tax->label ) . '</p>' . "\n";
+				$type_select .= '<p>' . $this->form->get_select( $opt_key, $og_types, 'og_type' ) . ' ' .
+					sprintf( _x( 'for %s', 'option comment', 'wpsso' ), $tax->label ) . '</p>' . "\n";
 			}
 
 			$tr_html  = '';
 			$tr_key   = 'og_type_for_ttn';
 			$th_label = _x( 'Type by Term Taxonomy', 'option label', 'wpsso' );
 
-			if ( ! empty( $hide_in_view[$tr_key] ) ) {
-				$tr_html = $this->form->get_tr_hide( $hide_in_view[$tr_key], $type_opt_keys );
+			if ( ! empty( $hide_in_view[ $tr_key ] ) ) {
+				$tr_html = $this->form->get_tr_hide( $hide_in_view[ $tr_key ], $type_opt_keys );
 			}
 
-			$table_rows[$tr_key] = $tr_html.$this->form->get_th_html( $th_label, '', $tr_key ).
+			$table_rows[$tr_key] = $tr_html . 
+			$this->form->get_th_html( $th_label, '', $tr_key ) . 
 			'<td>' . $type_select . '</td>';
 
 			unset( $type_select, $type_opt_keys );	// Just in case.
@@ -3129,33 +3221,32 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 		 */
 		protected function add_schema_item_props_table_rows( array &$table_rows ) {
 
-			$table_rows['schema_logo_url'] = $this->form->get_th_html( 
-				'<a href="https://developers.google.com/structured-data/customize/logos">' .
-				_x( 'Organization Logo URL', 'option label', 'wpsso' ) . '</a>',
-					'', 'schema_logo_url', array( 'is_locale' => true ) ).
+			$table_rows['schema_logo_url'] = '' . 
+			$this->form->get_th_html( '<a href="https://developers.google.com/structured-data/customize/logos">' .
+			_x( 'Organization Logo URL', 'option label', 'wpsso' ) . '</a>', '', 'schema_logo_url', array( 'is_locale' => true ) ) . 
 			'<td>' . $this->form->get_input( SucomUtil::get_key_locale( 'schema_logo_url', $this->p->options ), 'wide' ) . '</td>';
 
-			$table_rows['schema_banner_url'] = $this->form->get_th_html( _x( 'Organization Banner URL',
-				'option label', 'wpsso' ), '', 'schema_banner_url', array( 'is_locale' => true ) ).
+			$table_rows['schema_banner_url'] = '' . 
+			$this->form->get_th_html( _x( 'Organization Banner URL', 'option label', 'wpsso' ), '', 'schema_banner_url', array( 'is_locale' => true ) ) . 
 			'<td>' . $this->form->get_input( SucomUtil::get_key_locale( 'schema_banner_url', $this->p->options ), 'wide' ) . '</td>';
 
-			$table_rows['schema_img_max'] = $this->form->get_tr_hide( 'basic', 'schema_img_max' ).
-			$this->form->get_th_html( _x( 'Maximum Images to Include', 'option label', 'wpsso' ), '', 'schema_img_max' ).
-			'<td>' . $this->form->get_select( 'schema_img_max', range( 0, $this->p->cf['form']['max_media_items'] ), 'short', '', true ).
+			$table_rows['schema_img_max'] = $this->form->get_tr_hide( 'basic', 'schema_img_max' ) . 
+			$this->form->get_th_html( _x( 'Maximum Images to Include', 'option label', 'wpsso' ), '', 'schema_img_max' ) . 
+			'<td>' . $this->form->get_select( 'schema_img_max', range( 0, $this->p->cf['form']['max_media_items'] ), 'short', '', true ) . 
 			( empty( $this->form->options['og_vid_prev_img'] ) ?
 				'' : ' <em>' . _x( 'video preview images are enabled (and included first)',
 					'option comment', 'wpsso' ) . '</em>' ) . '</td>';
 
-			$table_rows['schema_img'] = $this->form->get_th_html( _x( 'Schema Image Dimensions',
-				'option label', 'wpsso' ), '', 'schema_img_dimensions' ).
+			$table_rows['schema_img'] = '' . 
+			$this->form->get_th_html( _x( 'Schema Image Dimensions', 'option label', 'wpsso' ), '', 'schema_img_dimensions' ) . 
 			'<td>' . $this->form->get_input_image_dimensions( 'schema_img' ) . '</td>';	// $use_opts = false
 
-			$table_rows['schema_desc_len'] = $this->form->get_tr_hide( 'basic', 'schema_desc_len' ).
-			$this->form->get_th_html( _x( 'Maximum Description Length', 'option label', 'wpsso' ), '', 'schema_desc_len' ).
+			$table_rows['schema_desc_len'] = $this->form->get_tr_hide( 'basic', 'schema_desc_len' ) . 
+			$this->form->get_th_html( _x( 'Maximum Description Length', 'option label', 'wpsso' ), '', 'schema_desc_len' ) . 
 			'<td>' . $this->form->get_input( 'schema_desc_len', 'short' ) . ' ' . _x( 'characters or less', 'option comment', 'wpsso' ) . '</td>';
 
-			$table_rows['schema_author_name'] = $this->form->get_tr_hide( 'basic', 'schema_author_name' ).
-			$this->form->get_th_html( _x( 'Author / Person Name Format', 'option label', 'wpsso' ), '', 'schema_author_name' ).
+			$table_rows['schema_author_name'] = $this->form->get_tr_hide( 'basic', 'schema_author_name' ) . 
+			$this->form->get_th_html( _x( 'Author / Person Name Format', 'option label', 'wpsso' ), '', 'schema_author_name' ) . 
 			'<td>' . $this->form->get_select( 'schema_author_name', $this->p->cf['form']['user_name_fields'] ) . '</td>';
 		}
 
@@ -3179,11 +3270,12 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 				$tr_html = '';
 				$opt_key = 'schema_type_for_' . $type_name;
 
-				if ( ! empty( $hide_in_view[$opt_key] ) ) {
-					$tr_html = $this->form->get_tr_hide( $hide_in_view[$opt_key], $opt_key );
+				if ( ! empty( $hide_in_view[ $opt_key ] ) ) {
+					$tr_html = $this->form->get_tr_hide( $hide_in_view[ $opt_key ], $opt_key );
 				}
 
-				$table_rows[$opt_key] = $tr_html.$this->form->get_th_html( $th_label, '', $opt_key ).
+				$table_rows[ $opt_key ] = $tr_html . 
+				$this->form->get_th_html( $th_label, '', $opt_key ) . 
 				'<td>' . $this->form->get_select( $opt_key, $schema_types, 'schema_type' ) . '</td>';
 			}
 
@@ -3197,15 +3289,14 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 
 				$type_opt_keys[] = $opt_key = 'schema_type_for_' . $pt->name;
 
-				$type_select .= '<p>' . $this->form->get_select( $opt_key, $schema_types, 'schema_type' ) .
-					' ' . sprintf( _x( 'for %s', 'option comment', 'wpsso' ), $pt->label ) . '</p>' . "\n";
+				$type_select .= '<p>' . $this->form->get_select( $opt_key, $schema_types, 'schema_type' ) . ' ' .
+					sprintf( _x( 'for %s', 'option comment', 'wpsso' ), $pt->label ) . '</p>' . "\n";
 			}
 
 			$type_opt_keys[] = $opt_key = 'schema_type_for_post_archive';
 
-			$type_select .= '<p>' . $this->form->get_select( $opt_key, $schema_types, 'schema_type' ) .
-				' ' . sprintf( _x( 'for %s', 'option comment', 'wpsso' ),
-					_x( '(Post Type) Archive Page', 'option comment', 'wpsso' ) ) . '</p>' . "\n";
+			$type_select .= '<p>' . $this->form->get_select( $opt_key, $schema_types, 'schema_type' ) . ' ' .
+				sprintf( _x( 'for %s', 'option comment', 'wpsso' ), _x( '(Post Type) Archive Page', 'option comment', 'wpsso' ) ) . '</p>' . "\n";
 
 			$tr_html  = '';
 			$tr_key   = 'schema_type_for_ptn';
@@ -3215,7 +3306,8 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 				$tr_html = $this->form->get_tr_hide( $hide_in_view[$tr_key], $type_opt_keys );
 			}
 
-			$table_rows[$tr_key] = $tr_html.$this->form->get_th_html( $th_label, '', $tr_key ).
+			$table_rows[$tr_key] = $tr_html . 
+			$this->form->get_th_html( $th_label, '', $tr_key ) . 
 			'<td>' . $type_select . '</td>';
 
 			unset( $type_select, $type_opt_keys );	// Just in case.
@@ -3230,8 +3322,8 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 
 				$type_opt_keys[] = $opt_key = 'schema_type_for_tax_' . $tax->name;
 
-				$type_select .= '<p>' . $this->form->get_select( $opt_key, $schema_types, 'schema_type' ) .
-					' ' . sprintf( _x( 'for %s', 'option comment', 'wpsso' ), $tax->label ) . '</p>' . "\n";
+				$type_select .= '<p>' . $this->form->get_select( $opt_key, $schema_types, 'schema_type' ) . ' ' .
+					sprintf( _x( 'for %s', 'option comment', 'wpsso' ), $tax->label ) . '</p>' . "\n";
 			}
 
 			$tr_html  = '';
@@ -3242,7 +3334,7 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 				$tr_html = $this->form->get_tr_hide( $hide_in_view[$tr_key], $type_opt_keys );
 			}
 
-			$table_rows[$tr_key] = $tr_html.$this->form->get_th_html( $th_label, '', $tr_key ).
+			$table_rows[$tr_key] = $tr_html . $this->form->get_th_html( $th_label, '', $tr_key ) . 
 			'<td>' . $type_select . '</td>';
 
 			unset( $type_select, $type_opt_keys );	// Just in case.
@@ -3253,24 +3345,26 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 		 */
 		protected function add_schema_knowledge_graph_table_rows( array &$table_rows ) {
 
-			$table_rows['schema_knowledge_graph'] = $this->form->get_th_html( _x( 'Knowledge Graph for Home Page',
-				'option label', 'wpsso' ), '', 'schema_knowledge_graph' ).
+			$table_rows['schema_knowledge_graph'] = '' . 
+			$this->form->get_th_html( _x( 'Knowledge Graph for Home Page', 'option label', 'wpsso' ), '', 'schema_knowledge_graph' ) . 
 			'<td>' .
 			'<p>' . $this->form->get_checkbox( 'schema_add_home_website' ) . ' ' .
 				sprintf( __( 'Include <a href="%s">WebSite Information</a> for Google Search',
 					'wpsso' ), 'https://developers.google.com/structured-data/site-name' ) . '</p>' .
 			'<p>' . $this->form->get_checkbox( 'schema_add_home_organization' ) . ' ' .
-				sprintf( __( 'Include <a href="%s">Organization Social Profile</a>',
+				sprintf( __( 'Include <a href="%s">Organization Social Profile</a> for a Business Site',
 					'wpsso' ), 'https://developers.google.com/structured-data/customize/social-profiles' ) . '</p>' .
 			'<p>' . $this->form->get_checkbox( 'schema_add_home_person' ) . ' ' .
-				sprintf( __( 'Include <a href="%s">Person Social Profile</a> for the Site Owner',
+				sprintf( __( 'Include <a href="%s">Person Social Profile</a> for a Personal Site',
 					'wpsso' ), 'https://developers.google.com/structured-data/customize/social-profiles' ) . '</p>' .
 			'</td>';
 
-			$site_owners = SucomUtil::get_user_select( array( 'administrator', 'editor' ) );
+			$owner_roles = $this->p->cf['wp']['roles']['owner'];
 
-			$table_rows['schema_home_person_id'] = $this->form->get_th_html( _x( 'User for Person Social Profile',
-				'option label', 'wpsso' ), '', 'schema_home_person_id' ).
+			$site_owners = SucomUtil::get_user_select_by_roles( $owner_roles );
+
+			$table_rows['schema_home_person_id'] = '' . 
+			$this->form->get_th_html( _x( 'User for Person Social Profile', 'option label', 'wpsso' ), '', 'schema_home_person_id' ) . 
 			'<td>' . $this->form->get_select( 'schema_home_person_id', $site_owners, '', '', true ) . '</td>';
 		}
 
@@ -3280,19 +3374,23 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 		 */
 		protected function add_optional_advanced_table_rows( array &$table_rows, $network = false ) {
 
-			$table_rows['plugin_preserve'] = '' .
-			$this->form->get_th_html( _x( 'Preserve Settings on Uninstall', 'option label', 'wpsso' ), '', 'plugin_preserve' ).
-			'<td>' . $this->form->get_checkbox( 'plugin_preserve' ) . '</td>' .
-			self::get_option_site_use( 'plugin_preserve', $this->form, $network, true );
+			$table_rows['plugin_clean_on_uninstall'] = '' .
+			$this->form->get_th_html( _x( 'Remove All Settings on Uninstall', 'option label', 'wpsso' ), '', 'plugin_clean_on_uninstall' ) . 
+			'<td>' .
+				$this->form->get_checkbox( 'plugin_clean_on_uninstall' ) . ' ' .
+				_x( 'including any custom meta for posts, terms, and users', 'option comment', 'wpsso' ) . ' ' . 
+			'</td>' .
+			self::get_option_site_use( 'plugin_clean_on_uninstall', $this->form, $network, true );
 
 			$table_rows['plugin_debug'] = '' .
-			$this->form->get_th_html( _x( 'Add Hidden Debug Messages', 'option label', 'wpsso' ), '', 'plugin_debug' ).
-			'<td>' . ( ! $network && SucomUtil::get_const( 'WPSSO_HTML_DEBUG' ) ?
-				$this->form->get_no_checkbox( 'plugin_debug' ) . ' <em>WPSSO_HTML_DEBUG constant is true</em>' :
-				$this->form->get_checkbox( 'plugin_debug' ) ) . '</td>' .
+			$this->form->get_th_html( _x( 'Add Hidden Debug Messages', 'option label', 'wpsso' ), '', 'plugin_debug' ) . 
+			'<td>'  .  ( ! $network && SucomUtil::get_const( 'WPSSO_HTML_DEBUG' ) ? $this->form->get_no_checkbox( 'plugin_debug' ) .
+				' <em>' . _x( 'WPSSO_HTML_DEBUG constant is true', 'option comment', 'wpsso' ) . '</em>' :
+					$this->form->get_checkbox( 'plugin_debug' ) ) .
+			'</td>' .
 			self::get_option_site_use( 'plugin_debug', $this->form, $network, true );
 
-			if ( $network || ! $this->p->check->aop( $this->p->lca, true, $this->p->avail['*']['p_dir'] ) ) {
+			if ( $network || ! $this->p->check->pp( $this->p->lca, true, $this->p->avail['*']['p_dir'] ) ) {
 
 				$table_rows['plugin_hide_pro'] = $this->form->get_tr_hide( 'basic', 'plugin_hide_pro' ) .
 				$this->form->get_th_html( _x( 'Hide All Pro Version Options', 'option label', 'wpsso' ), '', 'plugin_hide_pro' ) .
@@ -3311,10 +3409,8 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 
 		public static function get_option_site_use( $name, $form, $network = false, $enabled = false ) {
 			if ( $network ) {
-				return $form->get_th_html( _x( 'Site Use',
-					'option label (very short)', 'wpsso' ),
-						'site_use' ).( $enabled || self::$pkg['wpsso']['aop'] ?
-					'<td class="site_use">' . $form->get_select( $name . ':use',
+				return $form->get_th_html( _x( 'Site Use', 'option label (very short)', 'wpsso' ), 'site_use' ) . 
+					( $enabled || self::$pkg['wpsso']['pp'] ? '<td class="site_use">' . $form->get_select( $name . ':use',
 						WpssoConfig::$cf['form']['site_option_use'], 'site_use' ) . '</td>' :
 					'<td class="blank site_use">' . $form->get_select( $name . ':use',
 						WpssoConfig::$cf['form']['site_option_use'], 'site_use', '', true, true ) . '</td>' );
@@ -3479,7 +3575,7 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 
 						case 'plugins_page':
 
-							$html = '<a href="' . $this->pageref_url . '" target="_parent">' .
+							$html = '<a href="' . urlencode( $this->pageref_url ) . '" target="_parent">' .
 								sprintf( __( 'Return to %s', 'wpsso' ), $this->pageref_title ) . '</a>';
 
 							break;
@@ -3493,7 +3589,7 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 									$this->p->lca . '_pageref_title' => urlencode( $this->pageref_title ),
 								), $matches[2] );
 
-								$html = $matches[1].$url.$matches[3];
+								$html = $matches[1] . $url . $matches[3];
 							}
 
 							break;
@@ -3521,7 +3617,7 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 
 		public function get_check_for_updates_link( $only_url = false ) {
 
-			$link_url = '';
+			$link_url  = '';
 			$link_html = '';
 
 			if ( class_exists( 'WpssoUm' ) ) {
@@ -3601,19 +3697,11 @@ if ( ! class_exists( 'WpssoAdmin' ) ) {
 				return $html;
 			}
 
-			$short = $this->p->cf['plugin'][$ext]['short'];
-
 			$html .= ' <span class="ext-req-msg">';
 
-			if ( ! empty( $this->p->cf['plugin'][$ext]['url']['home'] ) ) {
-				$html .= '<a href="' . $this->p->cf['plugin'][$ext]['url']['home'] . '">';
-			}
-
-			$html .= sprintf( _x( '%s add-on required', 'option comment', 'wpsso' ), $short );
-
-			if ( ! empty( $this->p->cf['plugin'][$ext]['url']['home'] ) ) {
-				$html .= '</a>';
-			}
+			$html .= $this->p->util->get_admin_url( 'addons#' . $ext, 
+				sprintf( _x( '%s add-on required', 'option comment', 'wpsso' ),
+					$this->p->cf['plugin'][$ext]['short'] ) );
 
 			$html .= '</span>';
 

@@ -14,6 +14,7 @@ if ( ! class_exists( 'WpssoSitesubmenuSiteadvanced' ) && class_exists( 'WpssoAdm
 	class WpssoSitesubmenuSiteadvanced extends WpssoAdmin {
 
 		public function __construct( &$plugin, $id, $name, $lib, $ext ) {
+
 			$this->p =& $plugin;
 
 			if ( $this->p->debug->enabled ) {
@@ -49,7 +50,7 @@ if ( ! class_exists( 'WpssoSitesubmenuSiteadvanced' ) && class_exists( 'WpssoAdm
 			/**
 			 * Add a class to set a minimum width for the network postboxes.
 			 */
-			add_filter( 'postbox_classes_'.$this->pagehook.'_'.$this->pagehook.'_plugin',
+			add_filter( 'postbox_classes_' . $this->pagehook . '_' . $this->pagehook . '_plugin',
 				array( $this, 'add_class_postbox_network' ) );
 		}
 

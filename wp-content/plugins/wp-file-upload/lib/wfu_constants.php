@@ -147,7 +147,7 @@ function wfu_initialize_i18n_strings() {
 	DEFINE("WFU_WARNING_POTENTIAL_DOS_EMAIL_SUBJECT", __("Potential Denial-Of-Service Attack on {SITE}", "wp-file-upload"));
 	DEFINE("WFU_WARNING_POTENTIAL_DOS_EMAIL_MESSAGE", __("Hello admin\n\nThis is a message from Wordpress File Upload Plugin to notify you that a potential Denial-Of-Service attack has been detected on {SITE}.\n\nThe plugin detected more than {FILENUM} uploads within {INTERVAL} seconds.\n\nAll file uploads that exceed this limit are rejected to protect the website from overflowing.\n\nPlease check the upload history log in the plugin's area in Dashboard for any suspicious behaviour.\n\nA new message will follow if the situation remains.\n\nThanks", "wp-file-upload"));
 	DEFINE("WFU_WARNING_ALT_IPTANUS_SERVER_ACTIVATED", __("You have activated an alternative insecure Iptanus Services Server. For details please contact info@iptanus.com.", "wp-file-upload"));
-	DEFINE("WFU_WARNING_IPTANUS_SERVER_UNREACHABLE", __("Iptanus Services Server is unreachable. This may cause problems in some plugin functions. Please contact info@iptanus.com for details.", "wp-file-upload"));
+	DEFINE("WFU_WARNING_IPTANUS_SERVER_UNREACHABLE", __("Iptanus Services Server is unreachable. This may cause problems on some plugin functions. Please read this :article: for resolution.", "wp-file-upload"));
 	//admin area messages
 	DEFINE("WFU_DASHBOARD_ADD_SHORTCODE_REJECTED", __("Failed to add the shortcode to the page/post. Please try again. If the message persists, contact administrator.", "wp-file-upload"));
 	DEFINE("WFU_DASHBOARD_EDIT_SHORTCODE_REJECTED", __("Failed to edit the shortcode because the contents of the page changed. Try again to edit the shortcode.", "wp-file-upload"));
@@ -332,8 +332,12 @@ $GLOBALS["WFU_GLOBALS"] += array(
 	"WFU_PD_VISIBLE_PERLEVELS" => array( "Personal Data Visible Permission Levels", "integer", 2, "Defines how deep administrators can go into personal data permission details. A value of -1 denotes that there is no limit." ),
 	"WFU_PD_VISIBLE_LOGLEVELS" => array( "Personal Data Visible Log Action Levels", "integer", 2, "Defines how deep administrators can go into personal data log action details. A value of -1 denotes that there is no limit." ),
 	"WFU_UPLOADEDFILES_MENU" => array( "Uploaded Files Menu State", "string", "true", "Defines whether the Uploaded Files Dashboard menu item will be shown or not. It can be 'true' or 'false'." ),
-	"WFU_UPLOADEDFILES_DEFACTION" => array( "Uploaded Files Default Action", "string", "adminbrowser", "Defines the default action that will be executed when a file link is pressed in Uploaded Files page. It can be 'details', 'adminbrowser', 'historylog', 'link' and 'none'." ),
-	"WFU_UPLOADEDFILES_RESET_TIME" => array( "Uploaded Files Reset Time", "integer", 5, "Defines the interval in seconds before the unread uploaded files can be marked as read. A value of -1 denotes that there is no interval." )
+	"WFU_UPLOADEDFILES_DEFACTION" => array( "Uploaded Files Default Action", "string", "adminbrowser", "Defines the default action that will be executed when a file link is pressed in Uploaded Files page. It can be 'details', 'adminbrowser', 'historylog', 'link', 'download' and 'none'." ),
+	"WFU_UPLOADEDFILES_COLUMNS" => array( "Uploaded Files Columns", "string", "#, file, upload_date, user, properties, remarks, actions", "Defines the visible columns of the Uploaded Files list as well as their order. It is noted that 'File' column is always visible and it is the second column if '#' column is visible, or the first one if '#' column is hidden." ),
+	"WFU_UPLOADEDFILES_ACTIONS" => array( "Uploaded Files Actions", "string", "details, media, adminbrowser, historylog, link, download", "Defines the allowable actions and their order for each file in Uploaded Files list. It is noted that the actions shown for each file depend on its properties." ),
+	"WFU_UPLOADEDFILES_RESET_TIME" => array( "Uploaded Files Reset Time", "integer", 5, "Defines the interval in seconds before the unread uploaded files can be marked as read. A value of -1 denotes that there is no interval." ),
+	"WFU_UPLOADEDFILES_BARMENU" => array( "Uploaded Files Toolbar Menu State", "string", "true", "Defines whether the Uploaded Files Toolbar (Admin Bar) menu item will be shown or not. It can be 'true' or 'false'." ),
+	"WFU_UPLOADEDFILES_BARAUTOHIDE" => array( "Uploaded Files Auto-Hide on Toolbar", "string", "false", "Defines whether the Uploaded Files Toolbar (Admin Bar) menu item will be hidden when there are no new uploads. It can be 'true' or 'false'." )
 );
 //color definitions
 $GLOBALS["WFU_GLOBALS"] += array(
@@ -385,10 +389,11 @@ DEFINE("WFU_SERVICES_SERVER_URL", 'https://services2.iptanus.com');
 DEFINE("WFU_VERSION_SERVER_URL", WFU_SERVICES_SERVER_URL.'/wp-admin/admin-ajax.php');
 DEFINE("WFU_VERSION_HASH", '9npWpXMhAQ5e6AGJ5zqbaPxLk9ePD3eSu3WKeN9p89E9wmgL2PHtrqXPzBVpStzh');
 DEFINE("WFU_DOWNLOADER_URL", WPFILEUPLOAD_DIR."wfu_file_downloader.php");
+DEFINE("WFU_IPTANUS_SERVER_UNREACHABLE_ARTICLE", 'https://www.iptanus.com/iptanus-services-server-unreachable-error-wfu-plugin/');
 //alternative insecure server
 DEFINE("WFU_SERVICES_SERVER_ALT_URL", 'http://services.iptanus.com');
 DEFINE("WFU_VERSION_SERVER_ALT_URL", WFU_SERVICES_SERVER_ALT_URL.'/wp-admin/admin-ajax.php');
-DEFINE("WFU_PRO_VERSION_URL", 'http://www.iptanus.com/product/wordpress-file-upload-pro/');
+DEFINE("WFU_PRO_VERSION_URL", 'https://www.iptanus.com/product/wordpress-file-upload-pro/');
 //define images
 DEFINE("WFU_IMAGE_ADMIN_HELP", WPFILEUPLOAD_DIR.'images/help_16.png');
 DEFINE("WFU_IMAGE_ADMIN_RESTOREDEFAULT", WPFILEUPLOAD_DIR.'images/restore_16.png');

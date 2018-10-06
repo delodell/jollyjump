@@ -16,6 +16,7 @@ if ( ! class_exists( 'WpssoOpenGraph' ) ) {
 		protected $p;
 
 		public function __construct( &$plugin ) {
+
 			$this->p =& $plugin;
 
 			if ( $this->p->debug->enabled ) {
@@ -418,7 +419,7 @@ if ( ! class_exists( 'WpssoOpenGraph' ) ) {
 			}
 
 			$has_pdir    = $this->p->avail['*']['p_dir'];
-			$has_aop     = $this->p->check->aop( $this->p->lca, true, $has_pdir );
+			$has_pp      = $this->p->check->pp( $this->p->lca, true, $has_pdir );
 			$max_nums    = $this->p->util->get_max_nums( $mod );
 			$post_id     = $mod['is_post'] ? $mod['id'] : false;
 			$check_dupes = true;
@@ -472,7 +473,7 @@ if ( ! class_exists( 'WpssoOpenGraph' ) ) {
 			 * Locale meta tag.
 			 */
 			if ( ! isset( $mt_og['og:locale'] ) ) {
-				$mt_og['og:locale'] = $this->get_fb_locale( $this->p->options, $mod );	// localized
+				$mt_og['og:locale'] = $this->get_fb_locale( $this->p->options, $mod );
 			} elseif ( $this->p->debug->enabled ) {
 				$this->p->debug->log( 'og:locale already defined = ' . $mt_og['og:locale'] );
 			}
@@ -519,10 +520,10 @@ if ( ! class_exists( 'WpssoOpenGraph' ) ) {
 					$this->p->debug->log( 'getting description for og:description meta tag' );
 				}
 
-				$max_len   = $this->p->options['og_desc_len'];
-				$add_htags = $this->p->options['og_desc_hashtags'];
+				$max_len      = $this->p->options['og_desc_len'];
+				$add_hashtags = $this->p->options['og_desc_hashtags'];
 
-				$mt_og['og:description'] = $this->p->page->get_description( $max_len, '...', $mod, true, $add_htags );
+				$mt_og['og:description'] = $this->p->page->get_description( $max_len, '...', $mod, true, $add_hashtags );
 
 				if ( $this->p->debug->enabled ) {
 					$this->p->debug->log( 'og:description value = ' . $mt_og['og:description'] );
@@ -546,7 +547,7 @@ if ( ! class_exists( 'WpssoOpenGraph' ) ) {
 			 *
 			 * Call before getting all images to find / use preview images.
 			 */
-			if ( ! isset( $mt_og['og:video'] ) && $has_aop ) {
+			if ( ! isset( $mt_og['og:video'] ) && $has_pp ) {
 
 				if ( empty( $max_nums['og_vid_max'] ) ) {
 					if ( $this->p->debug->enabled ) {
@@ -705,9 +706,29 @@ if ( ! class_exists( 'WpssoOpenGraph' ) ) {
 					}
 				}
 
-				if ( isset( $mt_og['product:price:amount'] ) ) {
+				/**
+				 * Include variations (aka product offers) if available.
+				 */
+				if ( ! empty( $mt_og['product:offers'] ) && is_array( $mt_og['product:offers'] ) ) {
 
-					if ( is_numeric( $mt_og['product:price:amount'] ) ) {	// allow for price of 0
+					foreach ( $mt_og['product:offers'] as $num => $offer ) {
+
+						foreach( $offer as $mt_name => $mt_value ) {
+
+							if ( isset( $this->p->cf['head']['og_type_array']['product'][$mt_name] ) ) {
+
+								$mt_og['product'][$num][$mt_name] = $mt_value;
+
+								if ( isset( $mt_og[$mt_name] ) ) {
+									unset ( $mt_og[$mt_name] );
+								}
+							}
+						}
+					}
+				
+				} elseif ( isset( $mt_og['product:price:amount'] ) ) {
+
+					if ( is_numeric( $mt_og['product:price:amount'] ) ) {	// Allow for price of 0.
 
 						if ( empty( $mt_og['product:price:currency'] ) ) {
 							$mt_og['product:price:currency'] = $this->p->options['plugin_def_currency'];
@@ -723,6 +744,7 @@ if ( ! class_exists( 'WpssoOpenGraph' ) ) {
 						unset( $mt_og['product:price:currency'] );
 					}
 				}
+
 			}
 
 			/**
@@ -884,7 +906,7 @@ if ( ! class_exists( 'WpssoOpenGraph' ) ) {
 
 			$og_ret   = array();
 			$has_pdir = $this->p->avail['*']['p_dir'];
-			$has_aop  = $this->p->check->aop( $this->p->lca, true, $has_pdir );
+			$has_pp   = $this->p->check->pp( $this->p->lca, true, $has_pdir );
 			$use_prev = $this->p->options['og_vid_prev_img'];		// default option value is true/false
 			$num_diff = SucomUtil::count_diff( $og_ret, $num );
 
@@ -893,7 +915,7 @@ if ( ! class_exists( 'WpssoOpenGraph' ) ) {
 			/**
 			 * Get video information and preview enable/disable option from the post/term/user meta.
 			 */
-			if ( $has_aop && ! empty( $mod['obj'] ) ) {
+			if ( $has_pp && ! empty( $mod['obj'] ) ) {
 
 				/**
 				 * Note that get_options() returns null if an index key is not found.
@@ -944,9 +966,11 @@ if ( ! class_exists( 'WpssoOpenGraph' ) ) {
 				}
 
 				foreach ( $og_ret as $num => $og_single_video ) {
+
 					foreach ( SucomUtil::preg_grep_keys( '/^og:image(:.*)?$/', $og_single_video ) as $k => $v ) {
 						unset ( $og_ret[$num][$k] );
 					}
+
 					$og_ret[$num]['og:video:has_image'] = false;
 				}
 			}
@@ -958,7 +982,7 @@ if ( ! class_exists( 'WpssoOpenGraph' ) ) {
 			 * The og:video:title and og:video:description meta tags are not standard and their values will
 			 * only appear in Schema markup.
 			 */
-			if ( $has_aop && ! empty( $mod['obj'] ) && $md_pre !== 'none' ) {
+			if ( $has_pp && ! empty( $mod['obj'] ) && $md_pre !== 'none' ) {
 
 				foreach ( $og_ret as $num => $og_single_video ) {
 
@@ -1190,7 +1214,7 @@ if ( ! class_exists( 'WpssoOpenGraph' ) ) {
 
 			$ret       = array();
 			$has_pdir  = $this->p->avail['*']['p_dir'];
-			$has_aop   = $this->p->check->aop( $this->p->lca, true, $has_pdir );
+			$has_pp    = $this->p->check->pp( $this->p->lca, true, $has_pdir );
 			$og_images = null;
 			$og_videos = null;
 
@@ -1209,7 +1233,7 @@ if ( ! class_exists( 'WpssoOpenGraph' ) ) {
 
 					case ( preg_match( '/^(vid|prev)/', $key ) ? true : false ):
 
-						if ( null === $og_videos && $has_aop ) {	// Get videos only once.
+						if ( null === $og_videos && $has_pp ) {	// Get videos only once.
 							$og_videos = $this->get_all_videos( 1, $mod, false, $md_pre );	// $check_dupes is false.
 						}
 
@@ -1342,7 +1366,7 @@ if ( ! class_exists( 'WpssoOpenGraph' ) ) {
 					$mt_search = array(
 						$mt_media_pre . ':secure_url',	// og:image:secure_url
 						$mt_media_pre . ':url',		// og:image:url
-						$mt_media_pre,		// og:image
+						$mt_media_pre,			// og:image
 					);
 
 					break;
@@ -1369,10 +1393,10 @@ if ( ! class_exists( 'WpssoOpenGraph' ) ) {
 						$this->p->debug->log( $og_media[$key].' value is empty (skipped)' );
 					}
 
-				} elseif ( $og_media[$key] === WPSSO_UNDEF_INT || $og_media[$key] === (string) WPSSO_UNDEF_INT ) {
+				} elseif ( $og_media[$key] === WPSSO_UNDEF || $og_media[$key] === (string) WPSSO_UNDEF ) {
 
 					if ( $this->p->debug->enabled ) {
-						$this->p->debug->log( $og_media[$key].' value is '.WPSSO_UNDEF_INT.' (skipped)' );
+						$this->p->debug->log( $og_media[$key].' value is '.WPSSO_UNDEF.' (skipped)' );
 					}
 
 				} else {
@@ -1397,43 +1421,82 @@ if ( ! class_exists( 'WpssoOpenGraph' ) ) {
 
 				$fb_locale_key = SucomUtil::get_key_locale( 'fb_locale', $opts, $mixed );
 
-				if ( ! empty( $opts[$fb_locale_key] ) ) {
+				if ( ! empty( $opts[ $fb_locale_key ] ) ) {
 
 					if ( $this->p->debug->enabled ) {
-						$this->p->debug->log( 'returning "' . $opts[$fb_locale_key] . '" locale for "' . $fb_locale_key . '" option key' );
+						$this->p->debug->log( 'returning "' . $opts[ $fb_locale_key ] . '" locale for "' . $fb_locale_key . '" option key' );
 					}
 
-					return $opts[$fb_locale_key];
+					return $opts[ $fb_locale_key ];
 				}
 			}
 
-			$locale      = SucomUtil::get_locale( $mixed );
-			$def_locale  = SucomUtil::get_locale( 'default' );
-			$fb_pub_lang = SucomUtil::get_pub_lang( 'facebook' );
+			/**
+			 * Get the locale requested in $mixed.
+			 *
+			 * $mixed = 'default' | 'current' | post ID | $mod array
+			 */
+			$locale = SucomUtil::get_locale( $mixed );
 
-			// exceptions
+			if ( empty( $locale ) ) {
+
+				if ( $this->p->debug->enabled ) {
+					$this->p->debug->log( 'exiting early: locale value is empty' );
+				}
+
+				return $locale;
+			}
+
+			/**
+			 * Fix known exceptions.
+			 */
 			switch ( $locale ) {
+
 				case 'de_DE_formal':
+
 					$locale = 'de_DE';
+
 					break;
 			}
 
-			if ( ! empty( $fb_pub_lang[$locale] ) ) {
+			/**
+			 * Return the Facebook equivalent for this WordPress locale.
+			 */
+			$fb_pub_lang = SucomUtil::get_pub_lang( 'facebook' );
+
+			if ( ! empty( $fb_pub_lang[ $locale ] ) ) {
+
 				if ( $this->p->debug->enabled ) {
 					$this->p->debug->log( 'returning valid facebook locale "'.$locale.'"' );
 				}
+
 				return $locale;
-			} elseif ( ! empty( $fb_pub_lang[$def_locale] ) ) {
+
+			}
+			
+			/**
+			 * Fallback to the default WordPress locale.
+			 */
+			$def_locale  = SucomUtil::get_locale( 'default' );
+
+			if ( ! empty( $fb_pub_lang[ $def_locale ] ) ) {
+
 				if ( $this->p->debug->enabled ) {
 					$this->p->debug->log( 'returning default locale "'.$def_locale.'"' );
 				}
+
 				return $def_locale;
-			} else {
-				if ( $this->p->debug->enabled ) {
-					$this->p->debug->log( 'returning fallback locale "en_US"' );
-				}
-				return 'en_US';
+
 			}
+
+			/**
+			 * Fallback to en_US.
+			 */
+			if ( $this->p->debug->enabled ) {
+				$this->p->debug->log( 'returning fallback locale "en_US"' );
+			}
+
+			return 'en_US';
 		}
 
 		/**
@@ -1448,17 +1511,27 @@ if ( ! class_exists( 'WpssoOpenGraph' ) ) {
 		 *
 		 * Called by WpssoHead::get_head_array() before merging all meta tag arrays.
 		 */
-		public function sanitize_array( array $mod, array $mt_og ) {
+		public function sanitize_array( array $mod, array $mt_og, $og_type = '' ) {
 
 			if ( $this->p->debug->enabled ) {
 				$this->p->debug->mark();
 			}
 
-			if ( empty( $mt_og['og:type'] ) ) {
-				if ( $this->p->debug->enabled ) {
-					$this->p->debug->log( 'og:type is empty and required for sanitation' );
+			if ( empty( $og_type ) ) {
+				if ( empty( $mt_og['og:type'] ) ) {
+					if ( $this->p->debug->enabled ) {
+						$this->p->debug->log( 'og:type is empty and required for sanitation' );
+					}
+					return $mt_og;
 				}
-				return $mt_og;
+				$og_type = $mt_og['og:type'];
+			}
+
+			if ( ! empty( $mt_og[$og_type] ) && is_array( $mt_og[$og_type] ) ) {
+
+				foreach ( $mt_og[$og_type] as $num => $mt_arr ) {
+					$mt_og[$og_type][$num] = $this->sanitize_array( $mod, $mt_arr, $og_type );
+				}
 			}
 
 			foreach ( $this->p->cf['head']['og_type_mt'] as $type_id => $og_type_mt_md ) {
@@ -1467,7 +1540,7 @@ if ( ! class_exists( 'WpssoOpenGraph' ) ) {
 
 					if ( isset( $mt_og[$mt_name] ) ) {
 
-						if (  $type_id !== $mt_og['og:type'] ) {	// Mis-matched meta tag for this og:type
+						if (  $type_id !== $og_type ) {	// Mis-matched meta tag for this og:type
 
 							if ( $this->p->debug->enabled ) {
 								$this->p->debug->log( 'removing extra meta tag ' . $mt_name );

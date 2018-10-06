@@ -14,6 +14,7 @@ if ( ! class_exists( 'WpssoProfileYourSSO' ) && class_exists( 'WpssoAdmin' ) ) {
 	class WpssoProfileYourSSO extends WpssoAdmin {
 
 		public function __construct( &$plugin, $id, $name, $lib, $ext ) {
+
 			$this->p =& $plugin;
 
 			if ( $this->p->debug->enabled ) {
@@ -44,7 +45,9 @@ if ( ! class_exists( 'WpssoProfileYourSSO' ) && class_exists( 'WpssoAdmin' ) ) {
 		}
 
 		public function filter_action_buttons( $action_buttons ) {
+
 			unset( $action_buttons[1]['clear_all_cache'] );
+
 			return $action_buttons;
 		}
 

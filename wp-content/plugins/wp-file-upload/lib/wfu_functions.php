@@ -6,24 +6,79 @@
  *  Hook on plugin's functions
  *  
  *  This is a very powerful function that enables almost all plugin functions to
- *  be redeclared. In order to make a function redeclarable we just put the
- *  following code at the top of its function block:
- *  $a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { 
- *  case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+ *  be redeclared, either in whole or partially. Here is what it can do:
+ *
+ *    - It can execute a hook, based on the function parameters and then
+ *      execute the original function.
+ *    - It can execute a hook, based on the function's parameters and then
+ *      return without executing the original function. This mode is like
+ *      entirely redeclaring the original function.
+ *    - It can execute a hook after execution of the original function.
+ *    - It can redeclare the function parameters or pass new variables to the
+ *      original function.
+ *  
+ *  In order to make a function redeclarable we just need to put the
+ *  following 'magic' code at the top of its function block:
+ *  
+ *    $a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out);
+ *    if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v;
+ *    switch($a) { case 'R': return $out['output']; break; case 'D':
+ *    die($out['output']); }
+ *  
  *  Then the function can be hooked through the filter wfu_debug-{__FUNCTION__}.
+ *  
  *  The hook function takes the same parameters as the original function, plus
  *  one, which comes first and determines the behaviour of the hook function.
- *  The hook function must return an array having two items, 'output' and
- *  'result'. Item 'output' is the return value of the hook function (if
- *  required). Item 'result' denotes how the hook function will be handled. If
- *  'result' is 'X' then the result of the hook function will be ignored. If
- *  'result' is 'R' then the original function will terminate returning the
- *  output of the hook function. So it is like having been entirely substituted
- *  by the hook function. If 'result' is 'D' then the original function will die
- *  returning the output of the hook function. This applies to ajax handlers.
- *  It is noted that together with the hook, a global variable with name
- *  wfu_debug-{__FUNCTION__} must also be declared otherwise the hook will not
- *  work. This has been added to improve performance.
+ *  
+ *  This parameter is an array having three items as follows:
+ *  
+ *    - item 'output' contains the output of the original function (if exists)
+ *    - item 'result' has no meaning as input parameter but as returning one
+ *    - item 'vars' has no meaning as input parameter but as returning one
+ *  
+ *  The hook function must return the same array as follows:
+ *  
+ *    - item 'output' must contain the hook's output
+ *    - item 'result' must be either 'X', 'R', or 'D' when the hook is executed
+ *      at the beginning of the function, as explained below. It determines how
+ *      the hook will be handled, as follows:
+ *        - If 'result' is 'X' then the result of the hook function will be
+ *          ignored and the original function will be executed afterwards.
+ *        - If 'result' is 'R' then the original function will terminate
+ *          returning the output of the hook function. So it is like having been
+ *          entirely substituted by the hook function.
+ *        - If 'result' is 'D' then the original function will die returning the
+ *          output of the hook function. This applies to ajax handlers.
+ *      In the case that the hook is executed at the end of the function, then
+ *      item 'result' must always be 'R'.
+ *    - item 'vars' is an associative array that contains any variables that the
+ *      hook wants to pass to the original function like this:
+ *          $res['output'] = array('varname1' => value1, 'varname2' => value2);
+ *      Item 'vars' can be used to redeclare the function arguments and it is a
+ *      workaround to handling arguments passed by reference.
+ *  
+ *  It is noted that the hook can be executed either before or after execution
+ *  of the original function, despite the fact that the 'magic' code is added
+ *  to the beginning of the function.
+ *  
+ *   - To execute the hook before the function a global variable with name
+ *     wfu_debug-{__FUNCTION__} must be declared.
+ *   - To execute the hook after the function a global variable with name
+ *     wfu_debug_end-{__FUNCTION__} must be declared.
+ *  
+ *  It is noted that if both of these global variables are declared, or none of
+ *  them then the hook will not work.
+ *  
+ *  Arguments passed by reference: When declaring the hook filter, all arguments
+ *  are passed by value, even if some of the original function's arguments pass
+ *  by reference. However no PHP warnings and errors will be generated due to
+ *  this difference. If the hook wants to change the value of an argument and
+ *  reflect this change to the original function, it is possible through item
+ *  'vars' explained above. For example, if the original function passes
+ *  argument $var1 by reference (it is declared as &$var1 in the function
+ *  parameters), we cannot use the syntax $var1 = ...; inside the hook filter
+ *  but we can use the syntax $res['vars']['var1'] = ...; and this will result
+ *  $var1 in the original function to get the new value!
  *  
  *  @param string $function the function name of the original function
  *  @param array $args an array of parameters of the original function
@@ -36,20 +91,59 @@
  */
 function WFU_FUNCTION_HOOK($function, $args, &$out) {
 	// exit if plugin's debug mode is off or the hook has not been declared in
-	// global variables
-	if ( WFU_VAR("WFU_DEBUG") != "ON" || !isset($GLOBALS["wfu_debug-".$function]) ) return 'X';
+	// global variables;
+	if ( WFU_VAR("WFU_DEBUG") != "ON" || !( isset($GLOBALS["wfu_debug-".$function]) xor isset($GLOBALS["wfu_debug_end-".$function]) ) ) return 'X';
 	// exit if function name is empty or invalid
 	if ( $function == "" || preg_replace("/[^0-9a-zA-Z_]/", "", $function) != $function ) return 'X';
-	// run the hook
-	array_splice($args, 0, 0, array( array( "output" => "", "result" => "X" ) ));
-	$res = apply_filters_ref_array("wfu_debug-".$function, $args);
-	// exit if $res is invalid
-	if ( !is_array($res) || !isset($res["output"]) || !isset($res["result"]) ) return 'X';
-	$out = $res["output"];
-	// if result is 'X' then the caller must ignore the hook
-	// if result is 'R' then the caller must return the hook's output
-	// if result is 'D' then the caller must die returning the hook's output
-	return $res["result"];
+	//if the hook has been declared in global variables with wfu_debug_end-
+	//prefix then it will run at the end of the function
+	if ( isset($GLOBALS["wfu_debug_end-".$function]) ) {
+		$args_count = count($args);
+		//if a flag (specific string) is contained in the last position of the
+		//arguments list then do not re-execute the hook as this is the second
+		//pass
+		if ( $args_count > 0 && $args[$args_count - 1] === "wfu_debug_end-".$function."-second_pass" ) return 'X';
+		else {
+			//create an array of references to the function arguments and pass
+			//this to call_user_func_array instead of $args; this is a
+			//workaround to avoid PHP warnings when the original function passes
+			//arguments by reference
+			$args_byref = array();
+			foreach ( $args as $key => &$arg ) $args_byref[$key] = &$arg;
+			//add a flag (specific string) as the last argument in order to
+			//denote that the next execution of the hook is the second pass
+			array_push($args_byref, "wfu_debug_end-".$function."-second_pass");
+			//call the original function and get the returned value; it will
+			//contain the flag in the arguments, so the hook will not be
+			//executed again and the whole script will not be put in an infinite
+			//loop
+			$ret = call_user_func_array($function, $args_byref);
+			//pass the original function's output to the hook
+			array_splice($args, 0, 0, array( array( "output" => $ret, "result" => "X", "vars" => array() ) ));
+			//execute the hook
+			$res = apply_filters_ref_array("wfu_debug-".$function, $args);
+			if ( !is_array($res) || !isset($res["output"]) || !isset($res["result"]) ) $res = array( "output" => $ret, "result" => "R" );
+			if ( $res["result"] != 'R' ) $res["result"] = 'R';
+			if ( isset($res["vars"]) && !is_array($res["vars"]) ) $res["vars"] = array();
+			$out = $res;
+			return $res["result"];
+		}
+	}
+	else {
+		// prepare the arguments for the hook
+		array_splice($args, 0, 0, array( array( "output" => "", "result" => "X", "vars" => array() ) ));
+		// run the hook
+		$res = apply_filters_ref_array("wfu_debug-".$function, $args);
+		// exit if $res is invalid
+		if ( !is_array($res) || !isset($res["output"]) || !isset($res["result"]) ) $res = array( "output" => "", "result" => "X" );
+		if ( $res["result"] != 'X' && $res["result"] != 'R' && $res["result"] != 'D' ) $res["result"] = 'X';
+		if ( isset($res["vars"]) && !is_array($res["vars"]) ) $res["vars"] = array();
+		$out = $res;
+		// if result is 'X' then the caller must ignore the hook
+		// if result is 'R' then the caller must return the hook's output
+		// if result is 'D' then the caller must die returning the hook's output
+		return $res["result"];
+	}
 }
 
 //********************* String Functions ***************************************************************************************************
@@ -90,7 +184,7 @@ function wfu_upload_plugin_wildcard_to_preg($pattern, $strict = false) {
 }
 
 function wfu_upload_plugin_wildcard_to_mysqlregexp($pattern) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	if ( substr($pattern, 0, 6) == "regex:" ) return str_replace("\\", "\\\\", substr($pattern, 6));
 	else return str_replace("\\", "\\\\", '^'.str_replace(array('\*', '\?', '\[', '\]'), array('.*', '.', '[', ']'), preg_quote($pattern)).'$');
 }
@@ -297,6 +391,20 @@ function wfu_verify_global_short_token($token) {
 	$timeout = get_option('wfu_gst_'.$token);
 	if ( $timeout === false ) return false;
 	delete_option('wfu_gst_'.$token);
+	return ( $timeout > time() );
+}
+
+function wfu_generate_user_short_token($timeout) {
+	$token = wfu_create_random_string(16);
+	$expire = time() + (int)$timeout;
+	WFU_USVAR_store('wfu_ust_'.$token, $expire);
+	return $token;
+}
+
+function wfu_verify_user_short_token($token) {
+	if ( !WFU_USVAR_exists('wfu_ust_'.$token) ) return false;
+	$timeout = WFU_USVAR('wfu_ust_'.$token);
+	WFU_USVAR_unset('wfu_ust_'.$token);
 	return ( $timeout > time() );
 }
 
@@ -568,6 +676,14 @@ function wfu_PHP_array_to_JS_object($arr) {
 	return ( $ret == "" ? "{ }" : "{ $ret }" );
 }
 
+function wfu_array_to_GET_params($arr) {
+	$str = "";
+	foreach ( $arr as $key => $var )
+		$str .= ( $str == "" ? "" : "&" ).$key."=".$var;
+	
+	return $str;
+}
+
 //********************* Shortcode Attribute Functions **************************************************************************************
 
 function wfu_insert_category($categories, $before_category, $new_category) {
@@ -609,7 +725,7 @@ function wfu_insert_attributes($attributes, $in_category, $in_subcategory, $posi
 //********************* Plugin Options Functions *******************************************************************************************
 
 function wfu_get_server_environment() {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$php_env = '';
 	if ( PHP_INT_SIZE == 4 ) $php_env = '32bit';
 	elseif ( PHP_INT_SIZE == 8 ) $php_env = '64bit';
@@ -624,7 +740,7 @@ function wfu_get_server_environment() {
 }
 
 function wfu_ajaxurl() {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
 	return ( $plugin_options['admindomain'] == 'siteurl' || $plugin_options['admindomain'] == '' ? site_url("wp-admin/admin-ajax.php") : ( $plugin_options['admindomain'] == 'adminurl' ? admin_url("admin-ajax.php") : home_url("wp-admin/admin-ajax.php") ) );
 }
@@ -642,7 +758,7 @@ function wfu_get_plugin_version() {
 }
 
 function wfu_get_latest_version() {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
 	$postfields = array();
 	$postfields['action'] = 'wfuca_check_latest_version_free';
@@ -860,7 +976,7 @@ function wfu_getTree($dir) {
 	return $tree;
 }
 function wfu_parse_folderlist($subfoldertree) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$ret['path'] = array();
 	$ret['label'] = array();
 	$ret['level'] = array();
@@ -1457,7 +1573,7 @@ function wfu_revert_log_action($idlog) {
 
 //find user by its id and return a non-empty username
 function wfu_get_username_by_id($id) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$user = get_user_by('id', $id);
 	if ( $user == false && $id > 0 ) $username = 'unknown';
 	elseif ( $user == false && $id == -999 ) $username = 'system';
@@ -1466,11 +1582,51 @@ function wfu_get_username_by_id($id) {
 	return $username;
 }
 
-function wfu_get_unread_files_count($last_idlog) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+function wfu_get_unread_files_count() {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	global $wpdb;
+	$table_name1 = $wpdb->prefix . "wfu_log";
+
+	//get the last idlog read from options; create the option if it does not
+	//exist pointing to the currently last idlog
+	$last_idlog = get_option( "wordpress_file_upload_last_idlog" );
+	if ( $last_idlog === false ) {
+		$latest_idlog = $wpdb->get_var('SELECT MAX(idlog) FROM '.$table_name1);
+		$last_idlog = array( 'pre' => $latest_idlog, 'post' => $latest_idlog, 'time' => time() );
+		update_option( "wordpress_file_upload_last_idlog", $last_idlog );
+	}
+	$limit = (int)WFU_VAR("WFU_UPLOADEDFILES_RESET_TIME");
+	$unread_files_count = 0;
+	if ( $limit == -1 || time() > $last_idlog["time"] + $limit ) $unread_files_count = wfu_get_new_files_count($last_idlog["post"]);
+	else $unread_files_count = wfu_get_new_files_count($last_idlog["pre"]);
+	
+	return $unread_files_count;
+}
+
+function wfu_get_new_files_count($last_idlog) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	global $wpdb;
 	$table_name1 = $wpdb->prefix . "wfu_log";
 	return $wpdb->get_var('SELECT COUNT(idlog) FROM '.$table_name1.' WHERE action = \'upload\' AND idlog > '.(int)$last_idlog);
+}
+
+function wfu_read_log_data($data) {
+	$ret['service'] = "";
+	$ret['transferred'] = "";
+	$ret['error'] = "";
+	$ret['destination'] = "";
+	$ret['new_filename'] = "";
+	if ( substr($data, 0, 5) == "json:" ) {
+		$logdata = json_decode(substr($data, 5), true);
+		$ret['service'] = $logdata["service"];
+		$ret['transferred'] = $logdata["transferred"];
+		$ret['error'] = $logdata["error"];
+		$ret['destination'] = $logdata["destination"];
+		$ret['new_filename'] = $logdata["new_filename"];
+	}
+	else list($ret['service'], $ret['destination']) = explode("|", $data);
+	
+	return $ret;
 }
 
 //get the most current database record for file $filepath and also include any userdata if $include_userdata is true
@@ -1657,7 +1813,8 @@ function wfu_get_filedata_from_rec($filerec, $is_new = false, $update_transfer =
 function wfu_save_filedata_from_id($idlog, $filedata) {
 	global $wpdb;
 	$table_name1 = $wpdb->prefix . "wfu_log";
-	return $wpdb->update($table_name1, array( 'filedata' => wfu_encode_array_to_string($filedata) ), array( 'idlog' => $idlog ), array( '%s' ), array( '%d' ));
+	$latestrec = wfu_get_latest_rec_from_id($idlog);
+	return $wpdb->update($table_name1, array( 'filedata' => wfu_encode_array_to_string($filedata) ), array( 'idlog' => $latestrec->idlog ), array( '%s' ), array( '%d' ));
 }
 
 //get userdata from uploadid
@@ -1693,7 +1850,7 @@ function wfu_reassign_hashes() {
 }
 
 function wfu_make_rec_obsolete($filerec) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	global $wpdb;
 	$table_name1 = $wpdb->prefix . "wfu_log";
 	$filedata = wfu_get_filedata_from_rec($filerec, true);
@@ -1708,7 +1865,7 @@ function wfu_make_rec_obsolete($filerec) {
 
 //update database to reflect the current status of files
 function wfu_sync_database() {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	global $wpdb;
 	$table_name1 = $wpdb->prefix . "wfu_log";
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
@@ -1778,7 +1935,7 @@ function wfu_get_recs_of_user($userid) {
 }
 
 function wfu_get_filtered_recs($filter) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	global $wpdb;
 	$table_name1 = $wpdb->prefix . "wfu_log";
 	$table_name2 = $wpdb->prefix . "wfu_userdata";
@@ -1913,7 +2070,7 @@ function wfu_delete_option($option) {
 }
 
 function wfu_export_uploaded_files($params) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	global $wpdb;
 	$table_name1 = $wpdb->prefix . "wfu_log";
 	$table_name2 = $wpdb->prefix . "wfu_userdata";
@@ -2163,7 +2320,7 @@ function wfu_placements_remove_item($placements, $item) {
 //********************* Plugin Design Functions ********************************************************************************************
 
 function wfu_get_uploader_template($templatename = "") {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	if ($templatename != "") {
 		$classname = "WFU_UploaderTemplate_$templatename";
 		if ( class_exists($classname) )
@@ -2180,7 +2337,7 @@ function wfu_get_uploader_template($templatename = "") {
 }
 
 function wfu_get_browser_template($templatename = "") {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	if ($templatename != "") {
 		$classname = "WFU_BrowserTemplate_$templatename";
 		if ( class_exists($classname) )
@@ -2197,7 +2354,7 @@ function wfu_get_browser_template($templatename = "") {
 }
 
 function wfu_add_div() {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$items_count = func_num_args();
 	if ( $items_count == 0 ) return "";
 	$items_raw = func_get_args();
@@ -2288,7 +2445,7 @@ function wfu_extract_css_js_from_components($section_array, &$css, &$js) {
 }
 
 function wfu_add_loading_overlay($dlp, $code) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$echo_str = $dlp.'<div id="wfu_'.$code.'_overlay" style="margin:0; padding: 0; width:100%; height:100%; position:absolute; left:0; top:0; border:none; background:none; display:none;">';
 	$echo_str .= $dlp."\t".'<div style="margin:0; padding: 0; width:100%; height:100%; position:absolute; left:0; top:0; border:none; background-color:rgba(255,255,255,0.8); z-index:1;""></div>';
 	$echo_str .= $dlp."\t".'<table style="margin:0; padding: 0; table-layout:fixed; width:100%; height:100%; position:absolute; left:0; top:0; border:none; background:none; z-index:2;"><tbody><tr><td align="center" style="border:none;">';
@@ -2300,7 +2457,7 @@ function wfu_add_loading_overlay($dlp, $code) {
 }
 
 function wfu_add_pagination_header($dlp, $code, $curpage, $pages, $nonce = false) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	if ($nonce === false) $nonce = wp_create_nonce( 'wfu-'.$code.'-page' );
 	$echo_str = $dlp.'<div style="float:right;">';
 	$echo_str .= $dlp."\t".'<label id="wfu_'.$code.'_first_disabled" style="margin:0 4px; font-weight:bold; opacity:0.5; cursor:default; display:'.( $curpage == 1 ? 'inline' : 'none' ).';">&#60;&#60;</label>';
@@ -2323,7 +2480,7 @@ function wfu_add_pagination_header($dlp, $code, $curpage, $pages, $nonce = false
 }
 
 function wfu_add_bulkactions_header($dlp, $code, $actions) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$echo_str = $dlp.'<div style="float:left;">';
 	$echo_str .= $dlp."\t".'<select id="wfu_'.$code.'_bulkactions">';
 	$echo_str .= $dlp."\t\t".'<option value="" selected="selected">'.( substr($code, 0, 8) == "browser_" ? WFU_BROWSER_BULKACTION_TITLE : "Bulk Actions").'</option>';
@@ -2348,7 +2505,7 @@ function wfu_prepare_message_colors($template) {
 //********************* Email Functions ****************************************************************************************************
 
 function wfu_send_notification_email($user, $uploaded_file_paths, $userdata_fields, $params) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	global $blog_id;
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
 	
@@ -2430,7 +2587,7 @@ function wfu_send_notification_email($user, $uploaded_file_paths, $userdata_fiel
 }
 
 function wfu_notify_admin($subject, $message) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$admin_email = get_option("admin_email");
 	if ( $admin_email === false ) return;
 	wp_mail($admin_email, $subject, $message);
@@ -2440,7 +2597,7 @@ function wfu_notify_admin($subject, $message) {
 
 // function wfu_process_media_insert contribution from Aaron Olin with some corrections regarding the upload path
 function wfu_process_media_insert($file_path, $userdata_fields, $page_id){
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$wp_upload_dir = wp_upload_dir();
 	$filetype = wp_check_filetype( wfu_basename( $file_path ), null );
 
@@ -2564,35 +2721,35 @@ function wfu_parse_userdata_attribute($value){
 //********************* User State Functions ****************************************************************************************************
 
 function WFU_USVAR_exists($var) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	global $wfu_user_state_handler;
 	if ( $wfu_user_state_handler == "dboption" ) return WFU_USVAR_exists_dboption($var);
 	else return WFU_USVAR_exists_session($var);
 }
 
 function WFU_USVAR($var) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	global $wfu_user_state_handler;
 	if ( $wfu_user_state_handler == "dboption" ) return WFU_USVAR_dboption($var);
 	else return WFU_USVAR_session($var);
 }
 
 function WFU_USALL() {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	global $wfu_user_state_handler;
 	if ( $wfu_user_state_handler == "dboption" ) return WFU_USALL_dboption();
 	else return WFU_USALL_session();
 }
 
 function WFU_USVAR_store($var, $value) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	global $wfu_user_state_handler;
 	if ( $wfu_user_state_handler == "dboption" ) WFU_USVAR_store_dboption($var, $value);
 	else WFU_USVAR_store_session($var, $value);
 }
 
 function WFU_USVAR_unset($var) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	global $wfu_user_state_handler;
 	if ( $wfu_user_state_handler == "dboption" ) WFU_USVAR_unset_dboption($var);
 	else WFU_USVAR_unset_session($var);
@@ -2841,7 +2998,7 @@ function wfu_get_browser_params_from_safe($code) {
 //********************* POST/GET Requests Functions ****************************************************************************************************
 
 function wfu_decode_socket_response($response) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$ret = "";
 	if (0 === strpos($response, 'HTTP/1.1 200 OK')) {
 		$parts = preg_split("#\n\s*\n#Uis", $response);
@@ -2864,8 +3021,8 @@ function wfu_decode_socket_response($response) {
 	return $ret;
 }
 
-function wfu_post_request($url, $params, $verifypeer = false, $internal_request = false, $timeout = 0) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+function wfu_post_request($url, $params, $verifypeer = true, $internal_request = false, $timeout = 0) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
 	if ( isset($plugin_options['postmethod']) && $plugin_options['postmethod'] == 'curl' ) {
 		// POST request using CURL
@@ -2952,11 +3109,8 @@ function wfu_post_request($url, $params, $verifypeer = false, $internal_request 
 		if ( $internal_request && WFU_VAR("WFU_DASHBOARD_PROTECTED") == "true" ) {
 			$http_array['header'] .= "Authorization: Basic ".base64_encode(WFU_VAR("WFU_DASHBOARD_USERNAME").":".WFU_VAR("WFU_DASHBOARD_PASSWORD"))."\r\n";
 		}
-		if ( $verifypeer ) {
-			$http_array['verify_peer'] = true;
-			$http_array[$peer_key] = 'www.google.com';
-		}
 		$context_params = array( 'http' => $http_array );
+		if ( !$verifypeer ) $context_params['ssl'] = array( 'verify_peer' => false, 'allow_self_signed' => true, 'verify_peer_name' => false );
 		$context = stream_context_create($context_params);
 		return file_get_contents($url, false, $context);
 	}

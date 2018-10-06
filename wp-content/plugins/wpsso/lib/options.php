@@ -19,6 +19,7 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 		protected static $allow_cache = false;
 
 		public function __construct( &$plugin ) {
+
 			$this->p =& $plugin;
 
 			if ( $this->p->debug->enabled ) {
@@ -32,7 +33,7 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				$this->p->debug->log( 'running init_options action' );
 			}
 
-			do_action( $this->p->lca.'_init_options' );
+			do_action( $this->p->lca . '_init_options' );
 		}
 
 		public function get_defaults( $idx = false, $force_filter = false ) {
@@ -44,7 +45,7 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				) );
 			}
 
-			$defs =& $this->p->cf['opt']['defaults'];	// shortcut
+			$defs =& $this->p->cf['opt']['defaults'];	// Shortcut variable.
 
 			if ( $force_filter || ! self::$allow_cache || empty( $defs['options_filtered'] ) ) {
 
@@ -60,9 +61,9 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				}
 
 				$defs = $this->p->util->add_ptns_to_opts( $defs, array(
-					'plugin_add_to'   => 1,
 					'og_type_for'     => 'article',
 					'schema_type_for' => 'webpage',
+					'plugin_add_to'   => 1,
 				) );
 
 				/**
@@ -89,26 +90,28 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				 * Define the default Facebook locale and current locale values.
 				 */
 				$defs['fb_locale'] = $this->p->og->get_fb_locale( array(), 'default' );
+
 				if ( ( $locale_key = SucomUtil::get_key_locale( 'fb_locale' ) ) !== 'fb_locale' ) {
 					$defs[$locale_key] = $this->p->og->get_fb_locale( array(), 'current' );
 				}
 
 				$defs['seo_author_field'] = $this->p->options['plugin_cm_gp_name'];	// Reset to possible custom value.
-				$defs['og_author_field'] = $this->p->options['plugin_cm_fb_name'];	// Reset to possible custom value.
-				$defs['plugin_wpseo_social_meta'] = $this->p->avail['seo']['wpseo'] || get_option( 'wpseo' ) ? 1 : 0;
+				$defs['og_author_field']  = $this->p->options['plugin_cm_fb_name'];	// Reset to possible custom value.
+
+				$defs['plugin_wpseo_social_meta'] = $this->p->avail['seo']['wpseo'] ||
+					get_option( 'wpseo' ) ? 1 : 0;
 
 				foreach ( $this->p->cf['plugin'] as $ext => $info ) {
-					if ( ! empty( $info['update_auth'] ) && 
-						$info['update_auth']!== 'none' ) {	// Just in case.
-						$defs['plugin_'.$ext.'_'.$info['update_auth']] = '';
+					if ( ! empty( $info['update_auth'] ) && $info['update_auth']!== 'none' ) {	// Just in case.
+						$defs['plugin_' . $ext . '_' . $info['update_auth']] = '';
 					}
 				}
 
 				// check for default values from network admin settings
 				if ( is_multisite() && is_array( $this->p->site_options ) ) {
 					foreach ( $this->p->site_options as $opt_key => $opt_val ) {
-						if ( isset( $defs[$opt_key] ) && isset( $this->p->site_options[$opt_key.':use'] ) ) {
-							if ( $this->p->site_options[$opt_key.':use'] === 'default' ) {
+						if ( isset( $defs[$opt_key] ) && isset( $this->p->site_options[$opt_key . ':use'] ) ) {
+							if ( $this->p->site_options[$opt_key . ':use'] === 'default' ) {
 								$defs[$opt_key] = $this->p->site_options[$opt_key];
 							}
 						}
@@ -131,7 +134,7 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 					$this->p->debug->log( 'options_filtered value unchanged' );
 				}
 
-				$defs = apply_filters( $this->p->lca.'_get_defaults', $defs );
+				$defs = apply_filters( $this->p->lca . '_get_defaults', $defs );
 
 				if ( $this->p->debug->enabled ) {
 					$this->p->debug->mark( 'get_defaults filters' );	// end timer
@@ -158,7 +161,7 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				) );
 			}
 
-			$defs =& $this->p->cf['opt']['site_defaults'];	// shortcut
+			$defs =& $this->p->cf['opt']['site_defaults'];	// Shortcut variable.
 
 			if ( $force_filter || ! self::$allow_cache || empty( $defs['options_filtered'] ) ) {
 
@@ -167,10 +170,9 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				}
 
 				foreach ( $this->p->cf['plugin'] as $ext => $info ) {
-					if ( ! empty( $info['update_auth'] ) && 
-						$info['update_auth']!== 'none' ) {	// Just in case.
-						$defs['plugin_'.$ext.'_'.$info['update_auth']] = '';
-						$defs['plugin_'.$ext.'_'.$info['update_auth'].':use'] = 'default';
+					if ( ! empty( $info['update_auth'] ) && $info['update_auth']!== 'none' ) {	// Just in case.
+						$defs['plugin_' . $ext . '_' . $info['update_auth']] = '';
+						$defs['plugin_' . $ext . '_' . $info['update_auth'] . ':use'] = 'default';
 					}
 				}
 
@@ -187,7 +189,7 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 					$this->p->debug->log( 'options_filtered value unchanged' );
 				}
 
-				$defs = apply_filters( $this->p->lca.'_get_site_defaults', $defs );
+				$defs = apply_filters( $this->p->lca . '_get_site_defaults', $defs );
 
 				if ( $this->p->debug->enabled ) {
 					$this->p->debug->mark( 'get_site_defaults filters' );	// end timer
@@ -234,7 +236,7 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 						continue;
 					}
 
-					$version_key = 'plugin_'.$ext.'_version';
+					$version_key = 'plugin_' . $ext . '_version';
 
 					if ( empty( $opts[$version_key] ) || version_compare( $opts[$version_key], $info['version'], '!=' ) ) {
 
@@ -256,11 +258,11 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 					$has_diff_options = true;
 
 					if ( $this->p->debug->enabled ) {
-						$this->p->debug->log( $options_name.' current v'.$current_version.' different than latest v'.$latest_version );
+						$this->p->debug->log( $options_name . ' current v' . $current_version . ' different than latest v' . $latest_version );
 					}
 
 					if ( ! is_object( $this->upg ) ) {
-						require_once WPSSO_PLUGINDIR.'lib/upgrade.php';
+						require_once WPSSO_PLUGINDIR . 'lib/upgrade.php';
 						$this->upg = new WpssoOptionsUpgrade( $this->p );
 					}
 
@@ -280,7 +282,7 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				 */
 				if ( ! $network ) {
 
-					if ( $this->p->check->aop( $this->p->lca, false, $this->p->avail['*']['p_dir'] ) ) {
+					if ( $this->p->check->pp( $this->p->lca, false, $this->p->avail['*']['p_dir'] ) ) {
 
 						foreach ( array( 'plugin_hide_pro' => 0 ) as $idx => $def_val ) {
 							if ( $opts[$idx] === $def_val ) {
@@ -290,7 +292,7 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 							$has_diff_options = true;	// Save the options.
 						}
 
-					} elseif ( ! $has_new_options && $has_diff_version && empty( $opts['plugin_'.$this->p->lca.'_tid'] ) ) {
+					} elseif ( ! $has_new_options && $has_diff_version && empty( $opts['plugin_' . $this->p->lca . '_tid'] ) ) {
 
 						if ( null === $def_opts ) {	// only get default options once
 							$def_opts = $this->get_defaults();
@@ -299,7 +301,7 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 						$check_opt_vals = SucomUtil::preg_grep_keys( '/^plugin_/', $def_opts );
 
 						foreach ( array(
-							'plugin_preserve',
+							'plugin_clean_on_uninstall',
 							'plugin_debug',
 							'plugin_hide_pro',
 							'plugin_show_opts',
@@ -336,24 +338,24 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 						}
 
 						foreach ( array(
-							'add_link_rel_canonical' => 0,
+							'add_link_rel_canonical'    => 0,
 							'add_meta_name_description' => 0,
-							'add_meta_name_robots' => 0,
+							'add_meta_name_robots'      => 0,
 						) as $idx => $def_val ) {
 
-							$def_val = (int) apply_filters( $this->p->lca.'_'.$idx, $def_val );
+							$def_val = (int) apply_filters( $this->p->lca . '_' . $idx, $def_val );
 
-							$opts[$idx.':is'] = 'disabled';
+							$opts[$idx . ':is'] = 'disabled';
 
 							if ( $opts[$idx] === $def_val ) {
 								if ( $this->p->debug->enabled ) {
-									$this->p->debug->log( $idx.' already set to '.$def_val );
+									$this->p->debug->log( $idx . ' already set to ' . $def_val );
 								}
 								continue;
 							}
 
 							if ( $this->p->debug->enabled ) {
-								$this->p->debug->log( 'setting '.$idx.' to '.$def_val );
+								$this->p->debug->log( 'setting ' . $idx . ' to ' . $def_val );
 							}
 
 							$opts[$idx] = $def_val;
@@ -440,7 +442,7 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 						$admin_url = $this->p->util->get_admin_url( 'general' );
 					}
 
-					$this->p->notice->err( $error_msg.' '.sprintf( __( 'The plugin settings have been returned to their default values &mdash; <a href="%s">please review and save the new settings</a>.', 'wpsso' ), $admin_url ) );
+					$this->p->notice->err( $error_msg . ' ' . sprintf( __( 'The plugin settings have been returned to their default values &mdash; <a href="%s">please review and save the new settings</a>.', 'wpsso' ), $admin_url ) );
 				}
 
 				$opts = $network ? $this->get_site_defaults() : $this->get_defaults();
@@ -459,6 +461,10 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 		 * Sanitize and validate options, including both the plugin options and custom meta options arrays.
 		 */
 		public function sanitize( $opts = array(), $def_opts = array(), $network = false, $mod = false ) {
+
+			if ( $this->p->debug->enabled ) {
+				$this->p->debug->mark();
+			}
 
 			/**
 			 * Make sure we have something to work with.
@@ -495,7 +501,9 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				$base_key = preg_replace( '/(_[0-9]+)?(#.*|:[0-9]+)?$/', '', $opt_key );
 
 				if ( preg_match( '/:is$/', $base_key ) ) {
+
 					unset( $opts[$opt_key] );
+
 					continue;
 				}
 
@@ -516,10 +524,12 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 			 */
 			foreach ( array( 'og', 'schema' ) as $md_pre ) {
 
-				if ( ! empty( $opts[$md_pre . '_img_width'] ) && ! empty( $opts[$md_pre . '_img_height'] ) && ! empty( $opts[$md_pre . '_img_crop'] ) ) {
+				if ( ! empty( $opts[ $md_pre . '_img_width' ] ) && 
+					! empty( $opts[ $md_pre . '_img_height' ] ) && 
+					! empty( $opts[ $md_pre . '_img_crop' ] ) ) {
 
-					$img_width  = $opts[$md_pre . '_img_width'];
-					$img_height = $opts[$md_pre . '_img_height'];
+					$img_width  = $opts[ $md_pre . '_img_width' ];
+					$img_height = $opts[ $md_pre . '_img_height' ];
 					$img_ratio  = $img_width >= $img_height ? $img_width / $img_height : $img_height / $img_width;
 					$max_ratio  = isset( $this->p->cf['head']['limit_max'][$md_pre . '_img_ratio'] ) ?
 						$this->p->cf['head']['limit_max'][$md_pre . '_img_ratio'] :
@@ -573,15 +583,16 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 						continue;
 					}
 
-					$opt_name = 'plugin_'.$ext.'_'.$info['update_auth'];
+					$opt_name = 'plugin_' . $ext . '_' . $info['update_auth'];
 
-					if ( isset( $opts[$opt_name] ) && isset( $this->p->options[$opt_name] ) && $opts[$opt_name] !== $this->p->options[$opt_name] ) {
+					if ( isset( $opts[$opt_name] ) && isset( $this->p->options[$opt_name] ) &&
+						$opts[$opt_name] !== $this->p->options[$opt_name] ) {
 
 						$this->p->options[$opt_name] = $opts[$opt_name];
 
 						foreach ( array( 'err', 'inf', 'time' ) as $key ) {
-							delete_option( $ext.'_u'.$key );
-							delete_option( $ext.'_uapi2'.$key );
+							delete_option( $ext . '_u' . $key );
+							delete_option( $ext . '_uapi2' . $key );
 						}
 					}
 				}
@@ -622,13 +633,17 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 		 */
 		private function refresh_image_url_sizes( array &$opts ) {
 
+			if ( $this->p->debug->enabled ) {
+				$this->p->debug->mark();
+			}
+
 			/**
 			 * Remove all custom field names first, to exclude 'plugin_cf_img_url' and 'plugin_cf_vid_url'.
 			 */
 			$img_url_keys = preg_grep( '/^plugin_cf_/', array_keys( $opts ), PREG_GREP_INVERT );
 
 			/**
-			 * Allow for multi-option keys, like 'place_addr_img_url_1'.
+			 * Allow for multi-option keys, like 'place_img_url_1'.
 			 */
 			$img_url_keys = preg_grep( '/_(img|logo|banner)_url(_[0-9]+)?(#[a-zA-Z_]+)?$/', $img_url_keys );
 
@@ -647,7 +662,7 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 			/**
 			 * Hooked by several add-ons.
 			 */
-			$option_type = apply_filters( $this->p->lca.'_option_type', false, $base_key, $network, $mod );
+			$option_type = apply_filters( $this->p->lca . '_option_type', false, $base_key, $network, $mod );
 
 			/**
 			 * Translate error messages only once.
@@ -690,6 +705,8 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				case 'html':		// leave html, css, and javascript code blocks as-is
 				case 'code':		// code values cannot be blank
 				case 'preg':
+
+					$opt_val = preg_replace( '/[\r]+/', '', $opt_val );
 
 					break;
 
@@ -967,7 +984,7 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				case 'textured':
 
 					if ( $opt_val !== '' ) {
-						$opt_val = trim( wptexturize( ' '.$opt_val.' ' ) );
+						$opt_val = trim( wptexturize( ' ' . $opt_val . ' ' ) );
 					}
 
 					break;
@@ -1016,7 +1033,7 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 			if ( $ret_int ) {
 				$opt_val = intval( $opt_val );
 			} elseif ( $ret_fnum ) {
-				$opt_val = sprintf( '%.'.$num_prec.'f', $opt_val );
+				$opt_val = sprintf( '%.' . $num_prec . 'f', $opt_val );
 			}
 
 			return $opt_val;
@@ -1048,11 +1065,11 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 			foreach ( $this->p->cf['plugin'] as $ext => $info ) {
 
 				if ( isset( $info['version'] ) ) {
-					$opts['plugin_'.$ext.'_version'] = $info['version'];
+					$opts['plugin_' . $ext . '_version'] = $info['version'];
 				}
 
 				if ( isset( $info['opt_version'] ) ) {
-					$opts['plugin_'.$ext.'_opt_version'] = $info['opt_version'];
+					$opts['plugin_' . $ext . '_opt_version'] = $info['opt_version'];
 				}
 			}
 
@@ -1061,9 +1078,13 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 			$opts = apply_filters( $this->p->lca . '_save_options', $opts, $options_name, $network, $doing_upgrade );
 
 			if ( $network ) {
-				$saved = update_site_option( $options_name, $opts );	// Auto-creates options with autoload no.
+				if ( $saved = update_site_option( $options_name, $opts ) ) {// Auto-creates options with autoload no.
+					$this->p->site_options = $opts;
+				}
 			} else {
-				$saved = update_option( $options_name, $opts );		// Auto-creates options with autoload yes.
+				if ( $saved = update_option( $options_name, $opts ) ) {		// Auto-creates options with autoload yes.
+					$this->p->options = $opts;
+				}
 			}
 
 			if ( true === $saved ) {
@@ -1071,25 +1092,25 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				if ( $doing_upgrade ) {
 
 					if ( $this->p->debug->enabled ) {
-						$this->p->debug->log( $options_name.' settings have been upgraded and saved' );
+						$this->p->debug->log( $options_name . ' settings have been upgraded and saved' );
 					}
 
 					if ( is_admin() ) {
 
-						$dismiss_key = $options_name.'_settings_upgraded_and_saved';
+						$notice_key = $options_name . '_settings_upgraded_and_saved';
 
 						$this->p->notice->inf( sprintf( __( 'Plugin settings (%s) have been upgraded and saved.',
-							'wpsso' ), $options_name ), true, $dismiss_key, true );	// Can be dismissed permanently.
+							'wpsso' ), $options_name ), null, $notice_key, true );	// Can be dismissed permanently.
 					}
 
 				} elseif ( $this->p->debug->enabled ) {
-					$this->p->debug->log( $options_name.' settings have been saved silently' );
+					$this->p->debug->log( $options_name . ' settings have been saved silently' );
 				}
 
 			} else {
 
 				if ( $this->p->debug->enabled ) {
-					$this->p->debug->log( 'wordpress failed to save the '.$options_name.' settings' );
+					$this->p->debug->log( 'wordpress failed to save the ' . $options_name . ' settings' );
 				}
 
 				return false;
@@ -1104,13 +1125,12 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				return;
 			}
 
+			$size_name          = false;	// Only check banner urls - skip any banner image id options.
+			$opt_img_pre        = 'schema_banner';
 			$settings_page_link = $this->p->util->get_admin_url(
 				'essential#sucom-tabset_essential-tab_google',
 				_x( 'Organization Banner URL', 'option label', 'wpsso' )
 			);
-
-			$size_name   = null;	// Only check banner urls - skip any banner image id options.
-			$opt_img_pre = 'schema_banner';
 
 			/**
 			 * Returns an image array:
@@ -1125,6 +1145,11 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 			 * );
 			 */
 			$og_single_image     = $this->p->media->get_opts_single_image( $opts, $size_name, $opt_img_pre );
+
+			if ( $this->p->debug->enabled ) {
+				$this->p->debug->log_arr( '$og_single_image', $og_single_image );
+			}
+
 			$og_single_image_url = SucomUtil::get_mt_media_url( $og_single_image );
 
 			if ( ! empty( $og_single_image_url ) ) {
@@ -1146,7 +1171,10 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 					} else {
 
 						$error_msg = sprintf( __( 'The %1$s image dimensions are %2$s and must be exactly %3$s.',
-							'wpsso' ), $settings_page_link, $image_dims, $required_dims );
+							'wpsso' ), $settings_page_link, $image_dims, $required_dims ) . ' ';
+
+						$error_msg .= sprintf( __( 'Please correct the banner image at %s.',
+							'wpsso' ), $image_href );
 					}
 
 					$this->p->notice->err( $error_msg );
@@ -1166,7 +1194,9 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				 * The "use" value should be 'default', 'empty', or 'force'.
 				 */
 				case ( preg_match( '/:use$/', $base_key ) ? true : false ):
+
 					return 'not_blank';
+
 					break;
 
 				/**
@@ -1174,21 +1204,27 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				 */
 				case ( strpos( $base_key, 'add_' ) === 0 ? true : false ):
 				case ( strpos( $base_key, 'plugin_filter_' ) === 0 ? true : false ):
+
 					return 'checkbox';
+
 					break;
 
 				/**
 				 * Empty string or must include at least one HTML tag.
 				 */
 				case 'og_vid_embed':
+
 					return 'html';
+
 					break;
 
 				/**
 				 * A regular expression.
 				 */
 				case ( preg_match( '/_preg$/', $base_key ) ? true : false ):
+
 					return 'preg';
+
 					break;
 
 				/**
@@ -1197,7 +1233,9 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				case ( strpos( $base_key, '_js_' ) !== false ? true : false ):
 				case ( strpos( $base_key, '_css_' ) !== false ? true : false ):
 				case ( preg_match( '/(_css|_js|_html)$/', $base_key ) ? true : false ):
+
 					return 'code';
+
 					break;
 
 				/**
@@ -1206,7 +1244,9 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				case 'gv_id_title':	// Title Field ID
 				case 'gv_id_desc':	// Description Field ID
 				case 'gv_id_img':	// Post Image Field ID
+
 					return 'blank_int';
+
 					break;
 
 				/**
@@ -1218,7 +1258,9 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				case 'og_desc_hashtags': 
 				case ( preg_match( '/_(cache_exp|filter_prio)$/', $base_key ) ? true : false ):
 				case ( preg_match( '/_(img|logo|banner)_url(:width|:height)$/', $base_key ) ? true : false ):
+
 					return 'integer';
+
 					break;
 
 				/**
@@ -1227,7 +1269,9 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				case 'plugin_upscale_img_max':
 				case 'plugin_min_shorten':
 				case ( preg_match( '/_(len|warn)$/', $base_key ) ? true : false ):
+
 					return 'pos_int';
+
 					break;
 
 				/**
@@ -1238,13 +1282,16 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				case 'schema_img_id':
 				case 'tc_lrg_img_id':
 				case 'tc_sum_img_id':
+
 					return 'img_id';
 
 				/**
 				 * Must be numeric (blank and zero are ok).
 				 */
 				case 'product_price':
+
 					return 'blank_num';
+
 					break;
 
 				/**
@@ -1252,7 +1299,9 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				 */
 				case ( preg_match( '/_img_width$/', $base_key ) ? true : false ):
 				case ( preg_match( '/^tc_[a-z]+_width$/', $base_key ) ? true : false ):
+
 					return 'img_width';
+
 					break;
 
 				/**
@@ -1260,21 +1309,27 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				 */
 				case ( preg_match( '/_img_height$/', $base_key ) ? true : false ):
 				case ( preg_match( '/^tc_[a-z]+_height$/', $base_key ) ? true : false ):
+
 					return 'img_height';
+
 					break;
 
 				/**
 				 * Must be texturized.
 				 */
 				case 'og_title_sep':
+
 					return 'textured';
+
 					break;
 
 				/**
 				 * Empty of alpha-numeric uppercase (hyphens are allowed as well).
 				 */
 				case ( preg_match( '/_tid$/', $base_key ) ? true : false ):
+
 					return 'auth_id';
+
 					break;
 
 				/**
@@ -1284,7 +1339,9 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				case 'fb_app_secret':
 				case 'p_dom_verify':
 				case ( preg_match( '/_api_key$/', $base_key ) ? true : false ):
+
 					return 'api_key';
+
 					break;
 
 				/**
@@ -1302,6 +1359,7 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				case 'pin_desc':
 				case 'product_brand':
 				case 'product_color':
+				case 'product_sku':
 				case 'product_currency':
 				case 'product_size':
 				case 'plugin_col_def_width':
@@ -1314,7 +1372,9 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				case 'plugin_yourls_token':
 				case ( strpos( $base_key, 'plugin_cf_' ) === 0 ? true : false ):	// value is name of meta key
 				case ( strpos( $base_key, '_filter_name' ) !== false ? true : false ):
+
 					return 'one_line';
+
 					break;
 
 				/**
@@ -1326,7 +1386,6 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				case 'seo_author_field':
 				case 'og_def_img_id_pre': 
 				case 'og_img_id_pre': 
-				case 'p_author_name':
 				case 'plugin_shortener':		// 'none' or name of shortener
 				case 'product_avail':
 				case 'product_condition':
@@ -1334,21 +1393,27 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				case ( strpos( $base_key, '_crop_x' ) !== false ? true : false ):
 				case ( strpos( $base_key, '_crop_y' ) !== false ? true : false ):
 				case ( preg_match( '/^(plugin|wp)_cm_[a-z]+_(name|label)$/', $base_key ) ? true : false ):
+
 					return 'not_blank';
+
 					break;
 
 				/**
 				 * twitter-style usernames (prepend with an at).
 				 */
 				case 'tc_site':
+
 					return 'at_name';
+
 					break;
 
 				/**
 				 * Strip leading urls off facebook usernames.
 				 */
 				case 'fb_admins':
+
 					return 'url_base';
+
 					break;
 
 				/**
@@ -1379,14 +1444,18 @@ if ( ! class_exists( 'WpssoOptions' ) ) {
 				case 'tc_lrg_img_url':
 				case 'tc_sum_img_url':
 				case ( strpos( $base_key, '_url' ) && isset( $this->p->cf['form']['social_accounts'][$base_key] ) ? true : false ):
+
 					return 'url';
+
 					break;
 
 				/**
 				 * CSS color code.
 				 */
 				case ( strpos( $base_key, '_color_' ) !== false ? true : false ):
+
 					return 'color';
+
 					break;
 			}
 

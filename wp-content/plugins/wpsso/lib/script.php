@@ -17,6 +17,7 @@ if ( ! class_exists( 'WpssoScript' ) ) {
 		private $tb_notices;
 
 		public function __construct( &$plugin ) {
+
 			$this->p =& $plugin;
 
 			if ( $this->p->debug->enabled ) {
@@ -61,7 +62,11 @@ if ( ! class_exists( 'WpssoScript' ) ) {
 				$this->p->debug->log( 'screen base = '.SucomUtil::get_screen_base() );
 			}
 
-			$js_file_ext = SucomUtil::get_const( 'WPSSO_DEV' ) ? 'js' : 'min.js';
+			/**
+			 * Do not use minified JS if the DEV constant is defined.
+			 */
+			$doing_dev      = SucomUtil::get_const( 'WPSSO_DEV' );
+			$js_file_ext    = $doing_dev ? 'js' : 'min.js';
 			$plugin_version = WpssoConfig::get_version();
 
 			/**
@@ -101,9 +106,9 @@ if ( ! class_exists( 'WpssoScript' ) ) {
 						$this->p->debug->log( 'enqueuing scripts for addons and licenses page' );
 					}
 
-					add_thickbox();	// required for the plugin details box
+					add_thickbox();	// Required for the plugin details box.
 
-					wp_enqueue_script( 'plugin-install' );	// required for the plugin details box
+					wp_enqueue_script( 'plugin-install' );	// Required for the plugin details box.
 
 					// no break
 
@@ -161,11 +166,15 @@ if ( ! class_exists( 'WpssoScript' ) ) {
 				case 'plugin-install.php':
 
 					if ( isset( $_GET['plugin'] ) ) {
+
 						$plugin_slug = $_GET['plugin'];
+
 						if ( isset( $this->p->cf['*']['slug'][$plugin_slug] ) ) {
+
 							if ( $this->p->debug->enabled ) {
 								$this->p->debug->log( 'enqueuing scripts for plugin install page' );
 							}
+
 							$this->add_plugin_install_iframe_script( $hook_name );
 						}
 					}
@@ -191,32 +200,36 @@ if ( ! class_exists( 'WpssoScript' ) ) {
 				$this->p->debug->mark();
 			}
 
-			$js_file_ext = SucomUtil::get_const( 'WPSSO_DEV' ) ? 'js' : 'min.js';
+			/**
+			 * Do not use minified JS if the DEV constant is defined.
+			 */
+			$doing_dev      = SucomUtil::get_const( 'WPSSO_DEV' );
+			$js_file_ext    = $doing_dev ? 'js' : 'min.js';
 			$plugin_version = WpssoConfig::get_version();
 
-			wp_enqueue_script( 'sucom-gutenberg-admin', 
-				WPSSO_URLPATH . 'js/gutenberg-admin.' . $js_file_ext, 
+			wp_enqueue_script( 'sucom-block-editor-admin', 
+				WPSSO_URLPATH . 'js/block-editor-admin.' . $js_file_ext, 
 					array( 'wp-data' ), $plugin_version, true );
 
-			wp_localize_script( 'sucom-gutenberg-admin', 'sucomGutenbergL10n',
-				$this->get_admin_gutenberg_script_data() );
+			wp_localize_script( 'sucom-block-editor-admin', 'sucomBlockEditorL10n',
+				$this->get_admin_block_editor_script_data() );
 		}
 
 		/**
 		 * Start localized variable names with an underscore.
 		 */
-		public function get_admin_gutenberg_script_data() {
+		public function get_admin_block_editor_script_data() {
 
 			$no_notices_text = sprintf( __( 'No new %s notifications.', 'wpsso' ), $this->p->cf['menu']['title'] );
 			$no_notices_html = '<div class="ab-item ab-empty-item">' . $no_notices_text . '</div>';
 
 			return array(
-				'_ajax_nonce' => wp_create_nonce( WPSSO_NONCE_NAME ),
-				'_metabox_id' => $this->p->lca . '_metabox_' . $this->p->cf['meta']['id'],
-				'_tb_notices' => $this->tb_notices,
+				'_ajax_nonce'      => wp_create_nonce( WPSSO_NONCE_NAME ),
+				'_metabox_id'      => $this->p->lca . '_metabox_' . $this->p->cf['meta']['id'],
+				'_tb_notices'      => $this->tb_notices,
 				'_no_notices_html' => $no_notices_html,
-				'_option_labels' => array(
-					'robots' => _x( 'Robots', 'option label', 'wpsso' ),
+				'_option_labels'   => array(
+					'robots'   => _x( 'Robots', 'option label', 'wpsso' ),
 				),
 			);
 		}
@@ -226,7 +239,7 @@ if ( ! class_exists( 'WpssoScript' ) ) {
 			$doing_block_editor = defined( 'DOING_BLOCK_EDITOR' ) ? DOING_BLOCK_EDITOR : false;
 
 			/**
-			 * Exit early if this is a block editor (aka Gutenberg) page.
+			 * Exit early if this is a block editor page.
 			 * The notices will be retrieved using an ajax call on page load and post save.
 			 */
 			if ( $doing_block_editor ) {
@@ -247,74 +260,72 @@ if ( ! class_exists( 'WpssoScript' ) ) {
 			<script type="text/javascript">
 				jQuery( document ).ready( function() {
 
-						// Just in case - make sure the same block editor function does not exist.
-						if ( typeof wpssoUpdateToolbar == 'function' ) {
-							return;
-						}
-
-						var ajaxNoticesData = {
-							action: 'wpsso_get_notices_json',
-							context: 'toolbar_notices',
-							_ajax_nonce: '<?php echo wp_create_nonce( WPSSO_NONCE_NAME ); ?>',
-							_notice_types: <?php echo json_encode( $this->tb_notices ); ?>,
-						}
-
-						jQuery.getJSON( ajaxurl, ajaxNoticesData, function( data ) {
-
-							var noticeHtml       = '';
-							var noticeStatus     = '';
-							var noticeTotalCount = 0;
-							var noticeTypeCount  = {};
-							var noNoticesHtml    = '<?php echo $no_notices_html; ?>';
-
-							jQuery.each( data, function( noticeType ) {
-
-								jQuery.each( data[noticeType], function( noticeKey ) {
-
-									// Skip hidden notices that we can't unhide.
-									if ( data[noticeType][noticeKey]['hidden'] && 
-										data[noticeType][noticeKey]['no-unhide'] ) {
-										return;
-									}
-
-									noticeHtml += data[noticeType][noticeKey]['msg_html'];
-
-									if ( ! data[noticeType][noticeKey]['no-count'] ) {
-										noticeTotalCount++;
-										noticeTypeCount[noticeType] = ++noticeTypeCount[noticeType] || 1;
-									}
-								} );
-							} );
-
-							if ( noticeHtml ) {
-								jQuery( '#wp-admin-bar-wpsso-toolbar-notices-container' ).html( noticeHtml );
-								jQuery( '#wp-admin-bar-wpsso-toolbar-notices' ).addClass( 'have-notices' );
-							} else {
-								jQuery( '#wp-admin-bar-wpsso-toolbar-notices-container' ).html( noNoticesHtml );
-								jQuery( '#wp-admin-bar-wpsso-toolbar-notices' ).removeClass( 'have-notices' );
-							}
-
-							jQuery( '#wpsso-toolbar-notices-count' ).html( noticeTotalCount );
-
-							if ( noticeTotalCount ) {
-
-								var noticeStatus = '';
-
-								if ( noticeTypeCount['err'] ) {
-									noticeStatus = 'error';
-								} else if ( noticeTypeCount['warn'] ) {
-									noticeStatus = 'warning';
-								} else if ( noticeTypeCount['inf'] ) {
-									noticeStatus = 'info';
-								} else if ( noticeTypeCount['upd'] ) {
-									noticeStatus = 'success';
-								}
-
-								jQuery( '#wp-admin-bar-wpsso-toolbar-notices' ).addClass( 'have-notices-' + noticeStatus );
-							}
-						} );
+					// Just in case - make sure the same block editor function does not exist.
+					if ( typeof wpssoUpdateToolbar == 'function' ) {
+						return;
 					}
-				);
+
+					var ajaxNoticesData = {
+						action: 'wpsso_get_notices_json',
+						context: 'toolbar_notices',
+						_ajax_nonce: '<?php echo wp_create_nonce( WPSSO_NONCE_NAME ); ?>',
+						_notice_types: '<?php echo implode( ',', $this->tb_notices ); ?>',
+					}
+
+					jQuery.getJSON( ajaxurl, ajaxNoticesData, function( data ) {
+
+						var noticeHtml       = '';
+						var noticeStatus     = '';
+						var noticeTotalCount = 0;
+						var noticeTypeCount  = {};
+						var noNoticesHtml    = '<?php echo $no_notices_html; ?>';
+
+						jQuery.each( data, function( noticeType ) {
+
+							jQuery.each( data[noticeType], function( noticeKey ) {
+
+								noticeHtml += data[noticeType][noticeKey]['msg_html'];
+
+								noticeTypeCount[noticeType] = ++noticeTypeCount[noticeType] || 1;
+
+								noticeTotalCount++;
+							} );
+						} );
+
+						// Cleanup any pre-existing notice classes.
+						jQuery( '#wp-admin-bar-wpsso-toolbar-notices' ).removeClass( 'have-notices-error' );
+						jQuery( '#wp-admin-bar-wpsso-toolbar-notices' ).removeClass( 'have-notices-warning' );
+						jQuery( '#wp-admin-bar-wpsso-toolbar-notices' ).removeClass( 'have-notices-info' );
+						jQuery( '#wp-admin-bar-wpsso-toolbar-notices' ).removeClass( 'have-notices-success' );
+
+						if ( noticeHtml ) {
+							jQuery( '#wp-admin-bar-wpsso-toolbar-notices-container' ).html( noticeHtml );
+							jQuery( '#wp-admin-bar-wpsso-toolbar-notices' ).addClass( 'have-notices' );
+						} else {
+							jQuery( '#wp-admin-bar-wpsso-toolbar-notices-container' ).html( noNoticesHtml );
+							jQuery( '#wp-admin-bar-wpsso-toolbar-notices' ).removeClass( 'have-notices' );
+						}
+
+						jQuery( '#wpsso-toolbar-notices-count' ).html( noticeTotalCount );
+
+						if ( noticeTotalCount ) {
+
+							var noticeStatus = '';
+
+							if ( noticeTypeCount['err'] ) {
+								noticeStatus = 'error';
+							} else if ( noticeTypeCount['warn'] ) {
+								noticeStatus = 'warning';
+							} else if ( noticeTypeCount['inf'] ) {
+								noticeStatus = 'info';
+							} else if ( noticeTypeCount['upd'] ) {
+								noticeStatus = 'success';
+							}
+
+							jQuery( '#wp-admin-bar-wpsso-toolbar-notices' ).addClass( 'have-notices-' + noticeStatus );
+						}
+					} );
+				} );
 			</script>
 			<?php
 		}
@@ -338,11 +349,15 @@ if ( ! class_exists( 'WpssoScript' ) ) {
 			 */
 			$custom_script_js = '
 jQuery( document ).ready( function(){
+
 	jQuery( "body#plugin-information.iframe a[id$=_from_iframe]" ).on( "click", function(){
+
 		if ( window.top.location.href.indexOf( "page=' . $this->p->lca . '-" ) ) {
+
 			var plugin_url = jQuery( this ).attr( "href" );
 			var pageref_url_arg = "&' . $this->p->lca . '_pageref_url=" + encodeURIComponent( window.top.location.href );
 			var pageref_title_arg = "&' . $this->p->lca . '_pageref_title=" + encodeURIComponent( jQuery( "h1", window.parent.document ).text() );
+
 			window.top.location.href = plugin_url + pageref_url_arg + pageref_title_arg;
 		}
 	});

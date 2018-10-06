@@ -1,7 +1,7 @@
 <?php
 
 function wfu_mk_dir_deep($conn_id, $basepath, $path) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	@ftp_chdir($conn_id, $basepath);
 	$parts = explode('/', $path);
 	foreach ( $parts as $part ) {
@@ -14,7 +14,7 @@ function wfu_mk_dir_deep($conn_id, $basepath, $path) {
 }
 
 function wfu_is_dir($path, $ftpdata) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$result = false;
 	if ( substr($path, 0, 7) == "sftp://" ) {
 		$ftpdata_flat =  str_replace(array('\:', '\@'), array('\_', '\_'), $ftpdata);
@@ -52,7 +52,7 @@ function wfu_is_dir($path, $ftpdata) {
 }
 
 function wfu_create_directory($path, $method, $ftpdata) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$ret_message = "";
 	if ( $method == "" || $method == "normal" ) {
 		mkdir($path, 0777, true);
@@ -111,7 +111,7 @@ function wfu_create_directory($path, $method, $ftpdata) {
 
 
 function wfu_upload_file($source, $target, $method, $ftpdata, $passive, $fileperms) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$ret_array = array();
 	$ret_array["uploaded"] = false;
 	$ret_array["admin_message"] = "";
@@ -199,7 +199,7 @@ function wfu_upload_file($source, $target, $method, $ftpdata, $passive, $fileper
 }
 
 function wfu_upload_file_sftp($ftp_host, $ftp_port, $ftp_username, $ftp_password, $source, $target, $fileperms) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$ret_message = "";
 	$conn = @ssh2_connect($ftp_host, $ftp_port);
 	if ( !$conn ) $ret_message = WFU_ERROR_ADMIN_FTPHOST_FAIL;
@@ -234,7 +234,7 @@ function wfu_upload_file_sftp($ftp_host, $ftp_port, $ftp_username, $ftp_password
 }
 
 function wfu_create_dir_deep_sftp($ftp_host, $ftp_port, $ftp_username, $ftp_password, $path) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$ret_message = "";
 	$conn = @ssh2_connect($ftp_host, $ftp_port);
 	if ( !$conn ) $ret_message = WFU_ERROR_ADMIN_FTPHOST_FAIL;

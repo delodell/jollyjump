@@ -17,8 +17,8 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 			'lca'    => 'wpsso',	// Main plugin lowercase acronym (deprecated on 2017/11/18).
 			'plugin' => array(
 				'wpsso' => array(			// Plugin acronym.
-					'version'     => '4.11.0',	// Plugin version.
-					'opt_version' => '596',		// Increment when changing default option values.
+					'version'     => '4.15.0',	// Plugin version.
+					'opt_version' => '610',		// Increment when changing default option values.
 					'short'       => 'WPSSO Core',	// Short plugin name.
 					'name'        => 'WPSSO Core [Main Plugin]',
 					'desc'        => 'WPSSO Core gives social sites and search engines better information about your content, business and authors, with complete meta tags and Schema markup for social sharing, Google Knowledge Graph / Rich Card SEO, Pinterest Rich Pins, Twitter Cards and more.',
@@ -92,9 +92,9 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 								'buddypress' => '(plugin) BuddyPress',
 							),
 							'util' => array(
-								'post' => '(tool) Custom Post Meta',
-								'term' => '(tool) Custom Term Meta',
-								'user' => '(tool) Custom User Meta',
+								'post' => '(feature) Custom Post Meta',
+								'term' => '(feature) Custom Term Meta',
+								'user' => '(feature) Custom User Meta',
 							),
 						),
 						'pro' => array(
@@ -129,7 +129,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 								'rtmedia'    => '(plugin) rtMedia for WordPress, BuddyPress and bbPress',
 								'slideshare' => '(api) Slideshare API',
 								'soundcloud' => '(api) Soundcloud API',
-								'upscale'    => '(tool) WP Media Library Image Upscaling',
+								'upscale'    => '(feature) WP Media Library Image Upscaling',
 								'vimeo'      => '(api) Vimeo Video API',
 								'wistia'     => '(api) Wistia Video API',
 								'wpvideo'    => '(api) WordPress Video Shortcode',
@@ -150,14 +150,14 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 								'buddypress' => '(plugin) BuddyPress',
 							),
 							'util' => array(
-								'checkimgdims' => '(tool) Verify Image Dimensions',
+								'checkimgdims' => '(feature) Verify Image Dimensions',
 								'coauthors'    => '(plugin) Co-Authors Plus',
-								'language'     => '(tool) WP Locale to Publisher Language Mapping',
+								'language'     => '(feature) WP Locale to Publisher Language Mapping',
 								'shorten'      => '(api) URL Shortening Service APIs',
-								'post'         => '(tool) Custom Post Meta',
-								'term'         => '(tool) Custom Term Meta',
-								'user'         => '(tool) Custom User Meta',
-								'wpseo_meta'   => '(tool) Yoast SEO Social Meta',
+								'post'         => '(feature) Custom Post Meta',
+								'term'         => '(feature) Custom Term Meta',
+								'user'         => '(feature) Custom User Meta',
+								'wpseo_meta'   => '(feature) Yoast SEO Social Meta',
 							),
 						),
 					),
@@ -759,6 +759,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'schema_img_crop_y'            => 'center',
 					'schema_desc_len'              => 250,		// Meta itemprop="description" maximum text length (hard limit).
 					'schema_author_name'           => 'display_name',
+
 					/**
 					 * Standard WordPress types.
 					 */
@@ -773,6 +774,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'schema_type_for_post_archive' => 'item.list',		// Post type archive page.
 					'schema_type_for_search_page'  => 'webpage.search.results',
 					'schema_type_for_user_page'    => 'webpage.profile',
+
 					/**
 					 * Custom post types.
 					 */
@@ -782,7 +784,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'schema_type_for_business'     => 'local.business',
 					'schema_type_for_download'     => 'product',		// For Easy Digital Downloads.
 					'schema_type_for_event'        => 'event',
-					'schema_type_for_howto'        => 'howto',
+					'schema_type_for_howto'        => 'how.to',
 					'schema_type_for_job_listing'  => 'job.posting',	// For WP Job Manager
 					'schema_type_for_jobpost'      => 'job.posting',	// For Simple Job Board
 					'schema_type_for_organization' => 'organization',
@@ -795,15 +797,18 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'schema_type_for_tribe_events' => 'event',
 					'schema_type_for_webpage'      => 'webpage',
 					'schema_type_for_website'      => 'website',
-					'schema_review_item_type'      => 'none',		// Default Reviewed Item Type
-					'fb_publisher_url'             => '',			// (localized)
-					'fb_app_id'                    => '',
-					'fb_admins'                    => '',
-					'fb_author_name'               => 'display_name',
-					'fb_locale'                    => 'en_US',
-					'instgram_publisher_url'       => '',			// (localized)
-					'linkedin_publisher_url'       => '',			// (localized)
-					'myspace_publisher_url'        => '',			// (localized)
+					'fb_publisher_url'             => '',			// Facebook Business Page URL (localized).
+					'fb_app_id'                    => '',			// Facebook Application ID.
+					'fb_admins'                    => '',			// or Facebook Admin Username(s).
+					'fb_author_name'               => 'display_name',	// Author Name Format.
+					'fb_locale'                    => 'en_US',		// Custom Facebook Locale.
+					'instgram_publisher_url'       => '',			// Instagram Business Page URL (localized).
+					'linkedin_publisher_url'       => '',			// LinkedIn Company Page URL (localized).
+					'myspace_publisher_url'        => '',			// Myspace Business Page URL (localized).
+					'sc_publisher_url'             => '',			// Soundcloud Business Page URL (localized).
+					'tumblr_publisher_url'         => '',                   // Tumblr Business Page URL (localized).
+					'yt_publisher_url'             => '',                   // YouTube Business Channel URL (localized).
+					
 					/**
 					 * Standard WordPress types.
 					 */
@@ -818,6 +823,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'og_type_for_post_archive'     => 'website',		// Post type archive page.
 					'og_type_for_search_page'      => 'website',
 					'og_type_for_user_page'        => 'website',
+					
 					/**
 					 * Custom post types.
 					 */
@@ -849,17 +855,17 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'og_desc_warn'                 => 200,			// Recommended maximum length in characters for Facebook (soft limit).
 					'og_desc_hashtags'             => 0,
 					'p_publisher_url'              => '',			// (localized)
-					'p_author_name'                => 'display_name',	// Rich-pin specific article:author.
 					'p_dom_verify'                 => '',
-					'p_add_img_html'               => 1,
-					'p_add_nopin_media_img_tag'    => 1,
-					'p_add_nopin_header_img_tag'   => 1,
+					'p_add_nopin_header_img_tag'   => 1,			// Add "nopin" to Site Header Image
+					'p_add_nopin_media_img_tag'    => 0,			// Add "nopin" to WordPress Media
+					'p_add_img_html'               => 0,			// Add Hidden Image for Pin It Button
 					'sc_publisher_url'             => '',
 					'seo_desc_len'                 => 156,			// Meta name="description" maximum text length (hard limit).
 					'seo_author_field'             => 'gplus',
 					'seo_publisher_url'            => '',			// (localized)
 					'tumblr_publisher_url'         => '',
 					'yt_publisher_url'             => '',
+					
 					/**
 					 * Twitter Card options.
 					 */
@@ -877,6 +883,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'tc_lrg_img_crop'   => 0,
 					'tc_lrg_img_crop_x' => 'center',
 					'tc_lrg_img_crop_y' => 'center',
+					
 					/**
 					 * Enable / disable individual head HTML tags.
 					 */
@@ -966,12 +973,11 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'add_meta_property_product:pretax_price:currency'          => 1,
 					'add_meta_property_product:price:amount'                   => 1,
 					'add_meta_property_product:price:currency'                 => 1,
-					'add_meta_property_product:sale_price:amount'              => 1,
-					'add_meta_property_product:sale_price:currency'            => 1,
 					'add_meta_property_product:product_link'                   => 1,
 					'add_meta_property_product:purchase_limit'                 => 1,
 					'add_meta_property_product:retailer'                       => 1,
 					'add_meta_property_product:retailer_category'              => 1,
+					'add_meta_property_product:retailer_item_id'               => 1,
 					'add_meta_property_product:retailer_part_no'               => 1,
 					'add_meta_property_product:retailer_title'                 => 1,
 					'add_meta_property_product:sale_price:amount'              => 1,
@@ -1076,13 +1082,15 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'add_meta_itemprop_recipeyield'                            => 1,	// Schema Recipe.
 					'add_meta_itemprop_recipeingredient'                       => 1,	// Schema Recipe (supersedes ingredients).
 					'add_meta_itemprop_recipeinstructions'                     => 1,	// Schema Recipe.
+					
 					/**
 					 * Advanced settings - Plugin Settings tab.
 					 */
-					'plugin_preserve'   => 0,	// Preserve Settings on Uninstall.
-					'plugin_debug'      => 0,	// Add Hidden Debug Messages.
-					'plugin_hide_pro'   => 0,	// Hide All Pro Version Options.
-					'plugin_show_opts'  => 'basic',	// Options to Show by Default.
+					'plugin_clean_on_uninstall' => 0,	// Remove All Settings on Uninstall.
+					'plugin_debug'              => 0,	// Add Hidden Debug Messages.
+					'plugin_hide_pro'           => 0,	// Hide All Pro Version Options.
+					'plugin_show_opts'          => 'basic',	// Options to Show by Default.
+					
 					/**
 					 * Advanced settings - Content and Filters tab.
 					 */
@@ -1101,6 +1109,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'plugin_wistia_api'     => 1,		// Check for Embedded Media: Wistia Videos.
 					'plugin_wpvideo_api'    => 1,		// Check for Embedded Media: WordPress Video Shortcode.
 					'plugin_youtube_api'    => 1,		// Check for Embedded Media: Youtube Videos and Playlists.
+					
 					/**
 					 * Advanced settings - Integration tab.
 					 */
@@ -1109,36 +1118,19 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'plugin_head_attr_filter_name' => 'head_attributes',		// <head> Attributes Filter Hook.
 					'plugin_head_attr_filter_prio' => 100,
 					'plugin_honor_force_ssl'       => 1,				// Honor the FORCE_SSL Constant.
-					'plugin_add_person_role'       => 1,				// Add Person Role for New Users.
+					'plugin_new_user_is_person'    => 0,				// Add Person Role for New Users.
 					'plugin_filter_lang'           => 1,				// Use WP Locale for Language.
-					'plugin_page_excerpt'          => 1,				// Enable WP Excerpt for Pages.
-					'plugin_page_tags'             => 1,				// Enable WP Tags for Pages.
+					'plugin_page_excerpt'          => 0,				// Enable WP Excerpt for Pages.
+					'plugin_page_tags'             => 0,				// Enable WP Tags for Pages.
 					'plugin_check_head'            => 1,				// Check for Duplicate Meta Tags.
 					'plugin_create_wp_sizes'       => 1,				// Create Missing WP Media Sizes.
 					'plugin_check_img_dims'        => 0,				// Enforce Image Dimensions Check.
 					'plugin_upscale_images'        => 0,				// Allow Upscale of Smaller Images.
 					'plugin_upscale_img_max'       => 33,				// Maximum Image Upscale Percent.
+					
 					/**
 					 * Advanced settings - Custom Meta tab.
 					 */
-					'plugin_schema_type_col_media'  => 0,
-					'plugin_schema_type_col_post'   => 1,
-					'plugin_schema_type_col_term'   => 0,
-					'plugin_schema_type_col_user'   => 0,
-					'plugin_og_type_col_media'      => 0,
-					'plugin_og_type_col_post'       => 0,
-					'plugin_og_type_col_term'       => 0,
-					'plugin_og_type_col_user'       => 0,
-					'plugin_og_img_col_media'       => 0,
-					'plugin_og_img_col_post'        => 1,
-					'plugin_og_img_col_term'        => 1,
-					'plugin_og_img_col_user'        => 1,
-					'plugin_og_desc_col_media'      => 1,
-					'plugin_og_desc_col_post'       => 0,
-					'plugin_og_desc_col_term'       => 0,
-					'plugin_og_desc_col_user'       => 1,
-					'plugin_col_def_width'          => '15%',
-					'plugin_col_title_width'        => '25%',
 					'plugin_add_to_attachment'      => 1,
 					'plugin_add_to_page'            => 1,
 					'plugin_add_to_post'            => 1,
@@ -1159,12 +1151,36 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'plugin_cf_product_brand'       => '',			// Product Brand Custom Field.
 					'plugin_cf_product_color'       => '',			// Product Color Custom Field.
 					'plugin_cf_product_condition'   => '',			// Product Condition Custom Field.
-					'plugin_cf_product_currency'    => '',			// Product Currency Custom Field.
 					'plugin_cf_product_material'    => '',			// Product Material Custom Field.
+					'plugin_cf_product_sku'         => '',			// Product SKU Custom Field.
 					'plugin_cf_product_price'       => '',			// Product Price Custom Field.
+					'plugin_cf_product_currency'    => '',			// Product Currency Custom Field.
 					'plugin_cf_product_size'        => '',			// Product Size Custom Field.
 					'plugin_cf_product_gender'      => '',			// Product Target Gender Custom Field.
 					'plugin_cf_sameas_urls'         => '',			// Same-As URLs Custom Field.
+
+					/**
+					 * Advanced settings - List Columns tab.
+					 */
+					'plugin_schema_type_col_media'  => 0,
+					'plugin_schema_type_col_post'   => 1,
+					'plugin_schema_type_col_term'   => 0,
+					'plugin_schema_type_col_user'   => 0,
+					'plugin_og_type_col_media'      => 0,
+					'plugin_og_type_col_post'       => 0,
+					'plugin_og_type_col_term'       => 0,
+					'plugin_og_type_col_user'       => 0,
+					'plugin_og_img_col_media'       => 0,
+					'plugin_og_img_col_post'        => 1,
+					'plugin_og_img_col_term'        => 1,
+					'plugin_og_img_col_user'        => 1,
+					'plugin_og_desc_col_media'      => 1,
+					'plugin_og_desc_col_post'       => 0,
+					'plugin_og_desc_col_term'       => 0,
+					'plugin_og_desc_col_user'       => 1,
+					'plugin_col_def_width'          => '15%',
+					'plugin_col_title_width'        => '20em',
+
 					/**
 					 * Advanced settings - Cache Settings tab.
 					 */
@@ -1175,11 +1191,14 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'plugin_short_url_cache_exp' => 7776000,		// Get Shortened URL Cache Expiry (90 days / 3 months).
 					'plugin_topics_cache_exp'    => MONTH_IN_SECONDS,	// Article Topics Array Cache Expiry (1 month).
 					'plugin_types_cache_exp'     => MONTH_IN_SECONDS,	// Schema Types Array Cache Expiry (1 month).
-					'plugin_show_purge_count'    => 0,			// Show Cache Purge Count on Update.
-					'plugin_clear_on_save'       => 1,			// Clear All Caches on Save Settings.
-					'plugin_clear_all_refresh'   => 1,			// Auto-Refresh Cache After Clear All.
-					'plugin_clear_short_urls'    => 0,			// Clear Short URLs on Clear All Caches.
+					'plugin_clear_on_activate'   => 0,			// Clear All Caches on Activate.
+					'plugin_clear_on_deactivate' => 0,			// Clear All Caches on Deactivate.
+					'plugin_clear_on_save'       => 0,			// Clear All Caches on Save Settings.
+					'plugin_clear_short_urls'    => 0,			// Refresh Short URLs on Clear Cache.
+					'plugin_clear_all_refresh'   => 0,			// Auto-Refresh Cache After Clearing.
+					'plugin_clear_post_terms'    => 1,			// Clear Term Cache for Published Post.
 					'plugin_clear_for_comment'   => 1,			// Clear Post Cache for New Comment.
+					
 					/**
 					 * Advanced settings - Service APIs tab.
 					 */
@@ -1198,8 +1217,9 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'plugin_yourls_username'    => '',
 					'plugin_yourls_password'    => '',
 					'plugin_yourls_token'       => '',
+					
 					/**
-					 * Advanced settings - Contact Field IDs and Labels.
+					 * Advanced settings - Contact Fields.
 					 */
 					'plugin_cm_fb_name'          => 'facebook',
 					'plugin_cm_fb_label'         => 'Facebook User URL',
@@ -1244,23 +1264,26 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'wp_cm_yim_label'            => 'Yahoo Messenger',
 					'wp_cm_yim_enabled'          => 1,
 				),
+				
 				/**
 				 * Multisite options.
 				 */
 				'site_defaults' => array(
 					'options_version'  => '',		// Example: -wpsso512pro-wpssoum3gpl
 					'options_filtered' => false,
+					
 					/**
 					 * Advanced settings - Plugin Settings tab.
 					 */
-					'plugin_preserve'      => 0,		// Preserve Settings on Uninstall
-					'plugin_preserve:use'  => 'default',
-					'plugin_debug'         => 0,		// Add Hidden Debug Messages
-					'plugin_debug:use'     => 'default',
-					'plugin_hide_pro'      => 0,		// Hide All Pro Version Options
-					'plugin_hide_pro:use'  => 'default',
-					'plugin_show_opts'     => 'basic',	// Options to Show by Default
-					'plugin_show_opts:use' => 'default',
+					'plugin_clean_on_uninstall'     => 0,		// Remove All Settings on Uninstall
+					'plugin_clean_on_uninstall:use' => 'default',
+					'plugin_debug'                  => 0,		// Add Hidden Debug Messages
+					'plugin_debug:use'              => 'default',
+					'plugin_hide_pro'               => 0,		// Hide All Pro Version Options
+					'plugin_hide_pro:use'           => 'default',
+					'plugin_show_opts'              => 'basic',	// Options to Show by Default
+					'plugin_show_opts:use'          => 'default',
+					
 					/**
 					 * Advanced settings - Integration tab.
 					 */
@@ -1272,54 +1295,60 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'plugin_head_attr_filter_name:use' => 'default',
 					'plugin_head_attr_filter_prio'     => 100,
 					'plugin_head_attr_filter_prio:use' => 'default',
-					'plugin_honor_force_ssl'           => 1,		// Honor the FORCE_SSL Constant
+					'plugin_honor_force_ssl'           => 1,		// Honor the FORCE_SSL Constant.
 					'plugin_honor_force_ssl:use'       => 'default',
-					'plugin_add_person_role'           => 1,		// Add Person Role for New Users
-					'plugin_add_person_role:use'       => 'default',
-					'plugin_filter_lang'               => 1,		// Use WP Locale for Language
+					'plugin_new_user_is_person'        => 0,		// Add Person Role for New Users.
+					'plugin_new_user_is_person:use'    => 'default',
+					'plugin_filter_lang'               => 1,		// Use WP Locale for Language.
 					'plugin_filter_lang:use'           => 'default',
-					'plugin_page_excerpt'              => 1,		// Enable WP Excerpt for Pages
+					'plugin_page_excerpt'              => 0,		// Enable WP Excerpt for Pages.
 					'plugin_page_excerpt:use'          => 'default',
-					'plugin_page_tags'                 => 1,		// Enable WP Tags for Pages
+					'plugin_page_tags'                 => 0,		// Enable WP Tags for Pages.
 					'plugin_page_tags:use'             => 'default',
-					'plugin_check_head'                => 1,		// Check for Duplicate Meta Tags
+					'plugin_check_head'                => 1,		// Check for Duplicate Meta Tags.
 					'plugin_check_head:use'            => 'default',
-					'plugin_create_wp_sizes'           => 1,		// Recreate Missing WP Media Sizes
+					'plugin_create_wp_sizes'           => 1,		// Recreate Missing WP Media Sizes.
 					'plugin_create_wp_sizes:use'       => 'default',
-					'plugin_check_img_dims'            => 0,		// Enforce Image Dimensions Check
+					'plugin_check_img_dims'            => 0,		// Enforce Image Dimensions Check.
 					'plugin_check_img_dims:use'        => 'default',
-					'plugin_upscale_images'            => 0,		// Allow Upscale of Smaller Images
+					'plugin_upscale_images'            => 0,		// Allow Upscale of Smaller Images.
 					'plugin_upscale_images:use'        => 'default',
-					'plugin_upscale_img_max'           => 33,		// Maximum Image Upscale Percent
+					'plugin_upscale_img_max'           => 33,		// Maximum Image Upscale Percent.
 					'plugin_upscale_img_max:use'       => 'default',
+					
 					/**
 					 * Advanced settings - Cache Settings tab.
 					 */
-					'plugin_head_cache_exp'          => WEEK_IN_SECONDS,	// Head Markup Array Cache Expiry (1 week)
+					'plugin_head_cache_exp'          => WEEK_IN_SECONDS,	// Head Markup Array Cache Expiry (1 week).
 					'plugin_head_cache_exp:use'      => 'default',
-					'plugin_content_cache_exp'       => HOUR_IN_SECONDS,	// Filtered Content Text Cache Expiry (1 hour)
+					'plugin_content_cache_exp'       => HOUR_IN_SECONDS,	// Filtered Content Text Cache Expiry (1 hour).
 					'plugin_content_cache_exp:use'   => 'default',
-					'plugin_json_data_cache_exp'     => 1209600,		// Schema JSON Data Cache Expiry (2 weeks)
+					'plugin_json_data_cache_exp'     => 1209600,		// Schema JSON Data Cache Expiry (2 weeks).
 					'plugin_json_data_cache_exp:use' => 'default',
-					'plugin_imgsize_cache_exp'       => DAY_IN_SECONDS,	// Get Image URL Info Cache Expiry (1 day)
+					'plugin_imgsize_cache_exp'       => DAY_IN_SECONDS,	// Get Image URL Info Cache Expiry (1 day).
 					'plugin_imgsize_cache_exp:use'   => 'default',
-					'plugin_short_url_cache_exp'     => 7776000,		// Get Shortened URL Cache Expiry (90 days / 3 months)
+					'plugin_short_url_cache_exp'     => 7776000,		// Get Shortened URL Cache Expiry (90 days / 3 months).
 					'plugin_short_url_cache_exp:use' => 'default',
-					'plugin_topics_cache_exp'        => MONTH_IN_SECONDS,	// Article Topics Array Cache Expiry (1 month)
+					'plugin_topics_cache_exp'        => MONTH_IN_SECONDS,	// Article Topics Array Cache Expiry (1 month).
 					'plugin_topics_cache_exp:use'    => 'default',
-					'plugin_types_cache_exp'         => MONTH_IN_SECONDS,	// Schema Types Array Cache Expiry (1 month)
+					'plugin_types_cache_exp'         => MONTH_IN_SECONDS,	// Schema Types Array Cache Expiry (1 month).
 					'plugin_types_cache_exp:use'     => 'default',
-					'plugin_show_purge_count'        => 0,			// Show Cache Purge Count on Update
-					'plugin_show_purge_count:use'    => 'default',
-					'plugin_clear_on_save'           => 1,			// Clear All Caches on Save Settings
+					'plugin_clear_on_activate'       => 0,			// Clear All Caches on Activate.
+					'plugin_clear_on_activate:use'   => 'default',
+					'plugin_clear_on_deactivate'     => 0,			// Clear All Caches on Deactivate.
+					'plugin_clear_on_deactivate:use' => 'default',
+					'plugin_clear_on_save'           => 0,			// Clear All Caches on Save Settings.
 					'plugin_clear_on_save:use'       => 'default',
-					'plugin_clear_all_refresh'       => 1,			// Auto-Refresh Cache After Clear All
-					'plugin_clear_all_refresh:use'   => 'default',
-					'plugin_clear_short_urls'        => 0,			// Clear Short URLs on Clear All Caches
+					'plugin_clear_short_urls'        => 0,			// Refresh Short URLs on Clear Cache.
 					'plugin_clear_short_urls:use'    => 'default',
-					'plugin_clear_for_comment'       => 1,			// Clear Post Cache for New Comment
+					'plugin_clear_all_refresh'       => 0,			// Auto-Refresh Cache After Clearing.
+					'plugin_clear_all_refresh:use'   => 'default',
+					'plugin_clear_post_terms'        => 1,			// Clear Term Cache for Published Post.
+					'plugin_clear_post_terms:use'    => 'default',
+					'plugin_clear_for_comment'       => 1,			// Clear Post Cache for New Comment.
 					'plugin_clear_for_comment:use'   => 'default',
 				),
+				
 				/**
 				 * Contact method options prefix.
 				 */
@@ -1344,6 +1373,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'vk'          => 'vk',
 					'whatsapp'    => 'wa',
 				),
+				
 				/**
 				 * Custom field to meta data index.
 				 */
@@ -1358,13 +1388,15 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'plugin_cf_product_brand'       => 'product_brand',
 					'plugin_cf_product_color'       => 'product_color',
 					'plugin_cf_product_condition'   => 'product_condition',
-					'plugin_cf_product_currency'    => 'product_currency',
 					'plugin_cf_product_material'    => 'product_material',
+					'plugin_cf_product_sku'         => 'product_sku',
 					'plugin_cf_product_price'       => 'product_price',
+					'plugin_cf_product_currency'    => 'product_currency',
 					'plugin_cf_product_size'        => 'product_size',
 					'plugin_cf_product_gender'      => 'product_gender',
 					'plugin_cf_sameas_urls'         => 'schema_sameas_url',
 				),
+				
 				/**
 				 * Read meta values into numeric meta data index.
 				 */
@@ -1375,11 +1407,12 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'schema_sameas_url'         => true,
 				),
 			),
+			
 			/**
 			 * Update manager config.
 			 */
 			'um' => array(
-				'rec_version' => '1.11.0',	// Minimum update manager version (soft limit).
+				'rec_version' => '1.12.0',	// Minimum update manager version (soft limit).
 				'check_hours' => array(
 					24  => 'Every day',
 					48  => 'Every two days',
@@ -1404,13 +1437,14 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'stable' => '/^[0-9][0-9\.\-]+$/',
 				),
 			),
+			
 			/**
 			 * PHP config.
 			 */
 			'php' => array(
 				'label'       => 'PHP',
 				'min_version' => '5.4',		// Hard limit - deactivate the plugin when activating.
-				'rec_version' => '7.0',		// Soft limit - issue warning if lower version found.
+				'rec_version' => '7.1',		// Soft limit - issue warning if lower version found.
 				'version_url' => 'https://secure.php.net/supported-versions.php',
 				'extensions'  => array(
 					'curl' => array(	// PHP extension name.
@@ -1444,6 +1478,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					),
 				),
 			),
+			
 			/**
 			 * WordPress config.
 			 */
@@ -1483,16 +1518,49 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 						'cap'  => 'manage_options',
 					),
 				),
+				'roles' => array(
+					'all' => array(
+						'administrator',
+						'editor',
+						'author',
+						'contributor',
+						'subscriber',
+					),
+					'writer' => array(	// Users that can write posts.
+						'administrator',
+						'editor',
+						'author',
+						'contributor',
+					),
+					'publisher' => array(	// Users that can publish posts.
+						'administrator',
+						'editor',
+						'author',
+					),
+					'owner' => array(	// Users that can manage posts (edit, publish, delete, etc.).
+						'administrator',
+						'editor',
+					),
+					'admin' => array(
+						'administrator',
+					),
+					'person' => array(	// Users for the Schema Person markup.
+						'person',
+					),
+				),
+				
 				/**
 				 * Transient id prefix.
 				 */
 				'transient' => array(
+					'wpsso_!_' => array(	// Protect transient from being cleared automatically.
+					),
 					'wpsso_a_' => array(
 						'label'   => 'Article Topics',
 						'opt_key' => 'plugin_topics_cache_exp',
 						'filter'  => 'wpsso_cache_expire_article_topics',
 					),
-					'wpsso_b_' => array(	// Sharing buttons html cache.
+					'wpsso_b_' => array(	// Sharing buttons HTML cache.
 					),
 					'wpsso_h_' => array(
 						'label'   => 'Head Markup',
@@ -1500,24 +1568,24 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 						'filter'  => 'wpsso_cache_expire_head_array',
 					),
 					'wpsso_i_' => array(
-						'label' => 'Image URL Info',
+						'label'   => 'Image URL Info',
 						'opt_key' => 'plugin_imgsize_cache_exp',
-						'filter' => 'wpsso_cache_expire_image_url_size',
+						'filter'  => 'wpsso_cache_expire_image_url_size',
 					),
 					'wpsso_j_' => array(
 						'label'   => 'Schema Data',
 						'opt_key' => 'plugin_json_data_cache_exp',
 						'filter'  => 'wpsso_cache_expire_schema_json_data',
 					),
+					'wpsso_s_' => array(	// Automatic clearing is enable / disabled from settings.
+						'label'   => 'Shortened URLs',
+						'opt_key' => 'plugin_short_url_cache_exp',
+						'filter'  => 'wpsso_cache_expire_short_url',
+					),
 					'wpsso_t_' => array(
 						'label'   => 'Schema Types',
 						'opt_key' => 'plugin_types_cache_exp',
 						'filter'  => 'wpsso_cache_expire_schema_types',
-					),
-					'wpsso_s_' => array(
-						'label'   => 'Shortened URLs',
-						'opt_key' => 'plugin_short_url_cache_exp',
-						'filter'  => 'wpsso_cache_expire_short_url',
 					),
 					'wpsso_' => array(
 						'label' => 'All Transients',
@@ -1684,15 +1752,20 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'display_name' => 'Display Name',
 					'nickname'     => 'Nickname',
 				),
+				'addr_select' => array(
+					'none'   => '[None]',
+					'custom' => '[Custom Address]',
+					'new'    => '[New Address]',
+				),
 				'org_select' => array(
 					'none' => '[None]',
 					'new'  => '[New Organization]',
 					'site' => '[WebSite Organization]',
 				),
-				'addr_select' => array(
+				'place_select' => array(
 					'none'   => '[None]',
-					'custom' => '[Custom Address]',
-					'new'    => '[New Address]',
+					'custom' => '[Custom Place]',
+					'new'    => '[New Place]',
 				),
 				'show_options' => array(
 					'basic' => 'Basic Options',
@@ -1722,6 +1795,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'none'      => '[None]',
 					'ancestors' => 'Parents',
 				),
+				
 				/**
 				 * The shortener key is also its filename under lib/pro/ext/.
 				 */
@@ -1734,6 +1808,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'tinyurl' => 'TinyURL',
 					'yourls'  => 'YOURLS',
 				),
+				
 				/**
 				 * Social account keys and labels for Organization SameAs.
 				 */
@@ -1769,13 +1844,15 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'plugin_cf_product_brand'       => 'Product Brand Custom Field',
 					'plugin_cf_product_color'       => 'Product Color Custom Field',
 					'plugin_cf_product_condition'   => 'Product Condition Custom Field',
-					'plugin_cf_product_currency'    => 'Product Currency Custom Field',
 					'plugin_cf_product_material'    => 'Product Material Custom Field',
+					'plugin_cf_product_sku'         => 'Product SKU Custom Field',
 					'plugin_cf_product_price'       => 'Product Price Custom Field',
+					'plugin_cf_product_currency'    => 'Product Currency Custom Field',
 					'plugin_cf_product_size'        => 'Product Size Custom Field',
 					'plugin_cf_product_gender'      => 'Product Target Gender Custom Field',
 					'plugin_cf_sameas_urls'         => 'Same-As URLs Custom Field',
 				),
+				
 				/**
 				 * See https://developers.facebook.com/docs/reference/opengraph/object-type/product/.
 				 */
@@ -1784,6 +1861,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'kids'   => 'Kids',
 					'adult'  => 'Adult',
 				),
+				
 				/**
 				 * See https://schema.org/suggestedGender.
 				 */
@@ -1793,6 +1871,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'female' => 'Female',
 					'unisex' => 'Unisex',
 				),
+				
 				/**
 				 * See https://developers.google.com/search/docs/data-types/job-postings.
 				 */
@@ -1806,6 +1885,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'per_diem'   => 'Per Diem',
 					'other'      => 'Other',
 				),
+				
 				/**
 				 * See https://schema.org/ItemAvailability.
 				 */
@@ -1820,6 +1900,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 			 		'PreOrder'            => 'Pre-Order',
 			 		'SoldOut '            => 'Sold Out',
 				),
+				
 				/**
 				 * See https://schema.org/OfferItemCondition.
 				 */
@@ -1874,13 +1955,13 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 				),
 				'og_type_mt' => array(	// See https://developers.facebook.com/docs/reference/opengraph/.
 					'article' => array(	// See https://developers.facebook.com/docs/reference/opengraph/object-type/article/.
-						'article:author'          => '',
-						'article:publisher'       => '',
+						'article:author'          => '', // An array of Facebook profile URLs or IDs of the authors for this article.
+						'article:publisher'       => '', // A Facebook page URL or ID of the publishing entity.
 						'article:published_time'  => '',
 						'article:modified_time'   => '',
 						'article:expiration_time' => '',
-						'article:section'         => '',
-						'article:tag'             => '',
+						'article:section'         => '', // The section of your website to which the article belongs, such as 'Lifestyle' or 'Sports'
+						'article:tag'             => '', // An array of keywords relevant to the article.
 					),
 					'book' => array(
 						'book:author'       => '',
@@ -1944,8 +2025,9 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 						'product:price:currency'          => 'product_currency',
 						'product:product_link'            => '',
 						'product:purchase_limit'          => '',
-						'product:retailer'                => '',	// A Facebook ID or reference to the profile of the retailer.
+						'product:retailer'                => '',
 						'product:retailer_category'       => '',
+						'product:retailer_item_id'        => 'product_sku',
 						'product:retailer_part_no'        => '',
 						'product:retailer_title'          => '',
 						'product:sale_price:amount'       => '',	// Used by WooCommerce module.
@@ -2006,6 +2088,18 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 						'video:tag'          => '',
 					),
 				),
+				'og_type_array' => array(
+					'product' => array(
+						'product:original_price:amount'   => true,	// Used by WooCommerce module.
+						'product:original_price:currency' => true,	// Used by WooCommerce module.
+						'product:pretax_price:amount'     => true,
+						'product:pretax_price:currency'   => true,
+						'product:price:amount'            => true,
+						'product:price:currency'          => true,
+						'product:sale_price:amount'       => true,	// Used by WooCommerce module.
+						'product:sale_price:currency'     => true,	// Used by WooCommerce module.
+					),
+				),
 				'og_content_map' => array(
 					'product:availability' => array(	// 'instock', 'oos', or 'pending'
 				 		'Discontinued'        => 'oos',
@@ -2024,6 +2118,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 						'UsedCondition'        => 'used',
 					),
 				),
+				
 				/**
 				 * WpssoSchema::get_schema_types_array() flattens the array, so AVOID DUPLICATE KEY NAMES.
 				 *
@@ -2038,6 +2133,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 				'schema_type' => array(	// Element of 'head' array.
 					'thing' => array(	// Most generic type.
 						'creative.work' => array(	// Creative work, including books, movies, photographs, software programs, etc.
+							'answer'  => 'https://pending.schema.org/Answer',
 							'article' => array(
 								'article'              => 'https://schema.org/Article',
 								'article.news'         => 'https://schema.org/NewsArticle',
@@ -2067,8 +2163,8 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 								'game'       => 'https://schema.org/Game',
 								'video.game' => 'https://schema.org/VideoGame',
 							),
-							'howto' => array(
-								'howto'  => 'https://schema.org/HowTo',
+							'how.to' => array(
+								'how.to'  => 'https://schema.org/HowTo',
 								'recipe' => 'https://schema.org/Recipe',
 							),
 							'map'          => 'https://schema.org/Map',
@@ -2095,14 +2191,19 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 							'photograph'         => 'https://schema.org/Photograph',
 							'publication.issue'  => 'https://schema.org/PublicationIssue',
 							'publication.volume' => 'https://schema.org/PublicationVolume',
-							'question'           => 'https://schema.org/Question',
+							'question'           => 'https://pending.schema.org/Question',
 							'review'             => array(
 								'review'       => 'https://schema.org/Review',
 								'review.claim' => 'https://schema.org/ClaimReview',
 							),
 							'sculpture'            => 'https://schema.org/Sculpture',
 							'series'               => 'https://schema.org/Series',
-							'software.application' => 'https://schema.org/SoftwareApplication',
+							'software.application' => array( 
+								'software.application'            => 'https://schema.org/SoftwareApplication',
+								'software.application.mobile'     => 'https://schema.org/MobileApplication',
+								'software.application.video.game' => 'https://schema.org/VideoGame',
+								'software.application.web'        => 'https://schema.org/WebApplication',
+							),
 							'software.source.code' => 'https://schema.org/SoftwareSourceCode',
 							'tv.season'            => 'https://schema.org/TVSeason',
 							'tv.series'            => 'https://schema.org/TVSeries',
@@ -2111,8 +2212,13 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 								'webpage'                => 'https://schema.org/WebPage',
 								'webpage.about'          => 'https://schema.org/AboutPage',
 								'webpage.checkout'       => 'https://schema.org/CheckoutPage',
-								'webpage.collection'     => 'https://schema.org/CollectionPage',
+								'webpage.collection'     => array(
+									'webpage.collection'    => 'https://schema.org/CollectionPage',
+									'webpage.gallery.image' => 'https://schema.org/ImageGallery',
+									'webpage.gallery.video' => 'https://schema.org/VideoGallery',
+								),
 								'webpage.contact'        => 'https://schema.org/ContactPage',
+								'webpage.faq'            => 'https://pending.schema.org/FAQPage',
 								'webpage.item'           => 'https://schema.org/ItemPage',
 								'webpage.medical'        => 'https://health-lifesci.schema.org/MedicalWebPage',
 								'webpage.profile'        => 'https://schema.org/ProfilePage',
@@ -2274,7 +2380,10 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 							'reservation' => 'https://schema.org/Reservation',
 							'role' => 'https://schema.org/Role',
 							'seat' => 'https://schema.org/Seat',
-							// a service provided by an organization, e.g. delivery service, print services, etc.
+							
+							/**
+							 * A service provided by an organization, e.g. delivery service, print services, etc.
+							 */
 							'service' => array(
 								'service' => 'https://schema.org/Service',
 								'service.broadcast' => 'https://schema.org/BroadcastService',
@@ -2345,7 +2454,12 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 								),
 								'suite' => 'https://schema.org/Suite',
 							),
-							'administrative.area' => 'https://schema.org/AdministrativeArea',
+							'administrative.area' => array(
+								'administrative.area' => 'https://schema.org/AdministrativeArea',
+								'city' => 'https://schema.org/City',
+								'country' => 'https://schema.org/Country',
+								'state' => 'https://schema.org/State',
+							),
 							'civic.structure' => array(
 								'airport' => 'https://schema.org/Airport',
 								'aquarium' => 'https://schema.org/Aquarium',
@@ -2554,7 +2668,12 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 						'thing' => 'https://schema.org/Thing',
 					),
 				),
-				'schema_renamed' => array(	// element of 'head' array
+				'schema_url_fix' => array(	// Element of 'head' array.
+					'https://schema.org/Answer'   => 'https://pending.schema.org/Answer',
+					'https://schema.org/FAQPage'  => 'https://pending.schema.org/FAQPage',
+					'https://schema.org/Question' => 'https://pending.schema.org/Question',
+				),
+				'schema_renamed' => array(	// Element of 'head' array.
 					'anesthesia'           => 'anesthesia.specialty',
 					'cardiovascular'       => 'cardiovascular.specialty',
 					'community.health'     => 'community.health.specialty',
@@ -2571,6 +2690,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'geriatric'            => 'geriatric.specialty',
 					'gynecologic'          => 'gynecologic.specialty',
 					'hematologic'          => 'hematologic.specialty',
+					'howto'                => 'how.to',
 					'infectious'           => 'infectious.specialty',
 					'laboratory.science'   => 'laboratory.science.specialty',
 					'midwifery'            => 'midwifery.specialty',
@@ -2607,22 +2727,13 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 			'extend' => array(
 				'https://wpsso.com/extend/plugins/',
 			),
-			'follow' => array(
-				'size' => 32,
-				'src'  => array(
-					'images/follow/Wordpress.png'  => 'https://profiles.wordpress.org/jsmoriss/',
-					'images/follow/Github.png'     => 'https://github.com/SurniaUlula',
-					'images/follow/Facebook.png'   => 'https://www.facebook.com/SurniaUlulaCom',
-					'images/follow/GooglePlus.png' => 'https://plus.google.com/+SurniaUlula/',
-					'images/follow/Twitter.png'    => 'https://twitter.com/surniaululacom',
-					//'images/follow/Rss.png'      => 'https://wpsso.com/category/application/wordpress/wp-plugins/wpsso/feed/',
-				),
-			),
 		);
 
 		public static function get_version( $add_slug = false ) {
-			$ext = 'wpsso';
+
+			$ext  = 'wpsso';
 			$info =& self::$cf['plugin'][$ext];
+
 			return $add_slug ? $info['slug'] . '-' . $info['version'] : $info['version'];
 		}
 
@@ -2736,12 +2847,13 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 			/**
 			 * Define fixed constants.
 			 */
-			define( 'WPSSO_VERSION', self::$cf['plugin']['wpsso']['version'] );						
 			define( 'WPSSO_FILEPATH', $plugin_filepath );						
+			define( 'WPSSO_PLUGINBASE', self::$cf['plugin']['wpsso']['base'] );			// Example: wpsso/wpsso.php.
 			define( 'WPSSO_PLUGINDIR', trailingslashit( realpath( dirname( $plugin_filepath ) ) ) );
-			define( 'WPSSO_PLUGINSLUG', self::$cf['plugin']['wpsso']['slug'] );		// wpsso
-			define( 'WPSSO_PLUGINBASE', self::$cf['plugin']['wpsso']['base'] );		// wpsso/wpsso.php
+			define( 'WPSSO_PLUGINSLUG', self::$cf['plugin']['wpsso']['slug'] );			// Example: wpsso.
+			define( 'WPSSO_UNDEF', -1 );								// Undefined image width / height value.
 			define( 'WPSSO_URLPATH', trailingslashit( plugins_url( '', $plugin_filepath ) ) );
+			define( 'WPSSO_VERSION', self::$cf['plugin']['wpsso']['version'] );						
 
 			/**
 			 * Define variable constants. Default values can be changed by defining 
@@ -2774,7 +2886,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 				( defined( 'NONCE_KEY' ) ? NONCE_KEY : '' ) );
 
 			if ( defined( 'WPSSO_PLUGINDIR' ) ) {
-				$var_const['WPSSO_CACHEDIR'] = WPSSO_PLUGINDIR . 'cache/';
+				$var_const['WPSSO_CACHEDIR']    = WPSSO_PLUGINDIR . 'cache/';
 				$var_const['WPSSO_TOPICS_LIST'] = WPSSO_PLUGINDIR . 'share/topics.txt';
 			}
 
@@ -2782,80 +2894,69 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 				$var_const['WPSSO_CACHEURL'] = WPSSO_URLPATH . 'cache/';
 			}
 
-			$var_const['WPSSO_MENU_ORDER'] = '99.10';			// Position of the SSO menu item.
-			$var_const['WPSSO_TB_NOTICE_MENU_ORDER'] = '55';		// Position of the SSO notices toolbar menu item.
-			$var_const['WPSSO_TB_LOCALE_MENU_ORDER'] = '60';		// Position of the user locale toolbar menu item.
-			$var_const['WPSSO_TOOLBAR_NOTICES'] = true;			// Show error, warning, and info notices in the toolbar menu.
-			$var_const['WPSSO_JSON_PRETTY_PRINT'] = false;			// Output pretty / human readable json.
-			$var_const['WPSSO_UNDEF_INT'] = -1;				// Undefined image width / height value.
-
-			$var_const['WPSSO_CONTENT_BLOCK_FILTER_OUTPUT'] = true;
-			$var_const['WPSSO_CONTENT_FILTERS_MAX_TIME'] = 1.00;
-			$var_const['WPSSO_CONTENT_IMAGES_MAX_LIMIT'] = 5;		// Maximum number of images extracted from the content.
-			$var_const['WPSSO_CONTENT_VIDEOS_MAX_LIMIT'] = 5;		// Maximum number of videos extracted from the content.
-
-			$var_const['WPSSO_DUPE_CHECK_HEADER_COUNT'] = 5;		// Maximum number of times to check for duplicates.
-			$var_const['WPSSO_DUPE_CHECK_CLEAR_SHORTLINK'] = true;		// Clear / remove cache file before fetching shortlink url.
-			$var_const['WPSSO_DUPE_CHECK_WARNING_TIME'] = 2.50;		// Issue a warning if getting shortlink took more than 2.5 seconds.
-			$var_const['WPSSO_DUPE_CHECK_TIMEOUT_TIME'] = 3.00;		// Hard-limit - most crawlers time-out after 3 seconds.
-
-			$var_const['WPSSO_GET_POSTS_MAX_TIME'] = 0.10;			// Send an error to trigger_error() if get_posts() takes longer.
-			$var_const['WPSSO_PHP_GETIMGSIZE_MAX_TIME'] = 1.50;		// Send an error to trigger_error() if getimagesize() takes longer.
+			$var_const['WPSSO_MENU_ORDER']                  = '99.10';	// Position of the SSO menu item.
+			$var_const['WPSSO_TB_NOTICE_MENU_ORDER']        = '55';		// Position of the SSO notices toolbar menu item.
+			$var_const['WPSSO_TB_LOCALE_MENU_ORDER']        = '60';		// Position of the user locale toolbar menu item.
+			$var_const['WPSSO_TOOLBAR_NOTICES']             = true;		// Show error, warning, and info notices in the toolbar menu.
+			$var_const['WPSSO_JSON_PRETTY_PRINT']           = false;	// Output pretty / human readable json.
+			$var_const['WPSSO_CONTENT_BLOCK_FILTER_OUTPUT'] = true;		// Monitor and fix incorrectly coded filter hooks.
+			$var_const['WPSSO_CONTENT_FILTERS_MAX_TIME']    = 1.50;		// Issue a warning if the content filter takes longer than 1.5 seconds.
+			$var_const['WPSSO_CONTENT_IMAGES_MAX_LIMIT']    = 5;		// Maximum number of images extracted from the content.
+			$var_const['WPSSO_CONTENT_VIDEOS_MAX_LIMIT']    = 5;		// Maximum number of videos extracted from the content.
+			$var_const['WPSSO_DUPE_CHECK_HEADER_COUNT']     = 5;		// Maximum number of times to check for duplicates.
+			$var_const['WPSSO_DUPE_CHECK_TIMEOUT_TIME']     = 3.00;		// Hard-limit - most crawlers time-out after 3 seconds.
+			$var_const['WPSSO_DUPE_CHECK_WARNING_TIME']     = 2.50;		// Issue a warning if getting shortlink took more than 2.5 seconds.
+			$var_const['WPSSO_GET_POSTS_MAX_TIME']          = 0.10;		// Send an error to trigger_error() if get_posts() takes longer.
+			$var_const['WPSSO_PHP_GETIMGSIZE_MAX_TIME']     = 1.50;		// Send an error to trigger_error() if getimagesize() takes longer.
+			$var_const['WPSSO_REFRESH_CACHE_SLEEP_TIME']    = 0.25;		// Seconds to sleep between requests when refreshing the cache.
 
 			/**
-			 * Limits for some multi-options and Schema property arrays.
+			 * WPSSO schema limits.
 			 */
-			$var_const['WPSSO_SCHEMA_ADDL_TYPE_URL_MAX'] = 5;
-			$var_const['WPSSO_SCHEMA_EVENT_OFFERS_MAX'] = 10;
-			$var_const['WPSSO_SCHEMA_HOWTO_STEPS_MAX'] = 90;
-			$var_const['WPSSO_SCHEMA_HOWTO_SUPPLIES_MAX'] = 60;
-			$var_const['WPSSO_SCHEMA_HOWTO_TOOLS_MAX'] = 30;
-			$var_const['WPSSO_SCHEMA_RECIPE_INGREDIENTS_MAX'] = 60;
-			$var_const['WPSSO_SCHEMA_RECIPE_INSTRUCTIONS_MAX'] = 90;
-			$var_const['WPSSO_SCHEMA_LINKS_PER_PAGE_MAX'] = 200;
-			$var_const['WPSSO_SCHEMA_POSTS_PER_PAGE_MAX'] = 10;
-			$var_const['WPSSO_SCHEMA_POSTS_PER_SEARCH_MAX'] = 3;		// Must be smaller or equal to WPSSO_SCHEMA_POSTS_PER_PAGE_MAX.
-			$var_const['WPSSO_SCHEMA_REVIEWS_PER_PAGE_MAX'] = 30;
-			$var_const['WPSSO_SCHEMA_SAMEAS_URL_MAX'] = 5;
-			$var_const['WPSSO_SCHEMA_BREADCRUMB_SCRIPTS_MAX'] = 5;
+			$var_const['WPSSO_SCHEMA_ADDL_TYPE_URL_MAX']       = 5;
+			$var_const['WPSSO_SCHEMA_EVENT_OFFERS_MAX']        = 10;
+			$var_const['WPSSO_SCHEMA_RECIPE_INGREDIENTS_MAX']  = 50;
+			$var_const['WPSSO_SCHEMA_RECIPE_INSTRUCTIONS_MAX'] = 80;
+			$var_const['WPSSO_SCHEMA_REVIEWS_PER_PAGE_MAX']    = 30;
+			$var_const['WPSSO_SCHEMA_SAMEAS_URL_MAX']          = 5;
 
 			/**
 			 * WPSSO option and meta array names.
 			 */
-			$var_const['WPSSO_TS_NAME'] = 'wpsso_timestamps';
-			$var_const['WPSSO_OPTIONS_NAME'] = 'wpsso_options';
+			$var_const['WPSSO_TS_NAME']           = 'wpsso_timestamps';
+			$var_const['WPSSO_OPTIONS_NAME']      = 'wpsso_options';
 			$var_const['WPSSO_SITE_OPTIONS_NAME'] = 'wpsso_site_options';
-			$var_const['WPSSO_DISMISS_NAME'] = 'wpsso_dismissed';		// Dismissed notices.
-			$var_const['WPSSO_META_NAME'] = '_wpsso_meta';			// Post meta.
-			$var_const['WPSSO_PREF_NAME'] = '_wpsso_pref';			// User meta.
-			$var_const['WPSSO_POST_CHECK_NAME'] = 'wpsso_post_head_count';	// Duplicate check counter.
+			$var_const['WPSSO_DISMISS_NAME']      = 'wpsso_dismissed';		// Dismissed notices.
+			$var_const['WPSSO_META_NAME']         = '_wpsso_meta';			// Post meta.
+			$var_const['WPSSO_PREF_NAME']         = '_wpsso_pref';			// User meta.
+			$var_const['WPSSO_POST_CHECK_NAME']   = 'wpsso_post_head_count';	// Duplicate check counter.
 
 			/**
 			 * WPSSO option and meta array alternate names.
 			 */
-			$var_const['WPSSO_OPTIONS_NAME_ALT'] = 'ngfb_options';			// Fallback name.
+			$var_const['WPSSO_OPTIONS_NAME_ALT']      = 'ngfb_options';		// Fallback name.
 			$var_const['WPSSO_SITE_OPTIONS_NAME_ALT'] = 'ngfb_site_options';	// Fallback name.
-			$var_const['WPSSO_META_NAME_ALT'] = '_ngfb_meta';			// Fallback name.
-			$var_const['WPSSO_PREF_NAME_ALT'] = '_ngfb_pref';			// Fallback name.
+			$var_const['WPSSO_META_NAME_ALT']         = '_ngfb_meta';		// Fallback name.
+			$var_const['WPSSO_PREF_NAME_ALT']         = '_ngfb_pref';		// Fallback name.
 
 			/**
 			 * WPSSO hook priorities.
 			 */
-			$var_const['WPSSO_ADD_MENU_PRIORITY'] = -20;
+			$var_const['WPSSO_ADD_MENU_PRIORITY']    = -20;
 			$var_const['WPSSO_ADD_SUBMENU_PRIORITY'] = -10;
-			$var_const['WPSSO_ADD_COLUMN_PRIORITY'] = 100;
-			$var_const['WPSSO_META_SAVE_PRIORITY'] = 5;
-			$var_const['WPSSO_META_CACHE_PRIORITY'] = 10;
-			$var_const['WPSSO_INIT_PRIORITY'] = 12;
-			$var_const['WPSSO_HEAD_PRIORITY'] = 10;
-			$var_const['WPSSO_FOOTER_PRIORITY'] = 100;
+			$var_const['WPSSO_ADD_COLUMN_PRIORITY']  = 100;
+			$var_const['WPSSO_META_SAVE_PRIORITY']   = -10;		// Save our custom post/term/user meta before clearing the cache.
+			$var_const['WPSSO_META_CACHE_PRIORITY']  = 0;		// Clear our cache before priority 10 (where most caching plugins are hooked).
+			$var_const['WPSSO_INIT_PRIORITY']        = 12;
+			$var_const['WPSSO_HEAD_PRIORITY']        = 10;
+			$var_const['WPSSO_FOOTER_PRIORITY']      = 100;
 			$var_const['WPSSO_SEO_FILTERS_PRIORITY'] = 100;
 
 			/**
 			 * WPSSO PHP cURL library settings.
 			 */
-			$var_const['WPSSO_PHP_CURL_CAINFO'] = ABSPATH . WPINC . '/certificates/ca-bundle.crt';
-			$var_const['WPSSO_PHP_CURL_USERAGENT'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:59.0) Gecko/20100101 Firefox/59.0';
+			$var_const['WPSSO_PHP_CURL_CAINFO']             = ABSPATH . WPINC . '/certificates/ca-bundle.crt';
+			$var_const['WPSSO_PHP_CURL_USERAGENT']          = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:59.0) Gecko/20100101 Firefox/59.0';
 			$var_const['WPSSO_PHP_CURL_USERAGENT_FACEBOOK'] = 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)';
 
 			foreach ( $var_const as $name => $value ) {
@@ -2911,17 +3012,23 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 		}
 
 		public static function load_lib( $ret = false, $filespec = '', $classname = '' ) {
+
 			if ( false === $ret && ! empty( $filespec ) ) {
-				$filepath = WPSSO_PLUGINDIR.'lib/'.$filespec.'.php';
+
+				$filepath = WPSSO_PLUGINDIR . 'lib/' . $filespec . '.php';
+
 				if ( file_exists( $filepath ) ) {
+
 					require_once $filepath;
+
 					if ( empty( $classname ) ) {
-						return SucomUtil::sanitize_classname( 'wpsso'.$filespec, false );	// $underscore = false
+						return SucomUtil::sanitize_classname( 'wpsso' . $filespec, $allow_underscore = false );
 					} else {
 						return $classname;
 					}
 				}
 			}
+
 			return $ret;
 		}
 	}

@@ -1,7 +1,7 @@
 <?php
 
 function wfu_view_log($page = 1, $only_table_rows = false, $located_rec = -1) {
-	$a = func_get_args(); switch(WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out)) { case 'X': break; case 'R': return $out; break; case 'D': die($out); break; }
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	global $wpdb;
 	$siteurl = site_url();
 	$table_name1 = $wpdb->prefix . "wfu_log";
