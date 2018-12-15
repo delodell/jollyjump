@@ -37,15 +37,21 @@ if ( ! class_exists( 'WpssoSubmenuLicenses' ) && class_exists( 'WpssoAdmin' ) ) 
 		 */
 		protected function add_meta_boxes() {
 	
-			$short = $this->p->cf['plugin']['wpsso']['short'];
+			$metabox_id      = 'licenses';
+			$metabox_title   = _x( 'Licenses for Core Pro and Pro Add-ons', 'metabox title', 'wpsso' );
+			$metabox_screen  = $this->pagehook;
+			$metabox_context = 'normal';
+			$metabox_prio    = 'default';
+			$callback_args   = array(	// Second argument passed to the callback function / method.
+			);
 
-			add_meta_box( $this->pagehook.'_licenses',
-				_x( 'Licenses for Core Pro and Pro Add-ons', 'metabox title', 'wpsso' ),
-					array( $this, 'show_metabox_licenses' ), $this->pagehook, 'normal' );
+			add_meta_box( $this->pagehook . '_' . $metabox_id, $metabox_title,
+				array( $this, 'show_metabox_licenses' ), $metabox_screen,
+					$metabox_context, $metabox_prio, $callback_args );
 		}
 
 		public function show_metabox_licenses() {
-			$this->licenses_metabox_content( false );	// $network = false
+			$this->licenses_metabox_content( $network = false );
 		}
 	}
 }

@@ -3,8 +3,8 @@ Contributors: mythemeshop
 Creator's website link: http://mythemeshop.com/plugins/wp-review/
 Tags: review, wp review, rating, wp rating, user rating, google rating, star rating, product review
 Requires at least: 4.0
-Tested up to: 4.9.8
-Stable tag: 5.0.8
+Tested up to: 5.0
+Stable tag: 5.1.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -102,6 +102,33 @@ Please disable all plugins and check if rating is working properly. Then you can
 7. Percentage Review type
 
 == Changelog ==
+
+= v5.1.6 (Dec 7, 2018) =
+* Fixed meta boxes not hiding when set Review type to 'none'
+* Fixed WordPress 5.0 block editor conflict
+
+= v5.1.5 (Dec 4, 2018) =
+* Fixed missing files in the single page editor
+
+= v5.1.4 (Nov 22, 2018) =
+* Added unique class for each thumb layout
+
+= v5.1.3 (Nov 14, 2018) =
+* Fixed editor-plugin.js scripts loading in the front-end
+
+= v5.1.2 (Nov 7, 2018) =
+* Fixed wrong total rating calculation
+
+= v5.1.1 (Nov 1, 2018) =
+* Fixed PHP error in the review widget
+
+= v5.1.0 (Oct 17, 2018) =
+* Removed unnecessary scripts from the non WP Review admin pages
+* Fixed total rating disappearing issue if there are no features
+* Fixed inactive color issue bug if color filter is used in the theme
+* Fixed no space between HTML attributes
+* Fixed compatibility issue with Rank Math plugin
+* Overall code improvements according to the WPCS & PHPCS
 
 = v5.0.8 (Oct 3, 2018) =
 * Fixed adding unnecessary custom field values if the review is not enabled in the post

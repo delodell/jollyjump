@@ -34,14 +34,17 @@ if ( ! class_exists( 'WpssoLoader' ) ) {
 				 * Save time on known admin pages we don't modify.
 				 */
 				switch ( basename( $_SERVER['PHP_SELF'] ) ) {
+
 					case 'index.php':		// Dashboard
 					case 'edit-comments.php':	// Comments
 					case 'themes.php':		// Appearance
 					case 'plugins.php':		// Plugins
 					case 'tools.php':		// Tools
+
 						if ( $this->p->debug->enabled ) {
 							$this->p->debug->log( 'no modules required for current page' );
 						}
+
 						return;
 				}
 			}
@@ -57,32 +60,40 @@ if ( ! class_exists( 'WpssoLoader' ) ) {
 				}
 			}
 
-			foreach ( $this->p->cf['plugin'] as $ext => $info ) {
+			foreach ( $this->p->cf[ 'plugin' ] as $ext => $info ) {
 
-				$type = $this->p->check->pp( $this->p->lca, true, $this->p->avail['*']['p_dir'] ) &&
+				$type = $this->p->check->pp( $this->p->lca, true, $this->p->avail[ '*' ][ 'p_dir' ] ) &&
 					$this->p->check->pp( $ext, true, WPSSO_UNDEF ) === WPSSO_UNDEF ? 'pro' : 'gpl';
 
-				if ( ! isset( $info['lib'][$type] ) ) {
+				if ( ! isset( $info[ 'lib' ][ $type ] ) ) {
+
 					if ( $this->p->debug->enabled ) {
 						$this->p->debug->log( $ext . ' lib/' . $type . ' not defined' );
 					}
+
 					continue;
 				}
 
-				foreach ( $info['lib'][$type] as $sub => $libs ) {
+				foreach ( $info[ 'lib' ][ $type ] as $sub => $libs ) {
 
 					$log_prefix = 'loading ' . $ext . ' ' . $type . '/' . $sub . ': ';
 
 					if ( $sub === 'admin' ) {
+
 						if ( ! is_admin() ) {	// load admin sub-folder only in back-end
+
 							if ( $this->p->debug->enabled ) {
 								$this->p->debug->log( $log_prefix . 'ignored - not in admin back-end' );
 							}
+
 							continue;
-						} elseif ( $type === 'gpl' && ! empty( $this->p->options['plugin_hide_pro'] ) ) {
+
+						} elseif ( $type === 'gpl' && ! empty( $this->p->options[ 'plugin_hide_pro' ] ) ) {
+
 							if ( $this->p->debug->enabled ) {
 								$this->p->debug->log( $log_prefix . 'ignored - pro features hidden' );
 							}
+
 							continue;
 						}
 					}
@@ -91,9 +102,9 @@ if ( ! class_exists( 'WpssoLoader' ) ) {
 
 						/**
 						 * Example:
-						 *	'article' => 'Item Type Article',
-						 *	'article#news:no_load' => 'Item Type NewsArticle',
-						 *	'article#tech:no_load' => 'Item Type TechArticle',
+						 *	'article'              => 'Schema Type Article',
+						 *	'article#news:no_load' => 'Schema Type NewsArticle',
+						 *	'article#tech:no_load' => 'Schema Type TechArticle',
 						 */
 						list( $id, $stub, $action ) = SucomUtil::get_lib_stub_action( $lib_name );
 
@@ -161,7 +172,7 @@ if ( ! class_exists( 'WpssoLoader' ) ) {
 										'wpsso' ), $classname );
 
 									// translators: %s is the short plugin name
-									$error_pre = sprintf( __( '%s warning:', 'wpsso' ), $info['short'] );
+									$error_pre = sprintf( __( '%s warning:', 'wpsso' ), $info[ 'short' ] );
 
 									SucomUtil::safe_error_log( $error_pre . ' ' . $error_msg );
 								}
@@ -179,7 +190,7 @@ if ( ! class_exists( 'WpssoLoader' ) ) {
 
 									// translators: %1$s is the short plugin name, %2$s is the PHP library path
 									$this->p->notice->err( sprintf( __( '%1$s library class name for "%2$s" is not available.',
-										'wpsso' ), $info['short'], $lib_path ) . ' ' . $suffix_msg );
+										'wpsso' ), $info[ 'short' ], $lib_path ) . ' ' . $suffix_msg );
 								}
 
 								// translators: %s is the PHP library path
@@ -187,7 +198,7 @@ if ( ! class_exists( 'WpssoLoader' ) ) {
 									'wpsso' ), $lib_path ) . ' ' . $suffix_msg;
 
 								// translators: %s is the short plugin name
-								$error_pre = sprintf( __( '%s warning:', 'wpsso' ), $info['short'] );
+								$error_pre = sprintf( __( '%s warning:', 'wpsso' ), $info[ 'short' ] );
 
 								SucomUtil::safe_error_log( $error_pre . ' ' . $error_msg );
 							}

@@ -20,7 +20,7 @@ if ( ! class_exists( 'SucomNotice' ) ) {
 		private $dis_name     = 'sucom_dismissed';
 		private $tb_notices   = false;
 		private $has_shown    = false;
-		private $all_types    = array( 'nag', 'err', 'warn', 'upd', 'inf' );	// Sort by importance.
+		private $all_types    = array( 'nag', 'err', 'warn', 'inf', 'upd' );	// Sort by importance (most to least).
 		private $notice_info  = array();
 		private $notice_cache = array();
 
@@ -65,15 +65,15 @@ if ( ! class_exists( 'SucomNotice' ) ) {
 
 			if ( $text_domain !== null ) {
 				$this->text_domain = $text_domain;
-			} elseif ( ! empty( $this->p->cf['plugin'][$this->lca]['text_domain'] ) ) {
-				$this->text_domain = $this->p->cf['plugin'][$this->lca]['text_domain'];
+			} elseif ( ! empty( $this->p->cf[ 'plugin' ][ $this->lca ][ 'text_domain' ] ) ) {
+				$this->text_domain = $this->p->cf[ 'plugin' ][ $this->lca ][ 'text_domain' ];
 			}
 
-			if ( $label_transl !== false ) {
+			if ( false !== $label_transl ) {
 				$this->label_transl = $label_transl;	// Argument is already translated.
-			} elseif ( ! empty( $this->p->cf['menu']['title'] ) ) {
+			} elseif ( ! empty( $this->p->cf[ 'menu' ][ 'title' ] ) ) {
 				$this->label_transl = sprintf( __( '%s Notice', $this->text_domain ),
-					_x( $this->p->cf['menu']['title'], 'menu title', $this->text_domain ) );
+					_x( $this->p->cf[ 'menu' ][ 'title' ], 'menu title', $this->text_domain ) );
 			} else {
 				$this->label_transl = __( 'Notice', $this->text_domain );
 			}
@@ -106,20 +106,20 @@ if ( ! class_exists( 'SucomNotice' ) ) {
 			$this->log( 'nag', $msg_text, $user_id, $notice_key, false );	// $dismiss_time is false.
 		}
 
-		public function upd( $msg_text, $user_id = null, $notice_key = false, $dismiss_time = false ) {
-			$this->log( 'upd', $msg_text, $user_id, $notice_key, $dismiss_time );
-		}
-
-		public function inf( $msg_text, $user_id = null, $notice_key = false, $dismiss_time = false ) {
-			$this->log( 'inf', $msg_text, $user_id, $notice_key, $dismiss_time );
-		}
-
 		public function err( $msg_text, $user_id = null, $notice_key = false, $dismiss_time = false ) {
 			$this->log( 'err', $msg_text, $user_id, $notice_key, $dismiss_time );
 		}
 
 		public function warn( $msg_text, $user_id = null, $notice_key = false, $dismiss_time = false ) {
 			$this->log( 'warn', $msg_text, $user_id, $notice_key, $dismiss_time );
+		}
+
+		public function inf( $msg_text, $user_id = null, $notice_key = false, $dismiss_time = false ) {
+			$this->log( 'inf', $msg_text, $user_id, $notice_key, $dismiss_time );
+		}
+
+		public function upd( $msg_text, $user_id = null, $notice_key = false, $dismiss_time = false ) {
+			$this->log( 'upd', $msg_text, $user_id, $notice_key, $dismiss_time );
 		}
 
 		public function log( $msg_type, $msg_text, $user_id = null, $notice_key = false, $dismiss_time = false, $payload = array() ) {
@@ -138,40 +138,40 @@ if ( ! class_exists( 'SucomNotice' ) ) {
 
 			$use_cache = get_current_user_id() === $user_id ? true : false;
 
-			$payload['notice_key']   = empty( $notice_key ) ? false : sanitize_key( $notice_key );
-			$payload['dismiss_time'] = false;
-			$payload['dismiss_diff'] = isset( $payload['dismiss_diff'] ) ? $payload['dismiss_diff'] : null;
+			$payload[ 'notice_key' ]   = empty( $notice_key ) ? false : sanitize_key( $notice_key );
+			$payload[ 'dismiss_time' ] = false;
+			$payload[ 'dismiss_diff' ] = isset( $payload[ 'dismiss_diff' ] ) ? $payload[ 'dismiss_diff' ] : null;
 
 			/**
 			 * Add dismiss text for dismiss button and notice message.
 			 */
 			if ( $msg_type !== 'nag' && $this->can_dismiss() ) {	// Do not allow dismiss of nag messages.
 
-				$payload['dismiss_time'] = $dismiss_time;	// Maybe true, false, 0, or seconds greater than 0.
+				$payload[ 'dismiss_time' ] = $dismiss_time;	// Maybe true, false, 0, or seconds greater than 0.
 
-				if ( null === $payload['dismiss_diff'] ) {	// Has not been provided, so set a default value.
+				if ( null === $payload[ 'dismiss_diff' ] ) {	// Has not been provided, so set a default value.
 
 					$dismiss_suffix_msg = false;
 
-					if ( true === $payload['dismiss_time'] ) {	// True.
+					if ( true === $payload[ 'dismiss_time' ] ) {	// True.
 
-						$payload['dismiss_diff'] = __( 'Forever', $this->text_domain );
+						$payload[ 'dismiss_diff' ] = __( 'Forever', $this->text_domain );
 
 						$dismiss_suffix_msg = __( 'This notice can be dismissed permanently.', $this->text_domain );
 
-					} elseif ( empty( $payload['dismiss_time'] ) ) {	// False or 0 seconds.
+					} elseif ( empty( $payload[ 'dismiss_time' ] ) ) {	// False or 0 seconds.
 
-						$payload['dismiss_time'] = false;
-						$payload['dismiss_diff'] = false;
+						$payload[ 'dismiss_time' ] = false;
+						$payload[ 'dismiss_diff' ] = false;
 
-					} elseif ( is_numeric( $payload['dismiss_time'] ) ) {	// Seconds greater than 0.
+					} elseif ( is_numeric( $payload[ 'dismiss_time' ] ) ) {	// Seconds greater than 0.
 
-						$payload['dismiss_diff'] = human_time_diff( 0, $payload['dismiss_time'] );
+						$payload[ 'dismiss_diff' ] = human_time_diff( 0, $payload[ 'dismiss_time' ] );
 
 						$dismiss_suffix_msg = __( 'This notice can be dismissed for %s.', $this->text_domain );
 					}
 
-					if ( ! empty( $payload['dismiss_diff'] ) && $dismiss_suffix_msg ) {
+					if ( ! empty( $payload[ 'dismiss_diff' ] ) && $dismiss_suffix_msg ) {
 
 						$msg_text = trim( $msg_text );
 
@@ -185,7 +185,7 @@ if ( ! class_exists( 'SucomNotice' ) ) {
 						$msg_add_p = substr( $msg_text, -4 ) === '</p>' ? true : false;
 
 						$msg_text .= $msg_add_p || $msg_close_div ? '<p>' : ' ';
-						$msg_text .= sprintf( $dismiss_suffix_msg, $payload['dismiss_diff'] );
+						$msg_text .= sprintf( $dismiss_suffix_msg, $payload[ 'dismiss_diff' ] );
 						$msg_text .= $msg_add_p || $msg_close_div ? '</p>' : '';
 						$msg_text .= $msg_close_div;
 					}
@@ -197,11 +197,11 @@ if ( ! class_exists( 'SucomNotice' ) ) {
 			 */
 			$msg_text .= $this->get_ref_url_html();
 
-			$payload['msg_text']   = preg_replace( '/<!--spoken-->(.*?)<!--\/spoken-->/Us', ' ', $msg_text );
-			$payload['msg_spoken'] = preg_replace( '/<!--not-spoken-->(.*?)<!--\/not-spoken-->/Us', ' ', $msg_text );
-			$payload['msg_spoken'] = SucomUtil::decode_html( SucomUtil::strip_html( $payload['msg_spoken'] ) );
+			$payload[ 'msg_text' ]   = preg_replace( '/<!--spoken-->(.*?)<!--\/spoken-->/Us', ' ', $msg_text );
+			$payload[ 'msg_spoken' ] = preg_replace( '/<!--not-spoken-->(.*?)<!--\/not-spoken-->/Us', ' ', $msg_text );
+			$payload[ 'msg_spoken' ] = SucomUtil::decode_html( SucomUtil::strip_html( $payload[ 'msg_spoken' ] ) );
 
-			$msg_key = empty( $payload['notice_key'] ) ? sanitize_key( $payload['msg_spoken'] ) : $payload['notice_key'];
+			$msg_key = empty( $payload[ 'notice_key' ] ) ? sanitize_key( $payload[ 'msg_spoken' ] ) : $payload[ 'notice_key' ];
 
 			$this->maybe_set_notice_cache( $user_id, $use_cache );
 
@@ -211,10 +211,6 @@ if ( ! class_exists( 'SucomNotice' ) ) {
 				$this->update_notice_transient( $user_id );
 			}
 		}
-
-		public function trunc() {}	// Deprecated on 2018/09/08.
-
-		public function truncate() {}	// Deprecated on 2018/09/10.
 
 		/**
 		 * Clear a single notice key from the notice cache.
@@ -313,26 +309,32 @@ if ( ! class_exists( 'SucomNotice' ) ) {
 			}
 		}
 
-		public function get_ref( $idx = false, $text_prefix = '', $text_suffix = '' ) {
+		public function get_ref( $ref_key = false, $text_prefix = '', $text_suffix = '' ) {
 
 			$refs = end( $this->notice_info );	// Get the last reference added.
 
-			if ( 'edit' === $idx ) {
-				if ( isset( $refs['mod'] ) ) {
-					if ( $refs['mod']['is_post'] && $refs['mod']['id'] ) {
-						return $text_prefix . get_edit_post_link( $refs['mod']['id'], false ) . $text_suffix;	// $display is false.
+			if ( 'edit' === $ref_key ) {
+
+				if ( isset( $refs[ 'mod' ] ) ) {
+
+					if ( $refs[ 'mod' ][ 'is_post' ] && $refs[ 'mod' ][ 'id' ] ) {
+						return $text_prefix . get_edit_post_link( $refs[ 'mod' ][ 'id' ], false ) . $text_suffix;	// $display is false.
 					} else {
 						return '';
 					}
+
 				} else {
 					return '';
 				}
-			} elseif ( $idx !== false ) {
-				if ( isset( $refs[$idx] ) ) {
-					return $text_prefix . $refs[$idx] . $text_suffix;
+
+			} elseif ( false !== $ref_key ) {
+
+				if ( isset( $refs[ $ref_key ] ) ) {
+					return $text_prefix . $refs[ $ref_key ] . $text_suffix;
 				} else {
 					null;
 				}
+
 			} else {
 				return $refs;
 			}
@@ -434,10 +436,10 @@ if ( ! class_exists( 'SucomNotice' ) ) {
 				return false;
 			}
 
-			if ( isset( $user_dismissed[$notice_key] ) ) {	// Notice has been dismissed.
+			if ( isset( $user_dismissed[ $notice_key ] ) ) {	// Notice has been dismissed.
 
 				$current_time = time();
-				$dismiss_time = $user_dismissed[$notice_key];
+				$dismiss_time = $user_dismissed[ $notice_key ];
 
 				if ( empty( $dismiss_time ) || $dismiss_time > $current_time ) {
 
@@ -521,7 +523,7 @@ if ( ! class_exists( 'SucomNotice' ) ) {
 			 */
 			foreach ( $notice_types as $msg_type ) {
 
-				if ( ! isset( $this->notice_cache[ $user_id ][$msg_type] ) ) {	// Just in case.
+				if ( ! isset( $this->notice_cache[ $user_id ][ $msg_type ] ) ) {	// Just in case.
 					continue;
 				}
 
@@ -529,30 +531,30 @@ if ( ! class_exists( 'SucomNotice' ) ) {
 
 					unset( $this->notice_cache[ $user_id ][ $msg_type ][ $msg_key ] );	// Don't show it twice.
 
-					if ( empty( $payload['msg_text'] ) ) {	// Nothing to show.
+					if ( empty( $payload[ 'msg_text' ] ) ) {	// Nothing to show.
 						continue;
 					}
 
 					if ( 'nag' === $msg_type ) {
 
-						$nag_text .= $payload['msg_text'];	// Append to echo a single msg block.
+						$nag_text .= $payload[ 'msg_text' ];	// Append to echo a single msg block.
 
 						continue;
 					}
 
-					if ( ! empty( $payload['dismiss_time'] ) ) {	// True or seconds greater than 0.
+					if ( ! empty( $payload[ 'dismiss_time' ] ) ) {	// True or seconds greater than 0.
 
 						/**
 						 * Check for automatically hidden errors and/or warnings.
 						 */
-						if ( ! empty( $payload['notice_key'] ) && isset( $user_dismissed[$payload['notice_key']] ) ) {
+						if ( ! empty( $payload[ 'notice_key' ] ) && isset( $user_dismissed[ $payload[ 'notice_key' ] ] ) ) {
 
 							$current_time = time();
-							$dismiss_time = $user_dismissed[$payload['notice_key']];	// Get time for key.
+							$dismiss_time = $user_dismissed[ $payload[ 'notice_key' ] ];	// Get time for key.
 
 							if ( empty( $dismiss_time ) || $dismiss_time > $current_time ) {	// 0 or time in future.
 
-								$payload['hidden'] = true;
+								$payload[ 'hidden' ] = true;
 
 							} else {	// Dismiss has expired.
 
@@ -563,7 +565,7 @@ if ( ! class_exists( 'SucomNotice' ) ) {
 						}
 					}
 
-					if ( ! empty( $payload['hidden'] ) ) {
+					if ( ! empty( $payload[ 'hidden' ] ) ) {	// Notice is hidden.
 						continue;
 					}
 
@@ -593,7 +595,7 @@ if ( ! class_exists( 'SucomNotice' ) ) {
 				$payload = array(
 					'msg_text'   => preg_replace( '/<!--spoken-->(.*?)<!--\/spoken-->/Us', ' ', $nag_text ),
 					'msg_spoken' => preg_replace( '/<!--not-spoken-->(.*?)<!--\/not-spoken-->/Us', ' ', $nag_text ),
-					'msg_spoken' => SucomUtil::decode_html( SucomUtil::strip_html( $payload['msg_spoken'] ) ),
+					'msg_spoken' => SucomUtil::decode_html( SucomUtil::strip_html( $payload[ 'msg_spoken' ] ) ),
 				);
 
 				echo $this->get_nag_style();
@@ -666,21 +668,21 @@ if ( ! class_exists( 'SucomNotice' ) ) {
 
 			$notice_types = $this->all_types;
 
-			if ( ! empty( $_REQUEST['_notice_types'] ) ) {
+			if ( ! empty( $_REQUEST[ '_notice_types' ] ) ) {
 
-				if ( is_array( $_REQUEST['_notice_types'] ) ) {
-					$notice_types = $_REQUEST['_notice_types'];
+				if ( is_array( $_REQUEST[ '_notice_types' ] ) ) {
+					$notice_types = $_REQUEST[ '_notice_types' ];
 				} else {
-					$notice_types = explode( ',', $_REQUEST['_notice_types'] );
+					$notice_types = explode( ',', $_REQUEST[ '_notice_types' ] );
 				}
 			}
 
-			if ( ! empty( $_REQUEST['_exclude_types'] ) ) {
+			if ( ! empty( $_REQUEST[ '_exclude_types' ] ) ) {
 
-				if ( is_array( $_REQUEST['_exclude_types'] ) ) {
-					$exclude_types = $_REQUEST['_exclude_types'];
+				if ( is_array( $_REQUEST[ '_exclude_types' ] ) ) {
+					$exclude_types = $_REQUEST[ '_exclude_types' ];
 				} else {
-					$exclude_types = explode( ',', $_REQUEST['_exclude_types'] );
+					$exclude_types = explode( ',', $_REQUEST[ '_exclude_types' ] );
 				}
 
 				$notice_types = array_diff( $notice_types, $exclude_types );
@@ -696,7 +698,7 @@ if ( ! class_exists( 'SucomNotice' ) ) {
 			$user_dismissed   = empty( $user_id ) ? false : get_user_option( $this->dis_name, $user_id );
 			$update_dismissed = false;
 			$json_notices     = array();
-			$ajax_context     = empty( $_REQUEST['context'] ) ? '' : $_REQUEST['context'];	// 'block_editor' or 'toolbar_notices'
+			$ajax_context     = empty( $_REQUEST[ 'context' ] ) ? '' : $_REQUEST[ 'context' ];	// 'block_editor' or 'toolbar_notices'
 
 			$this->has_shown = true;
 
@@ -716,23 +718,23 @@ if ( ! class_exists( 'SucomNotice' ) ) {
 
 					unset( $this->notice_cache[ $user_id ][ $msg_type ][ $msg_key ] );	// Don't show it twice.
 
-					if ( empty( $payload['msg_text'] ) ) {	// Nothing to show.
+					if ( empty( $payload[ 'msg_text' ] ) ) {	// Nothing to show.
 						continue;
 					}
 
-					if ( ! empty( $payload['dismiss_time'] ) ) {	// True or seconds greater than 0.
+					if ( ! empty( $payload[ 'dismiss_time' ] ) ) {	// True or seconds greater than 0.
 
 						/**
 						 * Check for automatically hidden errors and/or warnings.
 						 */
-						if ( ! empty( $payload['notice_key'] ) && isset( $user_dismissed[$payload['notice_key']] ) ) {
+						if ( ! empty( $payload[ 'notice_key' ] ) && isset( $user_dismissed[ $payload[ 'notice_key' ] ] ) ) {
 
 							$current_time = time();
-							$dismiss_time = $user_dismissed[$payload['notice_key']];	// Get time for key.
+							$dismiss_time = $user_dismissed[ $payload[ 'notice_key' ] ];	// Get time for key.
 
 							if ( empty( $dismiss_time ) || $dismiss_time > $current_time ) {	// 0 or time in future.
 
-								$payload['hidden'] = true;
+								$payload[ 'hidden' ] = true;
 
 							} else {	// Dismiss has expired.
 
@@ -743,23 +745,20 @@ if ( ! class_exists( 'SucomNotice' ) ) {
 						}
 					}
 
-					/**
-					 * If the notice is hidden, then skip this notice.
-					 */
-					if ( ! empty( $payload['hidden'] ) ) {
+					if ( ! empty( $payload[ 'hidden' ] ) ) {	// Notice is hidden.
 						continue;
 					}
 
-					$payload['msg_html'] = $this->get_notice_html( $msg_type, $payload, true );	// $notice_alt is true.
+					$payload[ 'msg_html' ] = $this->get_notice_html( $msg_type, $payload, true );	// $notice_alt is true.
 
 					/**
 					 * Add paragraph tags for the block editor in case we want to use the 'msg_text' instead of 'msg_html'.
 					 */
-					if ( stripos( $payload['msg_text'], '<p>' ) === false ) {
-						$payload['msg_text'] = '<p>' . $payload['msg_text'] . '</p>';
+					if ( stripos( $payload[ 'msg_text' ], '<p>' ) === false ) {
+						$payload[ 'msg_text' ] = '<p>' . $payload[ 'msg_text' ] . '</p>';
 					}
 				
-					$json_notices[$msg_type][$msg_key] = $payload;
+					$json_notices[ $msg_type ][ $msg_key ] = $payload;
 				}
 			}
 
@@ -787,11 +786,11 @@ if ( ! class_exists( 'SucomNotice' ) ) {
 
 		private function maybe_add_update_errors( $user_id ) {
 
-			if ( isset( $this->p->cf['plugin'] ) && class_exists( 'SucomUpdate' ) ) {
+			if ( isset( $this->p->cf[ 'plugin' ] ) && class_exists( 'SucomUpdate' ) ) {
 
-				foreach ( array_keys( $this->p->cf['plugin'] ) as $ext ) {
+				foreach ( array_keys( $this->p->cf[ 'plugin' ] ) as $ext ) {
 
-					if ( ! empty( $this->p->options['plugin_' . $ext . '_tid'] ) ) {
+					if ( ! empty( $this->p->options[ 'plugin_' . $ext . '_tid' ] ) ) {
 
 						$uerr = SucomUpdate::get_umsg( $ext );
 
@@ -826,69 +825,78 @@ if ( ! class_exists( 'SucomNotice' ) ) {
 
 				case 'nag':
 
-					$payload['notice_label'] = false;	// No label for nag notices.
+					$payload[ 'notice_label' ] = false;	// No label for nag notices.
 
+					$msg_type = 'nag';
 					$wp_class = 'update-nag';
 
 					break;
 
-				case 'warn':
-
-					$wp_class = $notice_class . ' notice-warning';
-
-					break;
-
 				case 'err':
+				case 'error':
 
+					$msg_type = 'err';
 					$wp_class = $notice_class . ' notice-error error';
 
 					break;
 
-				case 'upd':
+				case 'warn':
+				case 'warning':
 
-					$wp_class = $notice_class . ' notice-success updated';
+					$msg_type = 'warn';
+					$wp_class = $notice_class . ' notice-warning';
 
 					break;
 
 				case 'inf':
-				default:
+				case 'info':
 
 					$msg_type = 'inf';
-
 					$wp_class = $notice_class . ' notice-info';
+
+					break;
+
+				case 'upd':
+				case 'updated':
+
+					$msg_type = 'upd';
+					$wp_class = $notice_class . ' notice-success updated';
+
+					break;
+
+				default:	// Unknown $msg_type.
+
+					$msg_type = 'unknown';
+					$wp_class = $notice_class;
 
 					break;
 			}
 
-			if ( ! isset( $payload['notice_label'] ) ) {	// Can be unset, false, empty string, or translated string.
-				$payload['notice_label'] = $this->label_transl;
+			if ( ! isset( $payload[ 'notice_label' ] ) ) {	// Can be unset, false, empty string, or translated string.
+				$payload[ 'notice_label' ] = $this->label_transl;
 			}
 
-			$css_id_attr = empty( $payload['notice_key'] ) ? '' : ' id="' . $msg_type . '-' . $payload['notice_key'] . '"';
+			$css_id_attr = empty( $payload[ 'notice_key' ] ) ? '' : ' id="' . $msg_type . '-' . $payload[ 'notice_key' ] . '"';
 
-			$is_dismissible = empty( $payload['dismiss_time'] ) ? false : true;
+			$is_dismissible = empty( $payload[ 'dismiss_time' ] ) ? false : true;
 
 			$data_attr = '';
 
 			if ( $is_dismissible ) {
 
-				$data_attr .= ' data-notice-key="' . ( isset( $payload['notice_key'] ) ?
-					esc_attr( $payload['notice_key'] ) : '' ). '"';
+				$data_attr .= ' data-notice-key="' . ( isset( $payload[ 'notice_key' ] ) ?
+					esc_attr( $payload[ 'notice_key' ] ) : '' ). '"';
 
-				$data_attr .= ' data-dismiss-time="' . ( isset( $payload['dismiss_time'] ) &&
-					is_numeric( $payload['dismiss_time'] ) ?
-						esc_attr( $payload['dismiss_time'] ) : 0 ) . '"';
+				$data_attr .= ' data-dismiss-time="' . ( isset( $payload[ 'dismiss_time' ] ) &&
+					is_numeric( $payload[ 'dismiss_time' ] ) ?
+						esc_attr( $payload[ 'dismiss_time' ] ) : 0 ) . '"';
 
 				$data_attr .= ' data-dismiss-nonce="' . wp_create_nonce( __FILE__ ) . '"';
-
 			}
 
-			/**
-			 * Optionally hide / show notices by default.
-			 */
 			$style_attr = ' style="' . 
-				( empty( $payload['style'] ) ? '' : $payload['style'] ) .
-				( empty( $payload['hidden'] ) ? 'display:block;' : 'display:none;' ) . '"';
+				( empty( $payload[ 'style' ] ) ? '' : $payload[ 'style' ] ) .
+				( empty( $payload[ 'hidden' ] ) ? 'display:block;' : 'display:none;' ) . '"';
 
 			$msg_html = '<div class="' . $this->lca . '-notice ' . 
 				( ! $is_dismissible ? '' : $this->lca . '-dismissible ' ) .
@@ -897,17 +905,17 @@ if ( ! class_exists( 'SucomNotice' ) ) {
 			/**
 			 * Float the dismiss button on the right, so the button must be added first.
 			 */
-			if ( ! empty( $payload['dismiss_diff'] ) && $is_dismissible ) {
+			if ( ! empty( $payload[ 'dismiss_diff' ] ) && $is_dismissible ) {
 				$msg_html .= '<button class="notice-dismiss" type="button">' .
-					'<span class="notice-dismiss-text">' . $payload['dismiss_diff'] . '</span>' .
+					'<span class="notice-dismiss-text">' . $payload[ 'dismiss_diff' ] . '</span>' .
 						'</button><!-- .notice-dismiss -->';
 			}
 
-			if ( false !== $payload['notice_label'] ) {	// Can be false, empty string, or translated string.
-				$msg_html .= '<div class="notice-label">' . $payload['notice_label'] . '</div><!-- .notice-label -->';
+			if ( false !== $payload[ 'notice_label' ] ) {	// Can be false, empty string, or translated string.
+				$msg_html .= '<div class="notice-label">' . $payload[ 'notice_label' ] . '</div><!-- .notice-label -->';
 			}
 
-			$msg_html .= '<div class="notice-message">' . $payload['msg_text'] . '</div><!-- .notice-message -->';
+			$msg_html .= '<div class="notice-message">' . $payload[ 'msg_text' ] . '</div><!-- .notice-message -->';
 
 			$msg_html .= '</div><!-- .' . $this->lca . '-notice -->' . "\n";
 
@@ -1106,8 +1114,8 @@ if ( ! class_exists( 'SucomNotice' ) ) {
 					padding:0;
 				}
 				#wpadminbar .have-notices #wp-admin-bar-'.$this->p->lca.'-toolbar-notices-container { 
-					min-width:70vw;		/* 70% of the viewing window width */
-					max-height:90vh;	/* 90% of the viewing window height */
+					min-width:70vw;			/* 70% of the viewing window width */
+					max-height:90vh;		/* 90% of the viewing window height */
 					overflow-y:scroll;
 				}
 				#wpadminbar .' . $this->lca . '-notice,
@@ -1181,29 +1189,25 @@ if ( ! class_exists( 'SucomNotice' ) ) {
 				}
 				#wpadminbar .' . $this->lca . '-notice .notice-label,
 				.' . $this->lca . '-notice .notice-label {
-					font-weight:bold;
-					color:#444;	/* default text color */
+					font-weight:600;
+					color:#444;			/* default text color */
 					background-color:#fcfcfc;	/* default background color */
 					white-space:nowrap;
 				}
 				#wpadminbar .' . $this->lca . '-notice.notice-error .notice-label,
 				.' . $this->lca . '-notice.notice-error .notice-label {
-					/* color:#dc3232; */
 					background-color: #fbeaea;
 				}
 				#wpadminbar .' . $this->lca . '-notice.notice-warning .notice-label,
 				.' . $this->lca . '-notice.notice-warning .notice-label {
-					/* color:#ffb900; */
 					background-color: #fff8e5;
 				}
 				#wpadminbar .' . $this->lca . '-notice.notice-info .notice-label,
 				.' . $this->lca . '-notice.notice-info .notice-label {
-					/* color:#00a0d2; */
 					background-color: #e5f5fa;
 				}
 				#wpadminbar .' . $this->lca . '-notice.notice-success .notice-label,
 				.' . $this->lca . '-notice.notice-success .notice-label {
-					/* color:#46b450; */
 					background-color: #ecf7ed;
 				}
 				.' . $this->lca . '-notice.notice-success .notice-label::before,
@@ -1297,10 +1301,14 @@ if ( ! class_exists( 'SucomNotice' ) ) {
 					list-style:inherit;
 				}
 				#wpadminbar .' . $this->lca . '-notice .notice-message b,
+				#wpadminbar .' . $this->lca . '-notice .notice-message b a,
 				#wpadminbar .' . $this->lca . '-notice .notice-message strong,
+				#wpadminbar .' . $this->lca . '-notice .notice-message strong a,
 				.' . $this->lca . '-notice .notice-message b,
-				.' . $this->lca . '-notice .notice-message strong {
-					font-weight:bold;
+				.' . $this->lca . '-notice .notice-message b a,
+				.' . $this->lca . '-notice .notice-message strong,
+				.' . $this->lca . '-notice .notice-message strong a {
+					font-weight:600;
 				}
 				.' . $this->lca . '-notice .notice-message .button-highlight {
 					border-color:#0074a2;
@@ -1347,8 +1355,8 @@ if ( ! class_exists( 'SucomNotice' ) ) {
 
 			$custom_style_css = '';
 
-			if ( isset( $this->p->cf['notice'] ) ) {
-				foreach ( $this->p->cf['notice'] as $css_class => $css_props ) {
+			if ( isset( $this->p->cf[ 'notice' ] ) ) {
+				foreach ( $this->p->cf[ 'notice' ] as $css_class => $css_props ) {
 					foreach ( $css_props as $prop_name => $prop_value ) {
 						$custom_style_css .= '.' . $this->lca . '-notice.' . $css_class . '{' . $prop_name . ':' . $prop_value . ';}' . "\n";
 					}

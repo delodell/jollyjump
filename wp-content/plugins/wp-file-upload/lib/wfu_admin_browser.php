@@ -898,8 +898,6 @@ function wfu_include_file($file_code) {
 }
 
 function wfu_file_details($file_code, $errorstatus, $invoker = '') {
-	global $wpdb;
-	$table_name1 = $wpdb->prefix . "wfu_log";
 	$siteurl = site_url();
 	$allow_obsolete = false;
 	$file_exists = true;

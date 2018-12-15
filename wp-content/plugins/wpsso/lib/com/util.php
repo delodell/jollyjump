@@ -9,6 +9,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'These aren\'t the droids you\'re looking for...' );
 }
 
+$lib_dir = dirname( __FILE__ ) . '/';
+
+require_once $lib_dir . 'util-wp.php';
+
 if ( ! class_exists( 'SucomUtil' ) ) {
 
 	class SucomUtil {
@@ -521,6 +525,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		);
 
 		private static $pub_lang = array(
+
 			/**
 			 * https://developers.facebook.com/docs/messenger-platform/messenger-profile/supported-locales
 			 */
@@ -668,6 +673,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 				'zu_ZA' => 'Zulu',
 				'zz_TR' => 'Zazaki',
 			),
+
 			/**
 			 * https://developers.google.com/+/web/api/supported-languages
 			 */
@@ -734,10 +740,12 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 				'vi'	=> 'Vietnamese',
 				'zu'	=> 'Zulu',
 			),
+
 			'pinterest' => array(
 				'en'	=> 'English',
 				'ja'	=> 'Japanese',
 			),
+
 			/**
 			 * https://www.tumblr.com/docs/en/share_button
 			 */
@@ -758,6 +766,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 				'zh_CN' => 'Chinese (Simplified)',
 				'zh_TW' => 'Chinese (Traditional)',
 			),
+
 			/**
 			 * https://dev.twitter.com/web/overview/languages
 			 */
@@ -829,7 +838,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 				/**
 				 * Only set the option the existing value is different.
 				 */
-				if ( $ini_saved[$name] !== false && $ini_saved[$name] !== $value ) {
+				if ( false !== $ini_saved[$name] && $ini_saved[$name] !== $value ) {
 
 					ini_set( $name, $value );
 
@@ -864,16 +873,13 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 				return self::$cache_wp_plugins;
 			}
 
-			if ( ! function_exists( 'get_plugins' ) ) {
+			if ( ! function_exists( 'get_plugins' ) ) {	// Load the library if necessary.
 
 				$plugin_lib = trailingslashit( ABSPATH ) . 'wp-admin/includes/plugin.php';
 
-				if ( file_exists( $plugin_lib ) ) {
-
+				if ( file_exists( $plugin_lib ) ) {	// Just in case.
 					require_once $plugin_lib;
-
 				} else {
-
 					$error_pre = sprintf( '%s error:', __METHOD__ );
 					$error_msg = sprintf( 'The WordPress %s library file is missing and required.', $plugin_lib );
 
@@ -882,9 +888,9 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 			}
 
 			if ( function_exists( 'get_plugins' ) ) {
-
-				return self::$cache_wp_plugins = get_plugins();
+				self::$cache_wp_plugins = get_plugins();
 			} else {
+				self::$cache_wp_plugins = array();
 
 				$error_pre = sprintf( '%s error:', __METHOD__ );
 				$error_msg = sprintf( 'The WordPress %s function is missing and required.', 'get_plugins()' );
@@ -892,17 +898,20 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 				self::safe_error_log( $error_pre . ' ' . $error_msg );
 			}
 
-			return self::$cache_wp_plugins = array();
+			return self::$cache_wp_plugins;
 		}
 
 		public static function clear_wp_plugins() {
+
 			self::$cache_wp_plugins = null;
 		}
 
 		public static function get_wp_plugin_dir() {
+
 			if ( defined( 'WP_PLUGIN_DIR' ) && is_dir( WP_PLUGIN_DIR ) && is_writable( WP_PLUGIN_DIR ) ) {
 				return WP_PLUGIN_DIR;
 			}
+
 			return false;
 		}
 
@@ -919,10 +928,12 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		 * Use "tz" in the method name to hint that input is an abbreviation.
 		 */
 		public static function get_tz_name( $tz_abbr ) {
+
 			return timezone_name_from_abbr( $tz_abbr );
 		}
 
 		public static function get_timezone_abbr( $tz_name ) {
+
 			return self::get_formatted_timezone( $tz_name, 'T' );
 		}
 
@@ -930,25 +941,34 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		 * Timezone offset in seconds - offset west of UTC is negative, and east of UTC is positive.
 		 */
 		public static function get_timezone_offset( $tz_name ) {
+
 			return self::get_formatted_timezone( $tz_name, 'Z' );
 		}
 
-		private static function get_formatted_array( $arr, $idx = false, $add_none = false ) {
+		private static function get_formatted_array( $arr, $key = false, $add_none = false ) {
 
-			if ( null === $idx ) {
+			if ( null === $key ) {
+
 				/**
 				 * Nothing to do.
 				 */
-			} elseif ( false === $idx ) {
+
+			} elseif ( false === $key ) {
+
 				/**
 				 * Nothing to do.
 				 */
-			} elseif ( true === $idx ) { // Sort by value.
+
+			} elseif ( true === $key ) { // Sort by value.
+
 				asort( $arr );
-			} elseif ( isset( $arr[$idx] ) ) { // Return a specific dashicon label.
-				return $arr[$idx];
+
+			} elseif ( isset( $arr[ $key ] ) ) { // Return a specific array value.
+
+				return $arr[ $key ];
+
 			} else {
-				return null;
+				return null;	// Array key not found - return null.
 			}
 
 			if ( true === $add_none ) { // Prefix array with 'none'.
@@ -958,25 +978,27 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 			return $arr;
 		}
 
-		public static function get_currencies( $idx = false, $add_none = false, $format = '%2$s (%1$s)' ) {
+		public static function get_currencies( $currency_abbrev = false, $add_none = false, $format = '%2$s (%1$s)' ) {
 
 			static $local_cache = array(); // Array of arrays, indexed by $format.
 
-			if ( ! isset( $local_cache[$format] ) ) {
+			if ( ! isset( $local_cache[ $format ] ) ) {
+
 				if ( $format === '%2$s' ) { // Optimize and get existing format.
-					$local_cache[$format] =& self::$currencies;
+					$local_cache[ $format ] =& self::$currencies;
 				} else {
 					foreach ( self::$currencies as $key => $value ) {
-						$local_cache[$format][$key] = sprintf( $format, $key, $value );
+						$local_cache[ $format ][ $key ] = sprintf( $format, $key, $value );
 					}
 				}
-				asort( $local_cache[$format] ); // Sort by value.
+
+				asort( $local_cache[ $format ] ); // Sort by value.
 			}
 
-			return self::get_formatted_array( $local_cache[$format], $idx, $add_none );
+			return self::get_formatted_array( $local_cache[ $format ], $currency_abbrev, $add_none );
 		}
 
-		public static function get_currency_abbrev( $idx = false, $add_none = false ) {
+		public static function get_currency_abbrev( $currency_abbrev = false, $add_none = false ) {
 
 			static $local_cache = null;
 
@@ -984,17 +1006,20 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 
 				$local_cache = array();
 
+				/**
+				 * Create an array of currency abbrev => abbrev values.
+				 */
 				foreach ( self::$currencies as $key => $value ) {
-					$local_cache[$key] = $key;
+					$local_cache[ $key ] = $key;	// Example: USD => USD
 				}
 
 				ksort( $local_cache ); // Sort by key (same as value).
 			}
 
-			return self::get_formatted_array( $local_cache, $idx, $add_none );
+			return self::get_formatted_array( $local_cache, $currency_abbrev, $add_none );
 		}
 
-		public static function get_currency_symbols( $idx = false, $add_none = false, $decode = false ) {
+		public static function get_currency_symbols( $currency_abbrev = false, $add_none = false, $decode = false ) {
 
 			if ( $decode ) {
 
@@ -1005,58 +1030,83 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 					$local_cache = array();
 
 					foreach ( self::$currency_symbols as $key => $value ) {
-						$local_cache[$key] = self::decode_html( $value );
+						$local_cache[ $key ] = self::decode_html( $value );	// Example: USD => $
 					}
 
 					ksort( $local_cache ); // Sort by key.
 				}
 
-				return self::get_formatted_array( $local_cache, $idx, $add_none );
-
-			} else {
-				return self::get_formatted_array( self::$currency_symbols, $idx, $add_none );
+				return self::get_formatted_array( $local_cache, $currency_abbrev, $add_none );
 			}
+
+			return self::get_formatted_array( self::$currency_symbols, $currency_abbrev, $add_none );
 		}
 
-		public static function get_currency_symbol_abbrev( $idx = false, $default = 'USD', $decode = true ) {
+		public static function get_currency_symbol_abbrev( $currency_symbol = false, $default = 'USD', $decode = true ) {
 
 			if ( $decode ) {
-				$idx = self::decode_html( $idx );
+				$currency_symbol = self::decode_html( $currency_symbol );
 			}
 
 			static $local_cache = array();
 
-			if ( isset( $local_cache[$idx] ) ) {
-				return $local_cache[$idx];
-			} elseif ( $idx === '$' ) {	// Match for USD first.
-				return $local_cache[$idx] = 'USD';
+			if ( isset( $local_cache[ $currency_symbol ] ) ) {
+
+				return $local_cache[ $currency_symbol ];
+
+			} elseif ( $currency_symbol === '$' ) {	// Optimize and match for USD first.
+
+				return $local_cache[ $currency_symbol ] = 'USD';
 			}
 
-			foreach ( self::get_currency_symbols( false, false, $decode ) as $abbrev => $symbol ) {
-				if ( $symbol === $idx ) {
-					return $local_cache[$idx] = $abbrev; // Stop here.
+			/**
+			 * Optionally decode the currency symbol values.
+			 */
+			$currency_symbols = self::get_currency_symbols( $currency_abbrev = false, $add_none = false, $decode );
+
+			if ( is_array( $currency_symbols ) ) {	// Just in case.
+
+				foreach ( $currency_symbols as $key => $value ) {		// Example: USD => $
+
+					if ( $value === $currency_symbol ) {			// Example: $ === $
+
+						/**
+						 * Cache by currency symbol and return the currency abbreviation.
+						 */
+						return $local_cache[ $currency_symbol ] = $key;
+					}
 				}
 			}
 
-			return $local_cache[$idx] = $default;
+			return $local_cache[ $currency_symbol ] = $default;
 		}
 
-		public static function get_dashicons( $idx = false, $add_none = false ) {
-			return self::get_formatted_array( self::$dashicons, $idx, $add_none );
+		public static function get_dashicons( $icon_number = false, $add_none = false ) {
+
+			return self::get_formatted_array( self::$dashicons, $icon_number, $add_none );
 		}
 
 		public static function get_pub_lang( $pub = '' ) {
+
 			switch ( $pub ) {
+
 				case 'fb':
-					return self::$pub_lang['facebook'];
+
+					return self::$pub_lang[ 'facebook' ];
+
 				case 'gplus':
 				case 'googleplus':
-					return self::$pub_lang['google'];
+
+					return self::$pub_lang[ 'google' ];
+
 				case 'pin':
-					return self::$pub_lang['pinterest'];
+
+					return self::$pub_lang[ 'pinterest' ];
+
 				default:
-					if ( isset( self::$pub_lang[$pub] ) ) {
-						return self::$pub_lang[$pub];
+
+					if ( isset( self::$pub_lang[ $pub ] ) ) {
+						return self::$pub_lang[ $pub ];
 					} else {
 						return array();
 					}
@@ -1090,7 +1140,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 
 			$filter_name = current_filter();
 
-			self::$cache_filter_values['original'][$filter_name] = $value; // Save value to static cache.
+			self::$cache_filter_values[ 'original' ][$filter_name] = $value; // Save value to static cache.
 
 			remove_filter( $filter_name, array( __CLASS__, __FUNCTION__ ), self::get_min_int() ); // Remove ourselves.
 
@@ -1101,14 +1151,14 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 
 			$filter_name = current_filter();
 
-			unset( self::$cache_filter_values['modified'][$filter_name] );	// Just in case.
+			unset( self::$cache_filter_values[ 'modified' ][$filter_name] );	// Just in case.
 
-			if ( isset( self::$cache_filter_values['original'][$filter_name] ) ) {      // Just in case.
-				if ( $value !== self::$cache_filter_values['original'][$filter_name] ) {
+			if ( isset( self::$cache_filter_values[ 'original' ][$filter_name] ) ) {      // Just in case.
+				if ( $value !== self::$cache_filter_values[ 'original' ][$filter_name] ) {
 
-					self::$cache_filter_values['modified'][$filter_name] = $value;
+					self::$cache_filter_values[ 'modified' ][$filter_name] = $value;
 
-					$value = self::$cache_filter_values['original'][$filter_name];      // Restore value from static cache.
+					$value = self::$cache_filter_values[ 'original' ][$filter_name];      // Restore value from static cache.
 				}
 			}
 
@@ -1118,49 +1168,86 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		}
 
 		public static function get_modified_filter_value( $filter_name ) {
-			if ( isset( self::$cache_filter_values['modified'][$filter_name] ) ) {
-				return self::$cache_filter_values['modified'][$filter_name];
+
+			if ( isset( self::$cache_filter_values[ 'modified' ][$filter_name] ) ) {
+				return self::$cache_filter_values[ 'modified' ][$filter_name];
 			} else {
 				return false;
 			}
 		}
 
+		/**
+		 * Defines the DOING_BLOCK_EDITOR constant.
+		 */
 		public static function is_doing_block_editor( $post_type = '' ) {
 
-			$is_doing = false;
-			$post_id  = false;
+			$is_doing      = false;
+			$post_id       = false;
+			$can_edit_id   = false;
+			$can_edit_type = false;
+			$req_action    = empty( $_REQUEST[ 'action' ] ) ? false : $_REQUEST[ 'action' ];
+			$is_meta_box   = empty( $_REQUEST[ 'meta-box-loader' ] ) && empty( $_REQUEST[ 'meta_box' ] ) ? false : true;
+			$is_gutenbox   = empty( $_REQUEST[ 'gutenberg_meta_boxes' ] ) ? false : true;
+			$is_classic    = isset( $_REQUEST[ 'classic-editor' ] ) && empty( $_REQUEST[ 'classic-editor' ] ) ? false : true;
 
-			if ( ! empty( $_REQUEST['post_ID'] ) ) {
-				$post_id = $_REQUEST['post_ID'];
-			} elseif ( ! empty( $_REQUEST['post'] ) && is_numeric( $_REQUEST['post'] ) ) {
-				$post_id = $_REQUEST['post'];
+			if ( ! empty( $_REQUEST[ 'post_ID' ] ) ) {
+				$post_id = $_REQUEST[ 'post_ID' ];
+			} elseif ( ! empty( $_REQUEST[ 'post' ] ) && is_numeric( $_REQUEST[ 'post' ] ) ) {
+				$post_id = $_REQUEST[ 'post' ];
 			}
 
-			if ( ! empty( $post_id ) ) {
+			if ( $post_id ) {
+
 				$post_type = get_post_type( $post_id );
-			}
 
-			$gutenbox = empty( $_REQUEST['gutenberg_meta_boxes'] ) ? false : true;
-			$meta_box = empty( $_REQUEST['meta_box'] ) ? false : true;
-			$classic  = isset( $_REQUEST['classic-editor'] ) && empty( $_REQUEST['classic-editor'] ) ? false : true;
-			$action   = empty( $_REQUEST['action'] ) ? false : $_REQUEST['action'];
+				if ( $post_type ) {
 
-			if ( $post_type ) {
-				if ( function_exists( 'gutenberg_can_edit_post_type' ) ) {
-					if ( gutenberg_can_edit_post_type( $post_type ) ) {
-						if ( $gutenbox ) {
-							$is_doing = true;
-						} elseif ( $meta_box ) {
-							$is_doing = true;
-						} elseif ( ! $classic ) {
-							$is_doing = true;
-						} elseif ( $post_id && $action === 'edit' ) {
-							$is_doing = true;
+					if ( function_exists( 'use_block_editor_for_post' ) ) {
+
+						/**
+						 * Calling use_block_editor_for_post() in WordPress v5.0 during post save crashes
+						 * the web browser. See https://core.trac.wordpress.org/ticket/45253 for details.
+						 */
+						global $wp_version;
+
+						if ( version_compare( $wp_version, '5.0', '>=' ) ) {
+							$can_edit_id = true;
+						} elseif ( use_block_editor_for_post( $post_id ) ) {
+							$can_edit_id = true;
+						}
+
+					} elseif ( function_exists( 'gutenberg_can_edit_post' ) ) {
+						if ( gutenberg_can_edit_post( $post_id ) ) {
+							$can_edit_id = true;
+						}
+					}
+		
+					if ( function_exists( 'use_block_editor_for_post_type' ) ) {
+						if ( use_block_editor_for_post_type( $post_type ) ) {
+							$can_edit_type = true;
+						}
+					} elseif ( function_exists( 'gutenberg_can_edit_post_type' ) ) {
+						if ( gutenberg_can_edit_post_type( $post_type ) ) {
+							$can_edit_type = true;
 						}
 					}
 				}
 			}
 	
+			if ( $can_edit_id ) {
+				if ( $can_edit_type ) {
+					if ( $is_gutenbox ) {
+						$is_doing = true;
+					} elseif ( $is_meta_box ) {
+						$is_doing = true;
+					} elseif ( ! $is_classic ) {
+						$is_doing = true;
+					} elseif ( $post_id && $req_action === 'edit' ) {
+						$is_doing = true;
+					}
+				}
+			}
+
 			if ( ! defined( 'DOING_BLOCK_EDITOR' ) ) {
 				define( 'DOING_BLOCK_EDITOR', $is_doing );
 			}
@@ -1172,8 +1259,8 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 
 			static $local_cache = array();
 
-			if ( isset( $local_cache[$url] ) ) {
-				return $local_cache[$url];
+			if ( isset( $local_cache[ $url ] ) ) {
+				return $local_cache[ $url ];
 			}
 
 			if ( ! empty( $url ) ) {
@@ -1182,60 +1269,74 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 
 					parse_url( $url, PHP_URL_SCHEME ) === 'https' ) {
 
-					return $local_cache[$url] = true;
+					return $local_cache[ $url ] = true;
 
 				} else {
-					return $local_cache[$url] = false;
+					return $local_cache[ $url ] = false;
 				}
 
 			} else {
 
 				if ( is_ssl() ) {
 
-					return $local_cache[$url] = true;
+					return $local_cache[ $url ] = true;
 
-				} elseif ( isset( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) &&
-					strtolower( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) === 'https' ) {
+				} elseif ( isset( $_SERVER[ 'HTTP_X_FORWARDED_PROTO' ] )
+					&& strtolower( $_SERVER[ 'HTTP_X_FORWARDED_PROTO' ] ) === 'https' ) {
 
-					return $local_cache[$url] = true;
+					return $local_cache[ $url ] = true;
 
-				} elseif ( isset( $_SERVER['HTTP_X_FORWARDED_SSL'] ) &&
-					strtolower( $_SERVER['HTTP_X_FORWARDED_SSL'] ) === 'on' ) {
+				} elseif ( isset( $_SERVER[ 'HTTP_X_FORWARDED_SSL' ] )
+					&& strtolower( $_SERVER[ 'HTTP_X_FORWARDED_SSL' ] ) === 'on' ) {
 
-					return $local_cache[$url] = true;
+					return $local_cache[ $url ] = true;
 				}
 			}
 
-			return $local_cache[$url] = false;
+			return $local_cache[ $url ] = false;
 		}
 
 		public static function get_prot( $url = '' ) {
+
 			if ( ! empty( $url ) ) {
+
 				return self::is_https( $url ) ? 'https' : 'http';
+
 			} elseif ( self::is_https() ) {
+
 				return 'https';
+
 			} elseif ( is_admin() )  {
+
 				if ( defined( 'FORCE_SSL_ADMIN' ) && FORCE_SSL_ADMIN ) {
 					return 'https';
 				}
+
 			} elseif ( defined( 'FORCE_SSL' ) && FORCE_SSL ) {
+
 				return 'https';
 			}
+
 			return 'http';
 		}
 
 		public static function update_prot( $url = '' ) {
+
 			if ( strpos( $url, '/' ) === 0 ) { // Skip relative urls.
 				return $url;
 			}
+
 			$prot_slash = self::get_prot() . '://';
+
 			if ( strpos( $url, $prot_slash ) === 0 ) { // Skip correct urls.
 				return $url;
 			}
+
 			return preg_replace( '/^([a-z]+:\/\/)/', $prot_slash, $url );
 		}
 
 		public static function get_const( $const, $undef = null ) {
+
 			if ( defined( $const ) ) {
 				return constant( $const );
 			} else {
@@ -1247,9 +1348,11 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		 * Returns false or the admin screen id string.
 		 */
 		public static function get_screen_id( $screen = false ) {
+
 			if ( false === $screen && function_exists( 'get_current_screen' ) ) {
 				$screen = get_current_screen();
 			}
+
 			if ( isset( $screen->id ) ) {
 				return $screen->id;
 			} else {
@@ -1261,9 +1364,11 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		 * Returns false or the admin screen base string.
 		 */
 		public static function get_screen_base( $screen = false ) {
+
 			if ( false === $screen && function_exists( 'get_current_screen' ) ) {
 				$screen = get_current_screen();
 			}
+
 			if ( isset( $screen->base ) ) {
 				return $screen->base;
 			} else {
@@ -1290,7 +1395,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		public static function sanitize_use_post( $mixed, $default = false ) {
 
 			if ( is_array( $mixed ) ) {
-				$use_post = isset( $mixed['use_post'] ) ? $mixed['use_post'] : $default;
+				$use_post = isset( $mixed[ 'use_post' ] ) ? $mixed[ 'use_post' ] : $default;
 			} elseif ( is_object( $mixed ) ) {
 				$use_post = isset( $mixed->use_post ) ? $mixed->use_post : $default;
 			} else {
@@ -1307,10 +1412,13 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		}
 
 		public static function sanitize_file_path( $file_path ) {
+
 			if ( empty( $file_path ) ) {
 				return false;
 			}
+
 			$file_path = implode( '/', array_map( array( __CLASS__, 'sanitize_file_name' ), explode( '/', $file_path ) ) );
+
 			return $file_path;
 		}
 
@@ -1373,28 +1481,47 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		public static function sanitize_tag( $tag ) {
 
 			$tag = sanitize_title_with_dashes( $tag, '', 'display' );
+
 			$tag = urldecode( $tag );
 
 			return $tag;
 		}
 
 		/**
-		 * Note that sanitize_hashtags() truncates tags that begin with a number - 
-		 * hashtags cannot begin with a number.
+		 * Note that hashtags cannot begin with a number - this methos truncates tags that begin with a number.
 		 */
-		public static function sanitize_hashtags( $tags = array() ) {
+		public static function sanitize_hashtags( array $tags = array() ) {
+
 			return preg_replace( array( '/^[0-9].*/', '/[ \[\]#!\$\?\\\\\/\*\+\.\-\^]/', '/^.+/' ), array( '', '', '#$0' ), $tags );
 		}
 
 		public static function sanitize_key( $key ) {
+
 			return preg_replace( '/[^a-z0-9_\-]/', '', strtolower( $key ) );
 		}
 
-		public static function array_to_hashtags( $tags = array() ) {
-			return trim( implode( ' ', array_filter( self::sanitize_hashtags( $tags ) ) ) ); // array_filter() removes empty array values.
+		public static function array_to_keywords( array $tags = array() ) {
+
+			$keywords = array_map( 'sanitize_text_field', $tags );
+
+			$keywords = trim( implode( ', ', $keywords ) );
+
+			return $keywords;
+		}
+
+		public static function array_to_hashtags( array $tags = array() ) {
+
+			$hashtags = self::sanitize_hashtags( $tags );
+
+			$hashtags = array_filter( $hashtags );	// Removes empty array elements.
+
+			$hashtags = trim( implode( ' ', $hashtags ) );
+
+			return $hashtags;
 		}
 
 		public static function explode_csv( $str ) {
+
 			if ( empty( $str ) ) {
 				return array();
 			} else {
@@ -1403,14 +1530,17 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		}
 
 		private static function unquote_csv_value( $val ) {
+
 			return trim( $val, '\'" ' ); // Remove quotes and spaces.
 		}
 
 		public static function titleize( $str ) {
+
 			return ucwords( preg_replace( '/[:\/\-\._]+/', ' ', self::decamelize( $str ) ) );
 		}
 
 		public static function decamelize( $str ) {
+
 			return ltrim( strtolower( preg_replace('/[A-Z]/', '_$0', $str ) ), '_' );
 		}
 
@@ -1437,13 +1567,13 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 				}
 			}
 
-			if ( $plugin_base !== false ) {
+			if ( false !== $plugin_base ) {
 
-				if ( isset( $local_cache[$plugin_base] ) ) {
-					return $local_cache[$plugin_base];
+				if ( isset( $local_cache[ $plugin_base ] ) ) {
+					return $local_cache[ $plugin_base ];
 				}
 
-				return $local_cache[$plugin_base] = false;
+				return $local_cache[ $plugin_base ] = false;
 			}
 
 			return $local_cache;
@@ -1494,7 +1624,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 
 			$active_plugins = get_option( 'active_plugins', array() );
 
-			if ( empty( $active_plugins[$plugin_base] ) ) {
+			if ( empty( $active_plugins[ $plugin_base ] ) ) {
 
 				if ( ! $silent ) {
 					do_action( 'activate_plugin', $plugin_base );
@@ -1530,46 +1660,46 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 
 			static $local_cache = array();
 
-			if ( $use_cache && isset( $local_cache[$plugin_base] ) ) {
-				return $local_cache[$plugin_base];
-			} elseif ( empty( $plugin_base ) ) { // Just in case.
-				return $local_cache[$plugin_base] = false;
-			} elseif ( validate_file( $plugin_base ) > 0 ) { // Contains invalid characters.
-				return $local_cache[$plugin_base] = false;
+			if ( $use_cache && isset( $local_cache[ $plugin_base ] ) ) {
+				return $local_cache[ $plugin_base ];
+			} elseif ( empty( $plugin_base ) ) { 				// Just in case.
+				return $local_cache[ $plugin_base ] = false;
+			} elseif ( validate_file( $plugin_base ) > 0 ) {		// Contains invalid characters.
+				return $local_cache[ $plugin_base ] = false;
 			} elseif ( ! is_file( WP_PLUGIN_DIR . '/' . $plugin_base ) ) { // Check existence of plugin folder.
-				return $local_cache[$plugin_base] = false;
+				return $local_cache[ $plugin_base ] = false;
 			}
 
 			$plugins = self::get_wp_plugins();
 
-			if ( ! isset( $plugins[$plugin_base] ) ) { // Check for a valid plugin header.
-				return $local_cache[$plugin_base] = false;
+			if ( ! isset( $plugins[ $plugin_base ] ) ) {			// Check for a valid plugin header.
+				return $local_cache[ $plugin_base ] = false;
 			}
 
-			return $local_cache[$plugin_base] = true;
+			return $local_cache[ $plugin_base ] = true;
 		}
 
 		public static function plugin_has_update( $plugin_base ) {
 
 			static $local_cache = array();
 
-			if ( isset( $local_cache[$plugin_base] ) ) {
-				return $local_cache[$plugin_base];
-			} elseif ( empty( $plugin_base ) ) { // Just in case.
-				return $local_cache[$plugin_base] = false;
+			if ( isset( $local_cache[ $plugin_base ] ) ) {
+				return $local_cache[ $plugin_base ];
+			} elseif ( empty( $plugin_base ) ) { 				// Just in case.
+				return $local_cache[ $plugin_base ] = false;
 			} elseif ( ! SucomUtil::plugin_is_installed( $plugin_base ) ) { // Call with class to use common cache.
-				return $local_cache[$plugin_base] = false;
+				return $local_cache[ $plugin_base ] = false;
 			}
 
 			$update_plugins = get_site_transient( 'update_plugins' );
 
 			if ( isset( $update_plugins->response ) && is_array( $update_plugins->response ) ) {
-				if ( isset( $update_plugins->response[$plugin_base] ) ) {
-					return $local_cache[$plugin_base] = true;
+				if ( isset( $update_plugins->response[ $plugin_base ] ) ) {
+					return $local_cache[ $plugin_base ] = true;
 				}
 			}
 
-			return $local_cache[$plugin_base] = false;
+			return $local_cache[ $plugin_base ] = false;
 		}
 
 		public static function get_slug_info( $plugin_slug, $plugin_fields = array(), $unfiltered = true ) {
@@ -1577,22 +1707,22 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 			static $local_cache = array();
 
 			$plugin_fields = array_merge( array(
-				'active_installs'   => true, // Get by default.
+				'active_installs'   => true,	// Get by default.
 				'added'             => false,
 				'banners'           => false,
 				'compatibility'     => false,
 				'contributors'      => false,
 				'description'       => false,
 				'donate_link'       => false,
-				'downloadlink'      => true, // Get by default.
+				'downloadlink'      => true,	// Get by default.
 				'group'             => false,
 				'homepage'          => false,
 				'icons'             => false,
 				'last_updated'      => false,
 				'sections'          => false,
 				'short_description' => false,
-				'rating'            => true, // Get by default.
-				'ratings'           => true, // Get by default.
+				'rating'            => true,	// Get by default.
+				'ratings'           => true,	// Get by default.
 				'requires'          => false,
 				'reviews'           => false,
 				'tags'              => false,
@@ -1620,28 +1750,37 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		}
 
 		public static function get_slug_name( $plugin_slug, $unfiltered = true ) {
+
 			$plugin_info = SucomUtil::get_slug_info( $plugin_slug, array(), $unfiltered );
-			return empty( $plugin_info->name ) ?
-				$plugin_slug : $plugin_info->name;
+
+			return empty( $plugin_info->name ) ? $plugin_slug : $plugin_info->name;
 		}
 
 		public static function get_slug_download_url( $plugin_slug, $unfiltered = true ) {
 
-			$plugin_info = SucomUtil::get_slug_info( $plugin_slug,
-				array( 'downloadlink' => true ), $unfiltered );
+			$plugin_info = SucomUtil::get_slug_info( $plugin_slug, array( 'downloadlink' => true ), $unfiltered );
 
 			if ( is_wp_error( $plugin_info ) ) {
+
 				return $plugin_info;
+
 			} elseif ( isset( $plugin_info->download_link ) ) {
+
 				if ( filter_var( $plugin_info->download_link, FILTER_VALIDATE_URL ) === false ) { // Just in case.
+
 					$plugin_name = empty( $plugin_info->name ) ? $plugin_slug : $plugin_info->name;
+
 					return new WP_Error( 'invalid_download_link', 
 						sprintf( __( 'The plugin information for "%s" contains an invalid download link.' ),
 							$plugin_name ) );
 				}
+
 				return $plugin_info->download_link;
+
 			} else {
+
 				$plugin_name = empty( $plugin_info->name ) ? $plugin_slug : $plugin_info->name;
+
 				return new WP_Error( 'missing_download_link', 
 					sprintf( __( 'The plugin information for "%s" does not contain a download link.' ),
 						$plugin_name ) );
@@ -1670,7 +1809,9 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 			}
 
 			WP_Filesystem();
+
 			$unzip_file = unzip_file( $plugin_zip, WP_PLUGIN_DIR );
+
 			@unlink( $plugin_zip );
 
 			if ( is_wp_error( $unzip_file ) ) {
@@ -1681,10 +1822,12 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		}
 
 		public static function add_site_option_key( $name, $key, $value ) {
+
 			return self::update_option_key( $name, $key, $value, true, true );
 		}
 
 		public static function update_site_option_key( $name, $key, $value, $protect = false ) {
+
 			return self::update_option_key( $name, $key, $value, $protect, true );
 		}
 
@@ -1692,21 +1835,23 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		 * Only creates new keys - does not update existing keys.
 		 */
 		public static function add_option_key( $name, $key, $value ) {
+
 			return self::update_option_key( $name, $key, $value, true, false ); // $protect = true.
 		}
 
 		public static function update_option_key( $name, $key, $value, $protect = false, $site = false ) {
+
 			if ( true === $site ) {
 				$opts = get_site_option( $name, array() );
 			} else {
 				$opts = get_option( $name, array() );
 			}
 
-			if ( true === $protect && isset( $opts[$key] ) ) {
+			if ( true === $protect && isset( $opts[ $key ] ) ) {
 				return false;
 			}
 
-			$opts[$key] = $value;
+			$opts[ $key ] = $value;
 
 			if ( true === $site ) {
 				return update_site_option( $name, $opts );
@@ -1716,19 +1861,22 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		}
 
 		public static function get_option_key( $name, $key, $site = false ) {
+
 			if ( true === $site ) {
 				$opts = get_site_option( $name, array() );
 			} else {
 				$opts = get_option( $name, array() );
 			}
-			if ( isset( $opts[$key] ) ) {
-				return $opts[$key];
+
+			if ( isset( $opts[ $key ] ) ) {
+				return $opts[ $key ];
 			} else {
 				return null;
 			}
 		}
 
 		public static function is_crawler_name( $crawler_name ) {
+
 			return $crawler_name === self::get_crawler_name() ? true : false;
 		}
 
@@ -1736,77 +1884,95 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 
 			if ( ! isset( self::$cache_crawler_name ) ) {
 
-				$ua = isset( $_SERVER['HTTP_USER_AGENT'] ) ?
-					strtolower( $_SERVER['HTTP_USER_AGENT'] ) : '';
+				$ua = isset( $_SERVER[ 'HTTP_USER_AGENT' ] ) ?
+					strtolower( $_SERVER[ 'HTTP_USER_AGENT' ] ) : '';
 
 				switch ( true ) {
 
 					/**
 					 * "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)"
 					 */
-					case ( strpos( $ua, 'facebookexternalhit/' ) !== false ):
+					case ( false !== strpos( $ua, 'facebookexternalhit/' ) ):
+
 						self::$cache_crawler_name = 'facebook';
+
 						break;
 
 					/**
 					 * "Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)"
 					 */
-					case ( strpos( $ua, 'compatible; bingbot/' ) !== false ):
+					case ( false !== strpos( $ua, 'compatible; bingbot/' ) ):
+
 						self::$cache_crawler_name = 'bing';
+
 						break;
 
 					/**
 					 * "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
 					 */
-					case ( strpos( $ua, 'compatible; googlebot/' ) !== false ):
+					case ( false !== strpos( $ua, 'compatible; googlebot/' ) ):
+
 						self::$cache_crawler_name = 'google';
+
 						break;
 
 					/**
 					 * Mozilla/5.0 (compatible; Google-Structured-Data-Testing-Tool +https://search.google.com/structured-data/testing-tool)"
 					 */
-					case ( strpos( $ua, 'compatible; google-structured-data-testing-tool' ) !== false ):
+					case ( false !== strpos( $ua, 'compatible; google-structured-data-testing-tool' ) ):
+
 						self::$cache_crawler_name = 'google';
+
 						break;
 
 					/**
 					 * "Pinterest/0.2 (+http://www.pinterest.com/bot.html)"
 					 */
-					case ( strpos( $ua, 'pinterest/' ) !== false ):
-					case ( strpos( $ua, 'pinterestbot/' ) !== false ):
+					case ( false !== strpos( $ua, 'pinterest/' ) ):
+					case ( false !== strpos( $ua, 'pinterestbot/' ) ):
+
 						self::$cache_crawler_name = 'pinterest';
+
 						break;
 
 					/**
 					 * "Twitterbot/1.0"
 					 */
-					case ( strpos( $ua, 'twitterbot/' ) !== false ):
+					case ( false !== strpos( $ua, 'twitterbot/' ) ):
 						self::$cache_crawler_name = 'twitter';
 						break;
 
 					/**
 					 * "W3C_Validator/1.3 http://validator.w3.org/services"
 					 */
-					case ( strpos( $ua, 'w3c_validator/' ) !== false ):
+					case ( false !== strpos( $ua, 'w3c_validator/' ) ):
+
 						self::$cache_crawler_name = 'w3c';
+
 						break;
 
 					/**
 					 * "Validator.nu/LV http://validator.w3.org/services"
 					 */
-					case ( strpos( $ua, 'validator.nu/' ) !== false ):
+					case ( false !== strpos( $ua, 'validator.nu/' ) ):
+
 						self::$cache_crawler_name = 'w3c';
+
 						break;
 
 					/**
 					 * "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MTC19V) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.81 Mobile Safari/537.36 (compatible; validator.ampproject.org) AppEngine-Google; (+http://code.google.com/appengine; appid: s~amp-validator)"
 					 */
-					case ( strpos( $ua, 'validator.ampproject.org' ) !== false ):
+					case ( false !== strpos( $ua, 'validator.ampproject.org' ) ):
+
 						self::$cache_crawler_name = 'amp';
+
 						break;
 
 					default:
+
 						self::$cache_crawler_name = 'none';
+
 						break;
 				}
 
@@ -1816,30 +1982,55 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 			return self::$cache_crawler_name;
 		}
 
-		public static function a2aa( $a ) {
-			$aa = array();
-			foreach ( $a as $i ) {
-				$aa[][] = $i;
+		public static function is_assoc( $mixed ) {
+
+			if ( is_array( $mixed ) ) {
+				return is_numeric( implode( array_keys( $mixed ) ) ) ? false : true;
 			}
-			return $aa;
+
+			return false;
 		}
 
-		public static function is_assoc( $arr ) {
-			if ( ! is_array( $arr ) ) {
-				return false;
-			} else {
-				return is_numeric( implode( array_keys( $arr ) ) ) ? false : true;
+		public static function a_to_aa( array $arr ) {
+
+			$arr_arr = array();
+
+			foreach ( $arr as $el ) {
+				$arr_arr[][] = $el;
 			}
+
+			return $arr_arr;
+		}
+
+		/**
+		 * Returns the number of bytes in a serialized array.
+		 */
+		public static function serialized_len( array $arr ) {
+
+			$serialized = serialize( $arr );
+
+			if ( function_exists( 'mb_strlen' ) ) {
+				return mb_strlen( $serialized, '8bit' );
+			}
+
+			return strlen( $serialized );
 		}
 
 		public static function get_opts_begin( $str, array $opts ) {
+
 			$found = array();
+
 			foreach ( $opts as $key => $value ) {
 				if ( strpos( $key, $str ) === 0 ) {
-					$found[$key] = $value;
+					$found[ $key ] = $value;
 				}
 			}
+
 			return $found;
+		}
+
+		public static function natksort( &$arr ) {
+			return uksort( $arr, 'strnatcmp' );
 		}
 
 		/**
@@ -1853,17 +2044,18 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 
 			foreach ( $match as $key ) {
 
-				if ( $replace !== false ) {
+				if ( false !== $replace ) {
 
 					$fixed = preg_replace( $pattern, $replace, $key );
 
-					$found[$fixed] = $input[$key];
+					$found[ $fixed ] = $input[ $key ];
+
 				} else {
-					$found[$key] = $input[$key];
+					$found[ $key ] = $input[ $key ];
 				}
 
-				if ( $remove !== false ) {
-					unset( $input[$key] );
+				if ( false !== $remove ) {
+					unset( $input[ $key ] );
 				}
 			}
 
@@ -1871,32 +2063,42 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		}
 
 		public static function rename_keys( &$opts = array(), $key_names = array(), $modifiers = true ) {
+
 			foreach ( $key_names as $old_name => $new_name ) {
+
 				if ( empty( $old_name ) ) { // Just in case.
 					continue;
 				}
+
 				$old_name_preg = $modifiers ? '/^' . $old_name . '(:is|:use|#.*|_[0-9]+)?$/' : '/^' . $old_name . '$/';
 
 				foreach ( preg_grep( $old_name_preg, array_keys ( $opts ) ) as $old_name_local ) {
+
 					if ( ! empty( $new_name ) ) { // Can be empty to remove option.
+
 						$new_name_local = preg_replace( $old_name_preg, $new_name . '$1', $old_name_local );
+
 						$opts[$new_name_local] = $opts[$old_name_local];
 					}
+
 					unset( $opts[$old_name_local] );
 				}
 			}
 		}
 
 		public static function next_key( $needle, array &$input, $loop = true ) {
+
 			$keys = array_keys( $input );
-			$pos = array_search( $needle, $keys );
-			if ( $pos !== false ) {
+			$pos  = array_search( $needle, $keys );
+
+			if ( false !== $pos ) {
 				if ( isset( $keys[ $pos + 1 ] ) ) {
 					return $keys[ $pos + 1 ];
 				} elseif ( true === $loop ) {
 					return $keys[0];
 				}
 			}
+
 			return false;
 		}
 
@@ -1904,19 +2106,26 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		 * Move an associative array element to the end.
 		 */
 		public static function move_to_end( array &$arr, $key ) {
+
 			if ( array_key_exists( $key, $arr ) ) {
-				$val = $arr[$key];
-				unset( $arr[$key] );
-				$arr[$key] = $val;
+
+				$val = $arr[ $key ];
+
+				unset( $arr[ $key ] );
+
+				$arr[ $key ] = $val;
 			}
+
 			return $arr;
 		}
 
 		public static function move_to_front( array &$arr, $key ) {
+
 			if ( array_key_exists( $key, $arr ) ) {
-				$val = $arr[$key];
+				$val = $arr[ $key ];
 				$arr = array_merge( array( $key => $val ), $arr );
 			}
+
 			return $arr;
 		}
 
@@ -1924,6 +2133,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		 * Returns the modified array.
 		 */
 		public static function get_before_key( array $arr, $match_key, $mixed, $add_value = '' ) {
+
 			return self::insert_in_array( 'before', $arr, $match_key, $mixed, $add_value );
 		}
 
@@ -1931,13 +2141,15 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		 * Returns the modified array.
 		 */
 		public static function get_after_key( array $arr, $match_key, $mixed, $add_value = '' ) {
+
 			return self::insert_in_array( 'after', $arr, $match_key, $mixed, $add_value );
 		}
 
 		/**
-		 * returns the modified array.
+		 * Returns the modified array.
 		 */
 		public static function get_replace_key( array $arr, $match_key, $mixed, $add_value = '' ) {
+
 			return self::insert_in_array( 'replace', $arr, $match_key, $mixed, $add_value );
 		}
 
@@ -1945,6 +2157,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		 * Modifies the referenced array directly, and returns true or false.
 		 */
 		public static function add_before_key( array &$arr, $match_key, $mixed, $add_value = '' ) {
+
 			return self::insert_in_array( 'before', $arr, $match_key, $mixed, $add_value, true ); // $ret_matched = true.
 		}
 
@@ -1952,6 +2165,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		 * Modifies the referenced array directly, and returns true or false.
 		 */
 		public static function add_after_key( array &$arr, $match_key, $mixed, $add_value = '' ) {
+
 			return self::insert_in_array( 'after', $arr, $match_key, $mixed, $add_value, true ); // $ret_matched = true.
 		}
 
@@ -1959,22 +2173,30 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		 * Modifies the referenced array directly, and returns true or false.
 		 */
 		public static function do_replace_key( array &$arr, $match_key, $mixed, $add_value = '' ) {
+
 			return self::insert_in_array( 'replace', $arr, $match_key, $mixed, $add_value, true ); // $ret_matched = true.
 		}
 
 		private static function insert_in_array( $rel_pos, array &$arr, $match_key, $mixed, $add_value, $ret_matched = false ) {
+
 			$matched = false;
+
 			if ( array_key_exists( $match_key, $arr ) ) {
+
 				$new_array = array();
+
 				foreach ( $arr as $key => $value ) {
+
 					if ( $rel_pos === 'after' ) {
-						$new_array[$key] = $value;
+						$new_array[ $key ] = $value;
 					}
+
 					/**
 					 * Add new value before/after the matched key.
 					 * Replace the matched key by default (no test required).
 					 */
 					if ( $key === $match_key ) {
+
 						if ( is_array( $mixed ) ) {
 							$new_array = array_merge( $new_array, $mixed );
 						} elseif ( is_string( $mixed ) ) {
@@ -1982,14 +2204,20 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 						} else {
 							$new_array[] = $add_value;
 						}
+
 						$matched = true;
 					}
-					if ( $rel_pos === 'before' )
-						$new_array[$key] = $value;
+
+					if ( $rel_pos === 'before' ) {
+						$new_array[ $key ] = $value;
+					}
 				}
+
 				$arr = $new_array;
+
 				unset( $new_array );
 			}
+
 			return $ret_matched ? $matched : $arr; // Return true/false or the array (default).
 		}
 
@@ -2018,14 +2246,17 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		}
 
 		public static function array_flatten( array $arr ) {
+
 			$return = array();
+
 		        foreach ( $arr as $key => $value ) {
 				if ( is_array( $value ) ) {
 					$return = array_merge( $return, self::array_flatten( $value ) );
 				} else {
-					$return[$key] = $value;
+					$return[ $key ] = $value;
 				}
 			}
+
 			return $return;
 		}
 
@@ -2090,9 +2321,11 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		}
 
 		public static function get_first_value( array $arr ) {
+
 			foreach ( $arr as $value ) {
 				return $value;
 			}
+
 			return null;	// Return null if array is empty.
 		}
 
@@ -2102,12 +2335,16 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		}
 
 		public static function get_last_num( array $input ) {
+
 			list( $first, $last, $next ) = self::get_first_last_next_nums( $input );
+
 			return $last;
 		}
 
 		public static function get_next_num( array $input ) {
+
 			list( $first, $last, $next ) = self::get_first_last_next_nums( $input );
+
 			return $next;
 		}
 
@@ -2139,10 +2376,13 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		}
 
 		/**
-		 * Return the first url from the associative array (og:image:secure_url, og:image:url, og:image).
+		 * Return the first URL from the associative array (og:image:secure_url, og:image:url, og:image).
 		 */
-		public static function get_mt_media_url( array $assoc, $mt_media_pre = 'og:image', 
-			array $mt_suffixes = array( ':secure_url', ':url', '', ':embed_url' ) ) {
+		public static function get_mt_media_url( array $assoc, $mt_media_pre = 'og:image', $mt_suffixes = null ) {
+
+			if ( ! is_array( $mt_suffixes ) ) {
+				$mt_suffixes = array( ':secure_url', ':url', '', ':embed_url' );
+			}
 
 			/**
 			 * Check for two dimensional arrays and keep following the first array element.
@@ -2203,6 +2443,10 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 				$mt_pre . ':condition'                       => '',
 				$mt_pre . ':ean'                             => '',
 				$mt_pre . ':expiration_time'                 => '',
+				$mt_pre . ':gtin8'                           => '',	// Non-standard / internal meta tag.
+				$mt_pre . ':gtin12'                          => '',	// Non-standard / internal meta tag.
+				$mt_pre . ':gtin13'                          => '',	// Non-standard / internal meta tag.
+				$mt_pre . ':gtin14'                          => '',	// Non-standard / internal meta tag.
 				$mt_pre . ':is_product_shareable'            => '',
 				$mt_pre . ':isbn'                            => '',
 				$mt_pre . ':material'                        => '',
@@ -2243,13 +2487,14 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 				$mt_pre . ':shipping_weight:value'           => '',
 				$mt_pre . ':shipping_weight:units'           => '',
 				$mt_pre . ':size'                            => '',
+				$mt_pre . ':sku'                             => '',	// Non-standard / internal meta tag.
 				$mt_pre . ':target_gender'                   => '',
 				$mt_pre . ':upc'                             => '',
 				$mt_pre . ':weight:value'                    => '',
 				$mt_pre . ':weight:units'                    => '',
 			);
 
-			if ( isset( $mt_og['og:type'] ) && $mt_og['og:type'] === 'product' ) {
+			if ( isset( $mt_og[ 'og:type' ] ) && $mt_og[ 'og:type' ] === 'product' ) {
 				$og_ret[ $mt_pre ]              = array();		// Non-standard / internal meta tag.
 				$og_ret[ $mt_pre . ':offers' ]  = array();		// Non-standard / internal meta tag.
 				$og_ret[ $mt_pre . ':reviews' ] = array();		// Non-standard / internal meta tag.
@@ -2322,7 +2567,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 			 * while array_key_exists() does, so use array_key_exists() here.
 			 */
 			if ( array_key_exists( 'og:type', $mt_og ) ) {
-				return array_merge( array( 'og:type' => $mt_og['og:type'] ), $og_ret, $mt_og );
+				return array_merge( array( 'og:type' => $mt_og[ 'og:type' ] ), $og_ret, $mt_og );
 			}
 
 			return array_merge( $og_ret, $mt_og );
@@ -2355,6 +2600,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		}
 
 		public static function get_site_name_alt( array $opts, $mixed = 'current' ) {
+
 			return self::get_key_value( 'site_name_alt', $opts, $mixed );
 		}
 
@@ -2428,7 +2674,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 
 			$key_locale = self::get_key_locale( $key, $opts, $mixed );
 
-			$opts[$key_locale] = $value;
+			$opts[ $key_locale ] = $value;
 		}
 
 		/**
@@ -2505,10 +2751,10 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 			 * to cache both self::get_locale() and SucomUtil::get_locale() in the
 			 * same variable.
 			 */
-			$idx = is_array( $mixed ) ? $mixed['name'] . '_' . $mixed['id'] : $mixed;
+			$key = is_array( $mixed ) ? $mixed[ 'name' ] . '_' . $mixed[ 'id' ] : $mixed;
 
-			if ( isset( self::$cache_locale_names[$idx] ) ) {
-				return self::$cache_locale_names[$idx];
+			if ( isset( self::$cache_locale_names[ $key ] ) ) {
+				return self::$cache_locale_names[ $key ];
 			}
 
 			if ( $mixed === 'default' ) {
@@ -2529,7 +2775,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 						$ms_locale = get_site_option( 'WPLANG' );
 					}
 
-					if ( $ms_locale !== false ) {
+					if ( false !== $ms_locale ) {
 						$locale = $ms_locale;
 					}
 
@@ -2537,7 +2783,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 
 					$db_locale = get_option( 'WPLANG' );
 
-					if ( $db_locale !== false ) {
+					if ( false !== $db_locale ) {
 						$locale = $db_locale;
 					}
 				}
@@ -2555,18 +2801,34 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 				}
 			}
 
-			return self::$cache_locale_names[$idx] = apply_filters( 'sucom_locale', $locale, $mixed );
+			return self::$cache_locale_names[ $key ] = apply_filters( 'sucom_locale', $locale, $mixed );
 		}
 
 		public static function get_available_locales() {
 
 			$available_locales = get_available_languages(); // Since wp 3.0.
 
+			$default_locale = self::get_locale( 'default' );
+
+			if ( ! is_array( $available_locales ) ) {	// Just in case.
+
+				$available_locales = array( $default_locale );
+
+			} elseif ( ! in_array( $default_locale, $available_locales ) ) {	// Just in case.
+
+				$available_locales[] = $default_locale;
+			}
+
+			sort( $available_locales );
+
 			return apply_filters( 'sucom_available_locales', $available_locales );
 		}
 
 		/**
-		 * Examples:
+		 * Results a salt string based on $mod values.
+		 *
+		 * Example mod salts:
+		 *
 		 * 	'post:123'
 		 * 	'term:456_tax:post_tag'
 		 * 	'post:0_url:https://example.com/a-subject/'
@@ -2575,28 +2837,28 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 
 			$mod_salt = '';
 
-			if ( ! empty( $mod['name'] ) ) {
+			if ( ! empty( $mod[ 'name' ] ) ) {
 
-				$mod_salt .= '_' . $mod['name'] . ':';
+				$mod_salt .= '_' . $mod[ 'name' ] . ':';
 
-				if ( $mod['id'] === false ) {
+				if ( $mod[ 'id' ] === false ) {
 					$mod_salt .= 'false';
-				} elseif ( $mod['id'] === true ) {
+				} elseif ( $mod[ 'id' ] === true ) {
 					$mod_salt .= 'true';
-				} elseif ( empty( $mod['id'] ) ) {
+				} elseif ( empty( $mod[ 'id' ] ) ) {
 					$mod_salt .= '0';
 				} else {
-					$mod_salt .= $mod['id'];
+					$mod_salt .= $mod[ 'id' ];
 				}
 			}
 
-			if ( ! empty( $mod['tax_slug'] ) ) {
-				$mod_salt .= '_tax:' . $mod['tax_slug'];
+			if ( ! empty( $mod[ 'tax_slug' ] ) ) {
+				$mod_salt .= '_tax:' . $mod[ 'tax_slug' ];
 			}
 
-			if ( empty( $mod['id'] ) ) {
+			if ( empty( $mod[ 'id' ] ) ) {
 
-				if ( ! empty( $mod['is_home'] ) ) {
+				if ( ! empty( $mod[ 'is_home' ] ) ) {
 					$mod_salt .= '_home';
 				}
 
@@ -2644,12 +2906,12 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 
 			$current_time = time();
 
-			if ( isset( $data_array['__created_at'] ) ) {
+			if ( isset( $data_array[ '__created_at' ] ) ) {
 
 				/**
 				 * Adjust the expiration time by removing the difference.
 				 */
-				$expires_in_secs = $cache_exp_secs - ( $current_time - $data_array['__created_at'] );
+				$expires_in_secs = $cache_exp_secs - ( $current_time - $data_array[ '__created_at' ] );
 
 				if ( $expires_in_secs < $reset_at_secs ) {
 					$expires_in_secs = $cache_exp_secs;
@@ -2659,7 +2921,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 
 				$expires_in_secs = $cache_exp_secs;
 
-				$data_array['__created_at'] = $current_time;
+				$data_array[ '__created_at' ] = $current_time;
 			}
 
 			set_transient( $cache_id, $data_array, $expires_in_secs );
@@ -2676,9 +2938,9 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 
 			foreach ( $checkbox as $key => $val ) {
 				if ( ! array_key_exists( $key, $opts ) ) {
-					$opts[$key] = 0; // Add missing checkbox as empty.
+					$opts[ $key ] = 0; // Add missing checkbox as empty.
 				}
-				unset ( $opts['is_checkbox_' . $key] );
+				unset ( $opts[ 'is_checkbox_' . $key] );
 			}
 			return $opts;
 		}
@@ -2715,7 +2977,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 
 				$screen_base = self::get_screen_base();
 
-				if ( $screen_base !== false ) {
+				if ( false !== $screen_base ) {
 					switch ( $screen_base ) {
 						case 'edit':		// post/page list
 						case 'edit-tags':	// categories/tags list
@@ -2777,32 +3039,43 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 			$ret = false;
 
 			if ( is_numeric( $use_post ) && $use_post > 0 ) {
+
 				$ret = self::is_post_exists( $use_post );
 
-			} elseif ( true === $use_post && ! empty( $GLOBALS['post']->ID ) ) {
+			} elseif ( true === $use_post && ! empty( $GLOBALS[ 'post' ]->ID ) ) {
+
 				$ret = true;
 
 			} elseif ( false === $use_post && is_post_type_archive() ) {
+
 				$ret = true;
 
 			} elseif ( false === $use_post && is_singular() ) {
+
 				$ret = true;
 
 			} elseif ( ! is_home() && is_front_page() && get_option( 'show_on_front' ) === 'page' ) { // Static front page.
+
 				$ret = true;
 
 			} elseif ( is_home() && ! is_front_page() && get_option( 'show_on_front' ) === 'page' ) { // Static posts page.
+
 				$ret = true;
 
 			} elseif ( is_admin() ) {
+
 				$screen_base = self::get_screen_base();
+
 				if ( $screen_base === 'post' ) {
 					$ret = true;
 				} elseif ( false === $screen_base && // Called too early for screen.
 					( self::get_request_value( 'post_ID', 'POST' ) !== '' || // Uses sanitize_text_field().
 						self::get_request_value( 'post', 'GET' ) !== '' ) ) {
+
 					$ret = true;
-				} elseif ( basename( $_SERVER['PHP_SELF'] ) === 'post-new.php' ) {
+
+				} elseif ( basename( $_SERVER[ 'PHP_SELF' ] ) === 'post-new.php' ) {
+
 					$ret = true;
 				}
 			}
@@ -2818,9 +3091,9 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 
 				$post_obj = get_post( $use_post );
 
-			} elseif ( true === $use_post && ! empty( $GLOBALS['post']->ID ) ) {
+			} elseif ( true === $use_post && ! empty( $GLOBALS[ 'post' ]->ID ) ) {
 
-				$post_obj = $GLOBALS['post'];
+				$post_obj = $GLOBALS[ 'post' ];
 
 			/**
 			 * The 'sucom_is_post_page' filter is used by the buddypress module.
@@ -2866,18 +3139,18 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 			}
 		}
 
-		public static function maybe_load_post( $id, $force = false ) {
+		public static function maybe_load_post( $post_id, $force = false ) {
 
 			global $post;
 
-			if ( empty( $post ) || $force ) {
+			if ( $force || ! isset( $post->ID ) || $post->ID !== $post_id ) {
 
-				$post = self::get_post_object( $id, 'object' );
+				$post = self::get_post_object( $post_id, 'object' );
 
 				return true;
-			} else {
-				return false;
 			}
+
+			return false;
 		}
 
 		public static function is_term_page( $term_id = 0, $tax_slug = '' ) {
@@ -2923,8 +3196,8 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 
 			} elseif ( is_admin() ) {
 
-				if ( self::is_term_page() &&
-					self::get_request_value( 'taxonomy' ) === 'category' ) { // Uses sanitize_text_field().
+				if ( self::is_term_page()
+					&& self::get_request_value( 'taxonomy' ) === 'category' ) { // Uses sanitize_text_field().
 
 					$ret = true;
 				}
@@ -2947,8 +3220,8 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 
 			} elseif ( is_admin() ) {
 
-				if ( self::is_term_page() &&
-					self::get_request_value( 'taxonomy' ) === '_tag' ) { // Uses sanitize_text_field().
+				if ( self::is_term_page()
+					&& self::get_request_value( 'taxonomy' ) === '_tag' ) { // Uses sanitize_text_field().
 
 					$ret = true;
 				}
@@ -3005,6 +3278,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		}
 
 		public static function is_author_page( $user_id = 0 ) {
+
 			return self::is_user_page( $user_id );
 		}
 
@@ -3024,7 +3298,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 
 				$screen_base = self::get_screen_base();
 
-				if ( $screen_base !== false ) {
+				if ( false !== $screen_base ) {
 
 					switch ( $screen_base ) {
 
@@ -3039,7 +3313,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 					}
 
 				} elseif ( self::get_request_value( 'user_id' ) !== '' ||  // Called too early for screen.
-					basename( $_SERVER['PHP_SELF'] ) === 'profile.php' ) {
+					basename( $_SERVER[ 'PHP_SELF' ] ) === 'profile.php' ) {
 
 					$ret = true;
 				}
@@ -3072,6 +3346,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		}
 
 		public static function get_author_object( $user_id = 0, $output = 'object' ) {
+
 			return self::get_user_object( $user_id, $ret );
 		}
 
@@ -3185,23 +3460,23 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		public static function get_request_value( $key, $method = 'ANY', $default = '' ) {
 
 			if ( $method === 'ANY' ) {
-				$method = $_SERVER['REQUEST_METHOD'];
+				$method = $_SERVER[ 'REQUEST_METHOD' ];
 			}
 
 			switch( $method ) {
 
 				case 'POST':
 
-					if ( isset( $_POST[$key] ) ) {
-						return sanitize_text_field( $_POST[$key] );
+					if ( isset( $_POST[ $key ] ) ) {
+						return sanitize_text_field( $_POST[ $key ] );
 					}
 
 					break;
 
 				case 'GET':
 
-					if ( isset( $_GET[$key] ) ) {
-						return sanitize_text_field( $_GET[$key] );
+					if ( isset( $_GET[ $key ] ) ) {
+						return sanitize_text_field( $_GET[ $key ] );
 					}
 
 					break;
@@ -3275,6 +3550,46 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 			return mb_decode_numericentity( $matches[0], $convmap, 'UTF-8' );
 		}
 
+		/**
+		 * Decode a URL and add query arguments. Returns false on error.
+		 */
+		public static function decode_url_add_query( $url, array $args ) {
+
+			if ( filter_var( $url, FILTER_VALIDATE_URL ) === false ) {	// Check for invalid URL.
+				return false;
+			}
+
+			$parsed_url = parse_url( SucomUtil::decode_html( urldecode( $url ) ) );
+
+			if ( empty( $parsed_url ) ) {
+				return false;
+			}
+
+			if ( empty( $parsed_url[ 'query' ] ) ) {
+				$parsed_url[ 'query' ] = http_build_query( $args );
+			} else {
+				$parsed_url[ 'query' ] .= '&' . http_build_query( $args );
+			}
+
+			$url = self::unparse_url( $parsed_url );
+
+			return $url;
+		}
+
+		public static function unparse_url( $parsed_url ) {
+
+			$scheme   = isset( $parsed_url[ 'scheme' ] )   ? $parsed_url[ 'scheme' ] . '://' : '';
+			$user     = isset( $parsed_url[ 'user' ] )     ? $parsed_url[ 'user' ] : '';
+			$pass     = isset( $parsed_url[ 'pass' ] )     ? ':' . $parsed_url[ 'pass' ]  : '';
+			$host     = isset( $parsed_url[ 'host' ] )     ? $parsed_url[ 'host' ] : '';
+			$port     = isset( $parsed_url[ 'port' ] )     ? ':' . $parsed_url[ 'port' ] : '';
+			$path     = isset( $parsed_url[ 'path' ] )     ? $parsed_url[ 'path' ] : '';
+			$query    = isset( $parsed_url[ 'query' ] )    ? '?' . $parsed_url[ 'query' ] : '';
+			$fragment = isset( $parsed_url[ 'fragment' ] ) ? '#' . $parsed_url[ 'fragment' ] : '';
+
+			return $scheme . $user . $pass . ( $user || $pass ? '@' : '' ) . $host . $port . $path . $query . $fragment;
+		}
+
 		public static function strip_html( $text ) {
 
 			$text = self::strip_shortcodes( $text );                                // Remove any remaining shortcodes.
@@ -3296,7 +3611,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		 */
 		public static function strip_shortcodes( $text ) {
 
-			if ( strpos( $text, '[' ) === false ) { // Stop here if no shortcodes.
+			if ( strpos( $text, '[' ) === false ) { // Optimize and check if there are shortcodes.
 				return $text;
 			}
 
@@ -3307,7 +3622,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 			}
 
 			$shortcodes_preg = apply_filters( 'sucom_strip_shortcodes_preg', array(
-				'/\[\/?(cs_element_|mk_|rev_slider_|vc_)[^\]]+\]/',
+				'/\[\/?(cs_element_|et_|mk_|rev_slider_|vc_)[^\]]+\]/',
 			) );
 
 			$text = preg_replace( $shortcodes_preg, ' ', $text );
@@ -3353,12 +3668,14 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 
 		public static function esc_url_encode( $url, $wp_esc_url = true ) {
 
-			$url = self::decode_html( $url ); // Just in case.
+			$decoded_url = self::decode_html( $url ); // Just in case - decode HTML entities.
+			$clean_url   = $wp_esc_url ? esc_url_raw( $decoded_url ) : $decoded_url;
+			$encoded_url = urlencode( $clean_url );
 
 			$replace = array( '%21', '%2A', '%27', '%28', '%29', '%3B', '%3A', '%40', '%26', '%3D', '%2B', '%24', '%2C', '%2F', '%3F', '%25', '%23', '%5B', '%5D' );
 			$allowed = array( '!', '*', '\'', '(', ')', ';', ':', '@', '&', '=', '+', '$', ',', '/', '?', '%', '#', '[', ']' );
 
-			return str_replace( $replace, $allowed, urlencode( ( $wp_esc_url ? esc_url_raw( $url ) : $url ) ) );
+			return str_replace( $replace, $allowed, $encoded_url );
 		}
 
 		public static function encode_html_emoji( $html ) {
@@ -3370,12 +3687,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 			}
 
 			$html = htmlentities( $html, ENT_QUOTES, $charset, false ); // $double_encode = false.
-
-			if ( function_exists( 'wp_encode_emoji' ) ) {
-				$html = wp_encode_emoji( $html );
-			} elseif ( method_exists( 'SucomUtilWP', 'wp_encode_emoji' ) ) { // Just in case.
-				$html = SucomUtilWP::wp_encode_emoji( $html );
-			}
+			$html = SucomUtilWP::wp_encode_emoji( $html );
 
 			return $html;
 		}
@@ -3384,10 +3696,12 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		 * Used to decode Facebook video urls.
 		 */
 		public static function replace_unicode_escape( $str ) {
+
 			return preg_replace_callback( '/\\\\u([0-9a-f]{4})/i', array( __CLASS__, 'replace_unicode_escape_callback' ), $str );
 		}
 
 		private static function replace_unicode_escape_callback( $match ) {
+
 			return mb_convert_encoding( pack( 'H*', $match[1] ), 'UTF-8', 'UCS-2' );
 		}
 
@@ -3418,6 +3732,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		 * Deprecated on 2018/09/20.
 		 */
 		public static function get_json_decode_scripts( $html, $assoc = true ) {
+
 			return self::get_json_scripts( $html );
 		}
 
@@ -3479,20 +3794,20 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 
 		/**
 		 * Example:
-		 *      'article' => 'Item Type Article',
-		 *      'article#news:no_load' => 'Item Type NewsArticle',
-		 *      'article#tech:no_load' => 'Item Type TechArticle',
+		 *      'article'              => 'Schema Type Article',
+		 *      'article#news:no_load' => 'Schema Type NewsArticle',
+		 *      'article#tech:no_load' => 'Schema Type TechArticle',
 		 */
 		public static function get_lib_stub_action( $lib_id ) {
 
-			if ( ( $pos = strpos( $lib_id, ':' ) ) !== false ) {
+			if ( false !== ( $pos = strpos( $lib_id, ':' ) ) ) {
 				$action = substr( $lib_id, $pos + 1 );
 				$lib_id = substr( $lib_id, 0, $pos );
 			} else {
 				$action = false;
 			}
 
-			if ( ( $pos = strpos( $lib_id, '#' ) ) !== false ) {
+			if ( false !== ( $pos = strpos( $lib_id, '#' ) ) ) {
 				$stub = substr( $lib_id, $pos + 1 );
 				$lib_id = substr( $lib_id, 0, $pos );
 			} else {
@@ -3509,12 +3824,15 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 			} elseif ( function_exists( 'wp_roles' ) ) {
 				return wp_roles()->is_role( $role );
 			} else {
-				return $GLOBALS['wp_roles']->is_role( $role );
+				return $GLOBALS[ 'wp_roles' ]->is_role( $role );
 			}
 		}
 
 		public static function get_user_ids_by_roles( array $roles, $blog_id = null ) {
 
+			/**
+			 * Get the user ID => name associative array, and keep only the array keys.
+			 */
 			$user_ids = array_keys( self::get_user_names_by_roles( $roles, $blog_id ) );
 
 			rsort( $user_ids );	// Newest user first.
@@ -3689,6 +4007,9 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 			}
 		}
 
+		/**
+		 * Returns an associative array.
+		 */
 		public static function get_hours_range( $start_secs = 0, $end_secs = 86400, $step_secs = 3600, $time_format = 'g:i a' ) {
 
 			$times = array();
@@ -3698,9 +4019,9 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 				$hour_mins = gmdate( 'H:i', $ts );
 
 				if ( ! empty( $time_format ) ) {
-					$times[$hour_mins] = gmdate( $time_format, $ts );
+					$times[ $hour_mins ] = gmdate( $time_format, $ts );
 				} else {
-					$times[$hour_mins] = $hour_mins;
+					$times[ $hour_mins ] = $hour_mins;
 				}
 			}
 
@@ -3756,20 +4077,20 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 
 			global $_wp_additional_image_sizes;
 
-			if ( isset( $_wp_additional_image_sizes[$size_name]['width'] ) ) {
-				$width = intval( $_wp_additional_image_sizes[$size_name]['width'] );
+			if ( isset( $_wp_additional_image_sizes[$size_name][ 'width' ] ) ) {
+				$width = intval( $_wp_additional_image_sizes[$size_name][ 'width' ] );
 			} else {
 				$width = get_option( $size_name . '_size_w' );
 			}
 
-			if ( isset( $_wp_additional_image_sizes[$size_name]['height'] ) ) {
-				$height = intval( $_wp_additional_image_sizes[$size_name]['height'] );
+			if ( isset( $_wp_additional_image_sizes[$size_name][ 'height' ] ) ) {
+				$height = intval( $_wp_additional_image_sizes[$size_name][ 'height' ] );
 			} else {
 				$height = get_option( $size_name . '_size_h' );
 			}
 
-			if ( isset( $_wp_additional_image_sizes[$size_name]['crop'] ) ) {
-				$crop = $_wp_additional_image_sizes[$size_name]['crop'];
+			if ( isset( $_wp_additional_image_sizes[$size_name][ 'crop' ] ) ) {
+				$crop = $_wp_additional_image_sizes[$size_name][ 'crop' ];
 			} else {
 				$crop = get_option( $size_name . '_crop' );
 			}
@@ -3786,7 +4107,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		 */
 		public static function get_atts_css_attr( array $atts, $css_name, $css_extra = '' ) {
 
-			$css_class = $css_name . '-' . ( empty( $atts['css_class'] ) ? 'button' : $atts['css_class'] );
+			$css_class = $css_name . '-' . ( empty( $atts[ 'css_class' ] ) ? 'button' : $atts[ 'css_class' ] );
 
 			if ( ! empty( $css_extra ) ) {
 				$css_class = $css_extra . ' ' . $css_class;
@@ -3797,9 +4118,9 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 
 		public static function get_atts_src_id( array $atts, $src_name ) {
 
-			$src_id = $src_name . '-' . ( empty( $atts['css_id'] ) ? 'button' : $atts['css_id'] );
+			$src_id = $src_name . '-' . ( empty( $atts[ 'css_id' ] ) ? 'button' : $atts[ 'css_id' ] );
 
-			if ( ! empty( $atts['use_post'] ) || is_singular() || in_the_loop() ) {
+			if ( ! empty( $atts[ 'use_post' ] ) || is_singular() || in_the_loop() ) {
 
 				global $post;
 
@@ -3812,7 +4133,8 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		}
 
 		public static function is_toplevel_edit( $hook_name ) {
-			return strpos( $hook_name, 'toplevel_page_' ) !== false && (
+
+			return false !== strpos( $hook_name, 'toplevel_page_' ) && (
 				( self::get_request_value( 'action', 'GET' ) === 'edit' && // Uses sanitize_text_field().
 					(int) self::get_request_value( 'post', 'GET' ) > 0 ) ||
 				( self::get_request_value( 'action', 'GET' ) === 'create_new' &&
@@ -3821,7 +4143,9 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		}
 
 		public static function is_true( $mixed, $allow_null = false ) {
+
 			$ret_bool = is_string( $mixed ) ? filter_var( $mixed, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : (bool) $mixed;
+
 		        return null === $ret_bool && ! $allow_null ? false : $ret_bool;
 		}
 
@@ -3829,6 +4153,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		 * Converts string to boolean.
 		 */
 		public static function get_bool( $mixed ) {
+
 			return is_string( $mixed ) ? filter_var( $mixed, FILTER_VALIDATE_BOOLEAN ) : (bool) $mixed;
 		}
 
@@ -3837,9 +4162,9 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		 */
 		public static function get_header_files( $skip_backups = true ) {
 
-			$ret_array = array();
-			$parent_dir = get_template_directory();
-			$child_dir = get_stylesheet_directory();
+			$ret_array    = array();
+			$parent_dir   = get_template_directory();
+			$child_dir    = get_stylesheet_directory();
 			$header_files = (array) glob( $parent_dir . '/header*.php' );
 
 			if ( $parent_dir !== $child_dir ) {
@@ -3847,10 +4172,13 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 			}
 
 			foreach ( $header_files as $tmpl_file ) {
+
 				if ( $skip_backups && preg_match( '/~backup-[0-9-]+$/', $tmpl_file ) ) { // Skip backup files.
 					continue;
 				}
+
 				$tmpl_base = basename( $tmpl_file );
+
 				$ret_array[$tmpl_base] = $tmpl_file; // Child template overwrites parent.
 			}
 
@@ -3858,22 +4186,27 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		}
 
 		public static function get_at_name( $val ) {
+
 			if ( $val !== '' ) {
-				$val = substr( preg_replace( array( '/^.*\//',
-					'/[^a-zA-Z0-9_]/' ), '', $val ), 0, 15 );
+
+				$val = substr( preg_replace( array( '/^.*\//', '/[^a-zA-Z0-9_]/' ), '', $val ), 0, 15 );
+
 				if ( ! empty( $val ) )  {
 					$val = '@' . $val;
 				}
 			}
+
 			return $val;
 		}
 
 		public static function is_amp() {
+
 			if ( ! defined( 'AMP_QUERY_VAR' ) ) {
 				$is_amp = false;
 			} else {
 				$is_amp = get_query_var( AMP_QUERY_VAR, false ) ? true : false;
 			}
+
 			return $is_amp;
 		}
 
@@ -3883,7 +4216,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 
 				$classname = apply_filters( $lca . '_load_lib', false, 'ext/compressor', 'SuextMinifyCssCompressor' );
 
-				if ( $classname !== false && class_exists( $classname ) ) {
+				if ( false !== $classname && class_exists( $classname ) ) {
 					$css_data = call_user_func( array( $classname, 'process' ), $css_data );
 				}
 			}
@@ -3892,19 +4225,25 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		}
 
 		public static function add_pkg_name( &$name, $type ) {
+
 			$name = self::get_pkg_name( $name, $type );
 		}
 
 		public static function get_pkg_name( $name, $type ) {
-			if ( strpos( $name, $type ) !== false ) {
+
+			if ( false !== strpos( $name, $type ) ) {
 				$name = preg_replace( '/^(.*) ' . $type . '( [\[\(].+[\)\]])?$/U', '$1$2', $name );
 			}
+
 			return preg_replace( '/^(.*)( [\[\(].+[\)\]])?$/U', '$1 ' . $type . '$2', $name );
 		}
 
 		public static function get_wp_hook_names( $filter_name ) {
+
 			global $wp_filter;
+
 			$hook_names = array();
+
 			if ( isset( $wp_filter[$filter_name]->callbacks ) ) {
 				foreach ( $wp_filter[$filter_name]->callbacks as $hook_prio => $hook_group ) {
 					foreach ( $hook_group as $hook_ref => $hook_info ) {
@@ -3914,37 +4253,51 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 					}
 				}
 			}
+
 			return $hook_names;
 		}
 
 		public static function get_hook_function_name( array $hook_info ) {
+
 			$hook_name = '';
-			if ( ! isset( $hook_info['function'] ) ) {              // Just in case.
+
+			if ( ! isset( $hook_info[ 'function' ] ) ) {              // Just in case.
+
 				return $hook_name;                              // Stop here - return an empty string.
-			} elseif ( is_array( $hook_info['function'] ) ) {       // Hook is a class / method.
-				$class_name = '';
+
+			} elseif ( is_array( $hook_info[ 'function' ] ) ) {       // Hook is a class / method.
+
+				$class_name    = '';
 				$function_name = '';
-				if ( is_object( $hook_info['function'][0] ) ) {
-					$class_name = get_class( $hook_info['function'][0] );
-				} elseif ( is_string( $hook_info['function'][0] ) ) {
-					$class_name = $hook_info['function'][0];
+
+				if ( is_object( $hook_info[ 'function' ][0] ) ) {
+					$class_name = get_class( $hook_info[ 'function' ][0] );
+				} elseif ( is_string( $hook_info[ 'function' ][0] ) ) {
+					$class_name = $hook_info[ 'function' ][0];
 				}
-				if ( is_string( $hook_info['function'][1] ) ) {
-					$function_name = $hook_info['function'][1];
+
+				if ( is_string( $hook_info[ 'function' ][1] ) ) {
+					$function_name = $hook_info[ 'function' ][1];
 
 				}
+
 				return $class_name . '::' . $function_name;
-			} elseif ( is_string ( $hook_info['function'] ) ) { // Hook is a function.
-				return $hook_info['function'];
+
+			} elseif ( is_string ( $hook_info[ 'function' ] ) ) { // Hook is a function.
+
+				return $hook_info[ 'function' ];
 			}
+
 			return $hook_name;
 		}
 		
 		public static function get_min_int() {
+
 			return defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : -2147483648;    // Since PHP 7.0.0.
 		}
 
 		public static function get_max_int() {
+
 			return defined( 'PHP_INT_MAX' ) ? PHP_INT_MAX : 2147483647;     // Since PHP 5.0.2.
 		}
 
@@ -3952,6 +4305,7 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		 * Allow for 0, but not true, false, null, or 'none'.
 		 */
 		public static function is_opt_id( $id ) {
+
 			if ( true === $id ) {
 				return false;
 			} elseif ( empty( $id ) && ! is_numeric( $id ) ) { // null or false.
@@ -3988,195 +4342,3 @@ if ( ! class_exists( 'SucomUtil' ) ) {
 		}
 	}
 }
-
-/**
- * SucomUtilWP is available in the lib/com/util.php library since 2017/11/14.
- */
-
-if ( ! class_exists( 'SucomUtilWP' ) ) {
-
-	class SucomUtilWP {
-
-		/**
-		 * wp_encode_emoji() is only available since WordPress v4.2.
-		 * Use the WordPress function if available, otherwise provide the same functionality.
-		 */
-		public static function wp_encode_emoji( $content ) {
-
-			if ( function_exists( 'wp_encode_emoji' ) ) {
-
-				return wp_encode_emoji( $content ); // Since wp 4.2.
-
-			} elseif ( function_exists( 'mb_convert_encoding' ) ) {
-
-				$regex = '/(
-				     \x23\xE2\x83\xA3               # Digits
-				     [\x30-\x39]\xE2\x83\xA3
-				   | \xF0\x9F[\x85-\x88][\xA6-\xBF] # Enclosed characters
-				   | \xF0\x9F[\x8C-\x97][\x80-\xBF] # Misc
-				   | \xF0\x9F\x98[\x80-\xBF]        # Smilies
-				   | \xF0\x9F\x99[\x80-\x8F]
-				   | \xF0\x9F\x9A[\x80-\xBF]        # Transport and map symbols
-				)/x';
-
-				if ( preg_match_all( $regex, $content, $all_matches ) ) {
-
-					if ( ! empty( $all_matches[1] ) ) {
-
-						foreach ( $all_matches[1] as $emoji ) {
-
-							$unpacked = unpack( 'H*', mb_convert_encoding( $emoji, 'UTF-32', 'UTF-8' ) );
-
-							if ( isset( $unpacked[1] ) ) {
-								$entity = '&#x' . ltrim( $unpacked[1], '0' ) . ';';
-								$content = str_replace( $emoji, $entity, $content );
-							}
-						}
-					}
-				}
-			}
-			return $content;
-		}
-
-		/**
-		 * Some themes and plugins have been known to hook the WordPress 'get_shortlink' filter 
-		 * and return an empty URL to disable the WordPress shortlink meta tag. This breaks the 
-		 * WordPress wp_get_shortlink() function and is a violation of the WordPress theme 
-		 * guidelines.
-		 *
-		 * This method calls the WordPress wp_get_shortlink() function, and if an empty string 
-		 * is returned, calls an unfiltered version of the same function.
-		 *
-		 * $context = 'blog', 'post' (default), 'media', or 'query'
-		 */
-		public static function wp_get_shortlink( $id = 0, $context = 'post', $allow_slugs = true ) {
-
-			$shortlink = '';
-
-			if ( function_exists( 'wp_get_shortlink' ) ) {
-				$shortlink = wp_get_shortlink( $id, $context, $allow_slugs ); // Since wp 3.0.
-			}
-
-			if ( empty( $shortlink ) || ! is_string( $shortlink) || filter_var( $shortlink, FILTER_VALIDATE_URL ) === false ) {
-				$shortlink = self::raw_wp_get_shortlink( $id, $context, $allow_slugs );
-			}
-
-			return $shortlink;
-		}
-
-		/**
-		 * Unfiltered version of wp_get_shortlink() from wordpress/wp-includes/link-template.php
-		 * Last synchronized with WordPress v4.9 on 2017/11/27.
-		 */
-		public static function raw_wp_get_shortlink( $id = 0, $context = 'post', $allow_slugs = true ) {
-		
-			$post_id = 0;
-			
-			if ( 'query' === $context && is_singular() ) {
-				$post_id = get_queried_object_id();
-				$post = get_post( $post_id );
-			} elseif ( 'post' === $context ) {
-				$post = get_post( $id );
-				if ( ! empty( $post->ID ) ) {
-					$post_id = $post->ID;
-				}
-			}
-
-			$shortlink = '';
-
-			if ( ! empty( $post_id ) ) {
-
-				$post_type = get_post_type_object( $post->post_type ); 
-
-				if ( 'page' === $post->post_type && $post->ID == get_option( 'page_on_front' ) && 'page' == get_option( 'show_on_front' ) ) {
-					$shortlink = home_url( '/' );
-				} elseif ( ! empty( $post_type->public ) ) {
-					$shortlink = home_url( '?p=' . $post_id );
-				}
-			} 
-			
-			return $shortlink;
-		}
-
-		/**
-		 * Unfiltered version of home_url() from wordpress/wp-includes/link-template.php
-		 * Last synchronized with WordPress v4.8.2 on 2017/10/22.
-		 */
-		public static function raw_home_url( $path = '', $scheme = null ) {
-
-			return self::raw_get_home_url( null, $path, $scheme );
-		}
-
-		/**
-		 * Unfiltered version of get_home_url() from wordpress/wp-includes/link-template.php
-		 * Last synchronized with WordPress v4.8.2 on 2017/10/22.
-		 */
-		public static function raw_get_home_url( $blog_id = null, $path = '', $scheme = null ) {
-
-			global $pagenow;
-
-			if ( method_exists( 'SucomUtil', 'protect_filter_value' ) ) {
-				SucomUtil::protect_filter_value( 'pre_option_home' );
-			}
-
-			if ( empty( $blog_id ) || ! is_multisite() ) {
-
-				$url = get_option( 'home' );
-
-			} else {
-
-				switch_to_blog( $blog_id );
-
-				$url = get_option( 'home' );
-
-				restore_current_blog();
-			}
-
-			if ( ! in_array( $scheme, array( 'http', 'https', 'relative' ) ) ) {
-
-				if ( is_ssl() && ! is_admin() && 'wp-login.php' !== $pagenow ) {
-
-					$scheme = 'https';
-				} else {
-					$scheme = parse_url( $url, PHP_URL_SCHEME );
-				}
-			}
-
-			$url = self::set_url_scheme( $url, $scheme );
-
-			if ( $path && is_string( $path ) ) {
-				$url .= '/'.ltrim( $path, '/' );
-			}
-
-			return $url;
-		}
-
-		/**
-		 * Unfiltered version of set_url_scheme() from wordpress/wp-includes/link-template.php
-		 * Last synchronized with WordPress v4.8.2 on 2017/10/22.
-		 */
-		private static function set_url_scheme( $url, $scheme = null ) {
-			if ( ! $scheme ) {
-				$scheme = is_ssl() ? 'https' : 'http';
-			} elseif ( $scheme === 'admin' || $scheme === 'login' || $scheme === 'login_post' || $scheme === 'rpc' ) {
-				$scheme = is_ssl() || force_ssl_admin() ? 'https' : 'http';
-			} elseif ( $scheme !== 'http' && $scheme !== 'https' && $scheme !== 'relative' ) {
-				$scheme = is_ssl() ? 'https' : 'http';
-			}
-			$url = trim( $url );
-			if ( substr( $url, 0, 2 ) === '//' ) {
-				$url = 'http:' . $url;
-			}
-			if ( 'relative' === $scheme ) {
-				$url = ltrim( preg_replace( '#^\w+://[^/]*#', '', $url ) );
-				if ( $url !== '' && $url[0] === '/' ) {
-					$url = '/'.ltrim( $url, "/ \t\n\r\0\x0B" );
-				}
-			} else {
-				$url = preg_replace( '#^\w+://#', $scheme . '://', $url );
-			}
-			return $url;
-		}
-	}
-}
-

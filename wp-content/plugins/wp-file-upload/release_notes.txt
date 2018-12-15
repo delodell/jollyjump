@@ -1,7 +1,2 @@
-<!--  --><span><strong>Version 4.9.0</strong> is a <strong>significant update</strong> due to addition of <strong>Microsoft OneDrive</strong> intgeration in the <strong>Pro</strong> version. The <strong>Free</strong> version introduces some improvements and bugs fixes as follows:</span>
-<ul style="list-style: disc; padding-left: 30px;">
-<li>Code further improved to reduce "Iptanus Server unreachable..." errors.</li>
-<li>Checked <strong>Weglot Translate</strong> compatibility; /wp-admin/admin-ajax.php needs to be added to Exclusion URL list of Weglot configuration so that uploads can work.</li>
-</ul>
-For more details about this version's changes please visit the Release Notes of the plugin's </span><a href="http://www.iptanus.com/wordpress-plugins/wordpress-file-upload/">support page</a><span>.</span><!--  -->
+<!--  --><span><strong>Version 4.10.0</strong> is a <strong>significant</strong> update due to introduction of <strong>Facebook Messenger Notifications</strong> in the <strong>Professional</strong> version. The free version introduces better support for files containing single quote characters (') in their filename.<br/><br/>For more details about this version's changes please visit the Release Notes of the plugin's </span><a href="http://www.iptanus.com/wordpress-plugins/wordpress-file-upload/">support page</a><span>.</span><!--  -->
 <!--  -->

@@ -10,7 +10,7 @@ class WPS_Subscription_FeedBurner extends WPS_Subscription_Base {
 
 		<form action="https://feedburner.google.com/fb/a/mailverify?uri=<?php echo $options['feedburner_id'] ?>" method="post" class="wp-subscribe-form wp-subscribe-feedburner" id="wp-subscribe-form-<?php echo $id ?>" target="popupwindow">
 
-			<input class="regular-text email-field" type="text" name="email" placeholder="<?php echo esc_attr( $options['email_placeholder'] ) ?>">
+			<input class="regular-text email-field" type="email" name="email" placeholder="<?php echo esc_attr( $options['email_placeholder'] ) ?>" required>
 
 			<input type="hidden" name="uri" value="<?php echo $options['feedburner_id'] ?>">
 

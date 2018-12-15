@@ -22,7 +22,10 @@ if ( ! class_exists( 'WpssoTerm' ) ) {
 
 		protected function add_actions() {
 
-			if ( is_admin() ) {
+			$is_admin   = is_admin();
+			$doing_ajax = defined( 'DOING_AJAX' ) && DOING_AJAX ? true : false;
+
+			if ( $is_admin ) {
 
 				/**
 				 * Hook a minimum number of admin actions to maximize performance.
@@ -114,15 +117,15 @@ if ( ! class_exists( 'WpssoTerm' ) ) {
 
 			$mod = WpssoMeta::$mod_defaults;
 
-			$mod['id']   = (int) $mod_id;
-			$mod['name'] = 'term';
-			$mod['obj']  =& $this;
+			$mod[ 'id' ]   = (int) $mod_id;
+			$mod[ 'name' ] = 'term';
+			$mod[ 'obj' ]  =& $this;
 
 			/**
 			 * Term
 			 */
-			$mod['is_term']  = true;
-			$mod['tax_slug'] = SucomUtil::get_term_object( $mod['id'], (string) $tax_slug, 'taxonomy' );
+			$mod[ 'is_term' ]  = true;
+			$mod[ 'tax_slug' ] = SucomUtil::get_term_object( $mod[ 'id' ], (string) $tax_slug, 'taxonomy' );
 
 			return apply_filters( $this->p->lca . '_get_term_mod', $mod, $mod_id, $tax_slug );
 		}
@@ -195,8 +198,8 @@ if ( ! class_exists( 'WpssoTerm' ) ) {
 			}
 
 			if ( $this->p->debug->enabled ) {
-				$this->p->debug->log( 'calling get_posts() for ' . $mod['name'] . ' id ' . $mod['id'] . 
-					' in taxonomy ' . $mod['tax_slug'] . ' (posts_per_page is ' . $ppp . ')' );
+				$this->p->debug->log( 'calling get_posts() for ' . $mod[ 'name' ] . ' id ' . $mod[ 'id' ] . 
+					' in taxonomy ' . $mod[ 'tax_slug' ] . ' (posts_per_page is ' . $ppp . ')' );
 			}
 
 			$posts_args = array_merge( array(
@@ -204,14 +207,14 @@ if ( ! class_exists( 'WpssoTerm' ) ) {
 				'orderby'        => 'date',
 				'order'          => 'DESC',
 				'paged'          => $paged,
-				'post_status'    => 'publish',
+				'post_status'    => 'publish',		// Only 'publish', not 'pending', 'draft', 'auto-draft', 'future', 'private', 'inherit', or 'trash'.
 				'post_type'      => 'any',		// Return post, page, or any custom post type.
 				'posts_per_page' => $ppp,
 				'tax_query'      => array(
 				        array(
-						'taxonomy'         => $mod['tax_slug'],
+						'taxonomy'         => $mod[ 'tax_slug' ],
 						'field'            => 'term_id',
-						'terms'            => $mod['id'],
+						'terms'            => $mod[ 'id' ],
 						'include_children' => true
 					)
 				),
@@ -224,11 +227,11 @@ if ( ! class_exists( 'WpssoTerm' ) ) {
 
 			if ( $mtime_max > 0 && $mtime_total > $mtime_max ) {
 
-				$info = $this->p->cf['plugin'][$this->p->lca];
+				$info = $this->p->cf[ 'plugin' ][$this->p->lca];
 
 				if ( $this->p->debug->enabled ) {
 					$this->p->debug->log( sprintf( 'slow query detected - WordPress get_posts() took %1$0.3f secs'.
-						' to get posts for term ID %2$d in taxonomy %3$s', $mtime_total, $mod['id'], $mod['tax_slug'] ) );
+						' to get posts for term ID %2$d in taxonomy %3$s', $mtime_total, $mod[ 'id' ], $mod[ 'tax_slug' ] ) );
 				}
 
 				// translators: %1$0.3f is a number of seconds
@@ -236,7 +239,7 @@ if ( ! class_exists( 'WpssoTerm' ) ) {
 
 				// translators: %1$0.3f is a number of seconds, %2$d is an ID number, %3$s is a taxonomy name, %4$s is a recommended max
 				$error_msg = sprintf( __( 'Slow query detected - WordPress get_posts() took %1$0.3f secs to get posts for term ID %2$d in taxonomy %3$s (%4$s).',
-					'wpsso' ), $mtime_total, $mod['id'], $mod['tax_slug'], $rec_max_msg );
+					'wpsso' ), $mtime_total, $mod[ 'id' ], $mod[ 'tax_slug' ], $rec_max_msg );
 
 				/**
 				 * Show an admin warning notice, if notices not already shown.
@@ -246,7 +249,7 @@ if ( ! class_exists( 'WpssoTerm' ) ) {
 				}
 
 				// translators: %s is the short plugin name
-				$error_pre = sprintf( __( '%s warning:', 'wpsso' ), $info['short'] );
+				$error_pre = sprintf( __( '%s warning:', 'wpsso' ), $info[ 'short' ] );
 
 				SucomUtil::safe_error_log( $error_pre . ' ' . $error_msg );
 			}
@@ -266,9 +269,9 @@ if ( ! class_exists( 'WpssoTerm' ) ) {
 
 			if ( ! empty( $term_id ) && strpos( $column_name, $this->p->lca . '_' ) === 0 ) {	// just in case
 
-				$col_idx = str_replace( $this->p->lca . '_', '', $column_name );
+				$col_key = str_replace( $this->p->lca . '_', '', $column_name );
 
-				if ( ( $col_info = self::get_sortable_columns( $col_idx ) ) !== null ) {
+				if ( ( $col_info = self::get_sortable_columns( $col_key ) ) !== null ) {
 					if ( isset( $col_info['meta_key'] ) ) {	// just in case
 						$value = $this->get_meta_cache_value( $term_id, $col_info['meta_key'] );
 					}
@@ -295,14 +298,14 @@ if ( ! class_exists( 'WpssoTerm' ) ) {
 			return $value;
 		}
 
-		public function update_sortable_meta( $term_id, $col_idx, $content ) {
+		public function update_sortable_meta( $term_id, $col_key, $content ) {
 
 			if ( $this->p->debug->enabled ) {
 				$this->p->debug->mark();
 			}
 
 			if ( ! empty( $term_id ) ) {	// just in case
-				if ( ( $col_info = self::get_sortable_columns( $col_idx ) ) !== null ) {
+				if ( ( $col_info = self::get_sortable_columns( $col_key ) ) !== null ) {
 					if ( isset( $col_info['meta_key'] ) ) {	// just in case
 						self::update_term_meta( $term_id, $col_info['meta_key'], $content );
 					}
@@ -352,7 +355,7 @@ if ( ! class_exists( 'WpssoTerm' ) ) {
 			/**
 			 * All meta modules set this property, so use it to optimize code execution.
 			 */
-			if ( WpssoMeta::$head_meta_tags !== false || ! isset( $screen->id ) ) {
+			if ( false !== WpssoMeta::$head_meta_tags || ! isset( $screen->id ) ) {
 				return;
 			}
 
@@ -415,7 +418,7 @@ if ( ! class_exists( 'WpssoTerm' ) ) {
 
 						if ( $this->p->notice->is_admin_pre_notices() ) {	// Skip if notices already shown.
 
-							$notice_key = $mod['name'] . '-' . $mod['id'] . '-notice-missing-og-' . $mt_suffix;
+							$notice_key = $mod[ 'name' ] . '-' . $mod[ 'id' ] . '-notice-missing-og-' . $mt_suffix;
 							$error_msg  = $this->p->msgs->get( 'notice-missing-og-' . $mt_suffix );
 
 							$this->p->notice->err( $error_msg, null, $notice_key );
@@ -435,17 +438,26 @@ if ( ! class_exists( 'WpssoTerm' ) ) {
 				}
 
 				if ( empty( $_GET[ WPSSO_NONCE_NAME ] ) ) {	// WPSSO_NONCE_NAME is an md5() string
+
 					if ( $this->p->debug->enabled ) {
 						$this->p->debug->log( 'nonce token query field missing' );
 					}
+
 				} elseif ( ! wp_verify_nonce( $_GET[ WPSSO_NONCE_NAME ], WpssoAdmin::get_nonce_action() ) ) {
+
 					$this->p->notice->err( sprintf( __( 'Nonce token validation failed for %1$s action "%2$s".',
 						'wpsso' ), 'term', $action_name ) );
+
 				} else {
+
 					$_SERVER['REQUEST_URI'] = remove_query_arg( array( $action_query, WPSSO_NONCE_NAME ) );
+
 					switch ( $action_name ) {
+
 						default:
+
 							do_action( $this->p->lca . '_load_meta_page_term_' . $action_name, $this->query_term_id );
+
 							break;
 					}
 				}
@@ -455,19 +467,16 @@ if ( ! class_exists( 'WpssoTerm' ) ) {
 		public function add_meta_boxes() {
 
 			if ( ! current_user_can( $this->query_tax_obj->cap->edit_terms ) ) {
+
 				if ( $this->p->debug->enabled ) {
 					$this->p->debug->log( 'insufficient privileges to add metabox for term ' . $this->query_term_id );
 				}
+
 				return;
 			}
 
-			$metabox_id      = $this->p->cf['meta']['id'];
-			$metabox_title   = _x( $this->p->cf['meta']['title'], 'metabox title', 'wpsso' );
-			$metabox_screen  = $this->p->lca . '-term';
-			$metabox_context = 'normal';
-			$metabox_prio    = 'default';
-			$add_metabox     = empty( $this->p->options[ 'plugin_add_to_term' ] ) ? false : true;
-			$add_metabox     = apply_filters( $this->p->lca . '_add_metabox_term', $add_metabox, $this->query_term_id );
+			$add_metabox = empty( $this->p->options[ 'plugin_add_to_term' ] ) ? false : true;
+			$add_metabox = apply_filters( $this->p->lca . '_add_metabox_term', $add_metabox, $this->query_term_id );
 
 			if ( $this->p->debug->enabled ) {
 				$this->p->debug->log( 'add metabox for term ID ' . $this->query_term_id . ' is ' . 
@@ -475,9 +484,19 @@ if ( ! class_exists( 'WpssoTerm' ) ) {
 			}
 
 			if ( $add_metabox ) {
+
+				$metabox_id      = $this->p->cf['meta'][ 'id' ];
+				$metabox_title   = _x( $this->p->cf['meta']['title'], 'metabox title', 'wpsso' );
+				$metabox_screen  = $this->p->lca . '-term';
+				$metabox_context = 'normal';
+				$metabox_prio    = 'default';
+				$callback_args   = array(	// Second argument passed to the callback.
+					'__block_editor_compatible_meta_box' => true,
+				);
+
 				add_meta_box( $this->p->lca . '_' . $metabox_id, $metabox_title,
 					array( $this, 'show_metabox_custom_meta' ), $metabox_screen,
-						$metabox_context, $metabox_prio );
+						$metabox_context, $metabox_prio, $callback_args );
 			}
 		}
 
@@ -495,7 +514,7 @@ if ( ! class_exists( 'WpssoTerm' ) ) {
 			$metabox_context = 'normal';
 
 			echo "\n" . '<!-- ' . $this->p->lca . ' term metabox section begin -->' . "\n";
-			echo '<h3 id="' . $this->p->lca . '-metaboxes">' . WpssoAdmin::$pkg[$this->p->lca]['short'] . '</h3>' . "\n";
+			echo '<h3 id="' . $this->p->lca . '-metaboxes">' . WpssoAdmin::$pkg[$this->p->lca][ 'short' ] . '</h3>' . "\n";
 			echo '<div id="poststuff">' . "\n";
 
 			do_meta_boxes( $metabox_screen, 'normal', $term_obj );
@@ -504,13 +523,18 @@ if ( ! class_exists( 'WpssoTerm' ) ) {
 			echo '<!-- ' . $this->p->lca . ' term metabox section end -->' . "\n";
 		}
 
+		public function ajax_metabox_custom_meta() {
+			die( '-1' );	// Nothing to do.
+		}
+
 		public function show_metabox_custom_meta( $term_obj ) {
 			echo $this->get_metabox_custom_meta( $term_obj );
 		}
 
 		public function get_metabox_custom_meta( $term_obj ) {
 
-			$metabox_id = $this->p->cf['meta']['id'];
+			$doing_ajax = defined( 'DOING_AJAX' ) ? DOING_AJAX : false;
+			$metabox_id = $this->p->cf['meta'][ 'id' ];
 			$mod        = $this->get_mod( $term_obj->term_id, $this->query_tax_slug );
 			$tabs       = $this->get_custom_meta_tabs( $metabox_id, $mod );
 			$opts       = $this->get_options( $term_obj->term_id );
@@ -525,19 +549,34 @@ if ( ! class_exists( 'WpssoTerm' ) ) {
 
 			$table_rows = array();
 
-			foreach ( $tabs as $key => $title ) {
-				$table_rows[$key] = array_merge( $this->get_table_rows( $metabox_id, $key, WpssoMeta::$head_meta_info, $mod ),
-					apply_filters( $this->p->lca . '_' . $mod['name'] . '_' . $key . '_rows',
-						array(), $this->form, WpssoMeta::$head_meta_info, $mod ) );
+			foreach ( $tabs as $tab_key => $title ) {
+
+				$filter_name = $this->p->lca . '_' . $mod[ 'name' ] . '_' . $tab_key . '_rows';
+
+				$table_rows[$tab_key] = array_merge(
+					$this->get_table_rows( $metabox_id, $tab_key, WpssoMeta::$head_meta_info, $mod ),
+					(array) apply_filters( $filter_name, array(), $this->form, WpssoMeta::$head_meta_info, $mod )
+				);
 			}
 
-			$metabox_html = $this->p->util->get_metabox_tabbed( $metabox_id, $tabs, $table_rows );
+			$tabbed_args = array(
+				'layout' => 'vertical',
+			);
+
+			$metabox_html = $this->p->util->get_metabox_tabbed( $metabox_id, $tabs, $table_rows, $tabbed_args );
+
+			if ( $doing_ajax ) {
+				$metabox_html .= '<script type="text/javascript">sucomInitTooltips();</script>' . "\n";
+			}
+
+			$container_id = $this->p->lca . '_metabox_' . $metabox_id . '_inside';
+			$metabox_html = "\n" . '<div id="' . $container_id . '">' . $metabox_html . '</div><!-- #'. $container_id . ' -->' . "\n";
 
 			if ( $this->p->debug->enabled ) {
-				$this->p->debug->mark( $metabox_id . ' table rows' );	// end timer
+				$this->p->debug->mark( $metabox_id . ' table rows' );	// End timer.
 			}
 
-			return "\n" . '<div id="' . $this->p->lca . '_metabox_' . $metabox_id . '">' . $metabox_html . '</div>' . "\n";
+			return $metabox_html;
 		}
 
 		/**
@@ -561,7 +600,7 @@ if ( ! class_exists( 'WpssoTerm' ) ) {
 
 			$col_meta_keys = WpssoMeta::get_column_meta_keys();
 
-			foreach ( $col_meta_keys as $col_idx => $meta_key ) {
+			foreach ( $col_meta_keys as $col_key => $meta_key ) {
 				self::delete_term_meta( $term_id, $meta_key );
 			}
 

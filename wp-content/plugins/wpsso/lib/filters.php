@@ -122,15 +122,15 @@ if ( ! class_exists( 'WpssoFilters' ) ) {
 
 			if ( class_exists( 'Yoast_Notification_Center' ) ) {
 
-				$info = $this->p->cf['plugin'][$this->p->lca];
-				$name = $this->p->cf['plugin'][$this->p->lca]['name'];
+				$info = $this->p->cf[ 'plugin' ][$this->p->lca];
+				$name = $this->p->cf[ 'plugin' ][$this->p->lca][ 'name' ];
 
 				/**
 				 * Since WordPress SEO v4.0.
 				 */
 				if ( method_exists( 'Yoast_Notification_Center', 'get_notification_by_id' ) ) {
 
-					$notif_id     = 'wpseo-conflict-' . md5( $info['base'] );
+					$notif_id     = 'wpseo-conflict-' . md5( $info[ 'base' ] );
 					$notif_msg    = '<style>#' . $notif_id . '{display:none;}</style>';	// Hide our empty notification. ;-)
 					$notif_center = Yoast_Notification_Center::get();
 					$notif_obj    = $notif_center->get_notification_by_id( $notif_id );
@@ -160,14 +160,17 @@ if ( ! class_exists( 'WpssoFilters' ) ) {
 
 				} elseif ( defined( 'Yoast_Notification_Center::TRANSIENT_KEY' ) ) {
 
-					if ( ( $wpseo_notif = get_transient( Yoast_Notification_Center::TRANSIENT_KEY ) ) !== false ) {
+					if ( false !== ( $wpseo_notif = get_transient( Yoast_Notification_Center::TRANSIENT_KEY ) ) ) {
 
-						$wpseo_notif = json_decode( $wpseo_notif );
+						$wpseo_notif = json_decode( $wpseo_notif, $assoc = false );
 
 						if ( ! empty( $wpseo_notif ) ) {
+
 							foreach ( $wpseo_notif as $num => $notif_msgs ) {
+
 								if ( isset( $notif_msgs->options->type ) && $notif_msgs->options->type == 'error' ) {
-									if ( strpos( $notif_msgs->message, $name ) !== false ) {
+
+									if ( false !== strpos( $notif_msgs->message, $name ) ) {
 
 										unset( $wpseo_notif[$num] );
 
@@ -192,28 +195,37 @@ if ( ! class_exists( 'WpssoFilters' ) ) {
 			}
 
 			if ( isset( $GLOBALS['wpseo_og'] ) && is_object( $GLOBALS['wpseo_og'] ) ) {
-				if ( ( $prio = has_action( 'wpseo_head', array( $GLOBALS['wpseo_og'], 'opengraph' ) ) ) !== false ) {
+
+				if ( false !== ( $prio = has_action( 'wpseo_head', array( $GLOBALS['wpseo_og'], 'opengraph' ) ) ) ) {
+
 					if ( $this->p->debug->enabled ) {
 						$this->p->debug->log( 'removing wpseo_head action for opengraph' );
 					}
+
 					$ret = remove_action( 'wpseo_head', array( $GLOBALS['wpseo_og'], 'opengraph' ), $prio );
 				}
 			}
 
 			if ( class_exists( 'WPSEO_Twitter' ) ) {
-				if ( ( $prio = has_action( 'wpseo_head', array( 'WPSEO_Twitter', 'get_instance' ) ) ) !== false ) {
+
+				if ( false !== ( $prio = has_action( 'wpseo_head', array( 'WPSEO_Twitter', 'get_instance' ) ) ) ) {
+
 					if ( $this->p->debug->enabled ) {
 						$this->p->debug->log( 'removing wpseo_head action for twitter' );
 					}
+
 					$ret = remove_action( 'wpseo_head', array( 'WPSEO_Twitter', 'get_instance' ), $prio );
 				}
 			}
 
 			if ( isset( WPSEO_Frontend::$instance ) ) {
-				if ( ( $prio = has_action( 'wpseo_head', array( WPSEO_Frontend::$instance, 'publisher' ) ) ) !== false ) {
+
+				if ( false !== ( $prio = has_action( 'wpseo_head', array( WPSEO_Frontend::$instance, 'publisher' ) ) ) ) {
+
 					if ( $this->p->debug->enabled ) {
 						$this->p->debug->log( 'removing wpseo_head action for publisher' );
 					}
+
 					$ret = remove_action( 'wpseo_head', array( WPSEO_Frontend::$instance, 'publisher' ), $prio );
 				}
 			}
@@ -231,10 +243,16 @@ if ( ! class_exists( 'WpssoFilters' ) ) {
 		 * HTTPS. See https://en.wikipedia.org/wiki/HTTP_301 for more info.
 		 */
 		public static function force_ssl_redirect() {
-			// check for web server variables in case WP is being used from the command line
+
+			/**
+			 * Check for web server variables in case WP is being used from the command line.
+			 */
 			if ( isset( $_SERVER['HTTP_HOST'] ) && isset( $_SERVER['REQUEST_URI'] ) ) {
+
 				if ( ! SucomUtil::is_https() ) {
-					wp_redirect( 'https://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'], 301 );
+
+					wp_redirect( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], 301 );
+
 					exit();
 				}
 			}

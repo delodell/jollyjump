@@ -21,10 +21,10 @@ if ( ! class_exists( 'WpssoSubmenuGeneral' ) && class_exists( 'WpssoAdmin' ) ) {
 				$this->p->debug->mark();
 			}
 
-			$this->menu_id = $id;
+			$this->menu_id   = $id;
 			$this->menu_name = $name;
-			$this->menu_lib = $lib;
-			$this->menu_ext = $ext;
+			$this->menu_lib  = $lib;
+			$this->menu_ext  = $ext;
 		}
 
 		/**
@@ -34,19 +34,35 @@ if ( ! class_exists( 'WpssoSubmenuGeneral' ) && class_exists( 'WpssoAdmin' ) ) {
 
 			$this->maybe_show_language_notice();
 
-			add_meta_box( $this->pagehook . '_opengraph',
-				_x( 'All Social WebSites / Open Graph', 'metabox title', 'wpsso' ),
-					array( $this, 'show_metabox_opengraph' ), $this->pagehook, 'normal' );
+			$metabox_id      = 'opengraph';
+			$metabox_title   = _x( 'All Social WebSites / Open Graph', 'metabox title', 'wpsso' );
+			$metabox_screen  = $this->pagehook;
+			$metabox_context = 'normal';
+			$metabox_prio    = 'default';
+			$callback_args   = array(	// Second argument passed to the callback function / method.
+			);
 
-			add_meta_box( $this->pagehook . '_publishers',
-				_x( 'Specific WebSites and Publishers', 'metabox title', 'wpsso' ),
-					array( $this, 'show_metabox_publishers' ), $this->pagehook, 'normal' );
+			add_meta_box( $this->pagehook . '_' . $metabox_id, $metabox_title,
+				array( $this, 'show_metabox_opengraph' ), $metabox_screen,
+					$metabox_context, $metabox_prio, $callback_args );
+
+			$metabox_id      = 'publishers';
+			$metabox_title   = _x( 'Specific WebSites and Publishers', 'metabox title', 'wpsso' );
+			$metabox_screen  = $this->pagehook;
+			$metabox_context = 'normal';
+			$metabox_prio    = 'default';
+			$callback_args   = array(	// Second argument passed to the callback function / method.
+			);
+
+			add_meta_box( $this->pagehook . '_' . $metabox_id, $metabox_title,
+				array( $this, 'show_metabox_publishers' ), $metabox_screen,
+					$metabox_context, $metabox_prio, $callback_args );
 
 			/**
 			 * Issues a warning notice if the default image size is too small,
 			 * unless the WPSSO_CHECK_DEFAULT_IMAGE constant has been defined as false.
 			 */
-			if ( SucomUtil::get_const( 'WPSSO_CHECK_DEFAULT_IMAGE' ) !== false ) {
+			if ( false !== SucomUtil::get_const( 'WPSSO_CHECK_DEFAULT_IMAGE' ) ) {
 				$this->p->media->get_default_images( 1, $this->p->lca . '-opengraph', false );
 			}
 		}
@@ -88,8 +104,10 @@ if ( ! class_exists( 'WpssoSubmenuGeneral' ) && class_exists( 'WpssoAdmin' ) ) {
 			$table_rows = array();
 
 			foreach ( $tabs as $tab_key => $title ) {
-				$table_rows[$tab_key] = apply_filters( $this->p->lca . '_' . $metabox_id . '_' . $tab_key . '_rows',
-					$this->get_table_rows( $metabox_id, $tab_key ), $this->form );
+				
+				$filter_name = $this->p->lca . '_' . $metabox_id . '_' . $tab_key . '_rows';
+
+				$table_rows[ $tab_key ] = apply_filters( $filter_name, $this->get_table_rows( $metabox_id, $tab_key ), $this->form );
 			}
 
 			$this->p->util->do_metabox_tabbed( $metabox_id, $tabs, $table_rows );
@@ -98,7 +116,7 @@ if ( ! class_exists( 'WpssoSubmenuGeneral' ) && class_exists( 'WpssoAdmin' ) ) {
 		protected function get_table_rows( $metabox_id, $tab_key ) {
 
 			$table_rows = array();
-			$user_contacts = $this->p->m['util']['user']->get_form_contact_fields();
+			$user_contacts = $this->p->m[ 'util' ][ 'user' ]->get_form_contact_fields();
 
 			switch ( $metabox_id . '-' . $tab_key ) {
 
@@ -141,26 +159,26 @@ if ( ! class_exists( 'WpssoSubmenuGeneral' ) && class_exists( 'WpssoAdmin' ) ) {
 					$this->form->get_th_html( _x( 'Title Separator', 'option label', 'wpsso' ), '', 'og_title_sep' ) . 
 					'<td>' . $this->form->get_input( 'og_title_sep', 'short' ) . '</td>';
 
-					$table_rows['og_title_len'] = '' . 
-					$this->form->get_th_html( _x( 'Maximum Title Length', 'option label', 'wpsso' ), '', 'og_title_len' ) . 
+					$table_rows['og_title_max_len'] = '' . 
+					$this->form->get_th_html( _x( 'Maximum Title Length', 'option label', 'wpsso' ), '', 'og_title_max_len' ) . 
 					'<td>' . 
-						$this->form->get_input( 'og_title_len', 'short' ) . ' ' . 
+						$this->form->get_input( 'og_title_max_len', 'short' ) . ' ' . 
 						_x( 'characters or less (hard limit), and warn at', 'option comment', 'wpsso' ) . ' ' . 
-						$this->form->get_input( 'og_title_warn', 'short' ) . ' ' . 
+						$this->form->get_input( 'og_title_warn_len', 'short' ) . ' ' . 
 						_x( 'characters (soft limit)', 'option comment', 'wpsso' ) . 
 					'</td>';
 
 
-					$table_rows['og_desc_len'] = '' . 
-					$this->form->get_th_html( _x( 'Maximum Description Length', 'option label', 'wpsso' ), '', 'og_desc_len' ) . 
+					$table_rows['og_desc_max_len'] = '' . 
+					$this->form->get_th_html( _x( 'Maximum Description Length', 'option label', 'wpsso' ), '', 'og_desc_max_len' ) . 
 					'<td>' . 
-						$this->form->get_input( 'og_desc_len', 'short' ) . ' ' . 
+						$this->form->get_input( 'og_desc_max_len', 'short' ) . ' ' . 
 						_x( 'characters or less (hard limit), and warn at', 'option comment', 'wpsso' ) . ' ' . 
-						$this->form->get_input( 'og_desc_warn', 'short' ) . ' ' . 
+						$this->form->get_input( 'og_desc_warn_len', 'short' ) . ' ' . 
 						_x( 'characters (soft limit)', 'option comment', 'wpsso' ) . 
 					'</td>';
 
-					$table_rows['og_desc_hashtags'] = $this->form->get_tr_hide( 'basic', 'og_desc_len' ) . 
+					$table_rows['og_desc_hashtags'] = $this->form->get_tr_hide( 'basic', 'og_desc_hashtags' ) . 
 					$this->form->get_th_html( _x( 'Add Hashtags to Descriptions', 'option label', 'wpsso' ), '', 'og_desc_hashtags' ) . 
 					'<td>' . $this->form->get_select( 'og_desc_hashtags', range( 0, $this->p->cf['form']['max_hashtags'] ), 'short', '', true ) . ' ' . 
 						_x( 'tag names', 'option comment', 'wpsso' ) . '</td>';
@@ -216,10 +234,6 @@ if ( ! class_exists( 'WpssoSubmenuGeneral' ) && class_exists( 'WpssoAdmin' ) ) {
 					$this->form->get_th_html( _x( 'or Facebook Admin Username(s)', 'option label', 'wpsso' ), '', 'fb_admins' ) . 
 					'<td>' . $this->form->get_input( 'fb_admins' ) . '</td>';
 
-					$table_rows['fb_author_name'] = $this->form->get_tr_hide( 'basic', 'fb_author_name' ) . 
-					$this->form->get_th_html( _x( 'Author Name Format', 'option label', 'wpsso' ), '', 'fb_author_name' ) . 
-					'<td>' . $this->form->get_select( 'fb_author_name', $this->p->cf['form']['user_name_fields'] ) . '</td>';
-
 					$fb_pub_lang   = SucomUtil::get_pub_lang( 'facebook' );
 					$fb_locale_key = SucomUtil::get_key_locale( 'fb_locale', $this->p->options );
 
@@ -237,10 +251,14 @@ if ( ! class_exists( 'WpssoSubmenuGeneral' ) && class_exists( 'WpssoAdmin' ) ) {
 						array( 'is_locale' => true ) ) . 
 					'<td>' . $this->form->get_input( SucomUtil::get_key_locale( 'seo_publisher_url', $this->p->options ), 'wide' ) . '</td>';
 
-					$table_rows['seo_desc_len'] = $this->form->get_tr_hide( 'basic', 'seo_desc_len' ) . 
-					$this->form->get_th_html( _x( 'Search / SEO Description Length', 'option label', 'wpsso' ), '', 'seo_desc_len' ) . 
-					'<td>' . $this->form->get_input( 'seo_desc_len', 'short' ) . ' ' .
+					$table_rows['seo_desc_max_len'] = $this->form->get_tr_hide( 'basic', 'seo_desc_max_len' ) . 
+					$this->form->get_th_html( _x( 'Search / SEO Description Length', 'option label', 'wpsso' ), '', 'seo_desc_max_len' ) . 
+					'<td>' . $this->form->get_input( 'seo_desc_max_len', 'short' ) . ' ' .
 					_x( 'characters or less', 'option comment', 'wpsso' ) . '</td>';
+
+					$table_rows['seo_author_name'] = $this->form->get_tr_hide( 'basic', 'seo_author_name' ) . 
+					$this->form->get_th_html( _x( 'Author / Person Name Format', 'option label', 'wpsso' ), '', 'seo_author_name' ) . 
+					'<td>' . $this->form->get_select( 'seo_author_name', $this->p->cf['form']['user_name_fields'] ) . '</td>';
 
 					$table_rows['seo_author_field'] = $this->form->get_tr_hide( 'basic', 'seo_author_field' ) . 
 					$this->form->get_th_html( _x( 'Author Link URL Profile Contact', 'option label', 'wpsso' ), '', 'seo_author_field' ) . 
@@ -311,9 +329,9 @@ if ( ! class_exists( 'WpssoSubmenuGeneral' ) && class_exists( 'WpssoAdmin' ) ) {
 						array( 'is_locale' => true ) ) . 
 					'<td>' . $this->form->get_input( SucomUtil::get_key_locale( 'tc_site', $this->p->options ) ) . '</td>';
 
-					$table_rows['tc_desc_len'] = $this->form->get_tr_hide( 'basic', 'tc_desc_len' ) . 
-					$this->form->get_th_html( _x( 'Maximum Description Length', 'option label', 'wpsso' ), '', 'tc_desc_len' ) . 
-					'<td>' . $this->form->get_input( 'tc_desc_len', 'short' ) . ' ' . 
+					$table_rows['tc_desc_max_len'] = $this->form->get_tr_hide( 'basic', 'tc_desc_max_len' ) . 
+					$this->form->get_th_html( _x( 'Maximum Description Length', 'option label', 'wpsso' ), '', 'tc_desc_max_len' ) . 
+					'<td>' . $this->form->get_input( 'tc_desc_max_len', 'short' ) . ' ' . 
 					_x( 'characters or less', 'option comment', 'wpsso' ) . '</td>';
 
 					$table_rows['tc_type_singular'] = $this->form->get_tr_hide( 'basic', 'tc_type_post' ) . 
@@ -337,7 +355,8 @@ if ( ! class_exists( 'WpssoSubmenuGeneral' ) && class_exists( 'WpssoAdmin' ) ) {
 				case 'pub-other_social':
 
 					$social_accounts = apply_filters( $this->p->lca . '_social_accounts', $this->p->cf['form']['social_accounts'] );
-					asort( $social_accounts );	// sort by translated label and maintain key association
+
+					asort( $social_accounts );	// Sort by translated label and maintain key association.
 
 					foreach ( $social_accounts as $social_key => $label ) {
 
@@ -347,8 +366,8 @@ if ( ! class_exists( 'WpssoSubmenuGeneral' ) && class_exists( 'WpssoAdmin' ) ) {
 						switch ( $social_key ) {
 
 							case 'fb_publisher_url':	// Facebook
-							case 'seo_publisher_url':	// Google
 							case 'p_publisher_url':		// Pinterest
+							case 'seo_publisher_url':	// Google
 							case 'tc_site':			// Twitter
 
 								continue 2;

@@ -31,18 +31,44 @@ if ( ! class_exists( 'WpssoSubmenuDashboard' ) && class_exists( 'WpssoAdmin' ) )
 
 		protected function add_plugin_hooks() {
 
-			$this->p->util->add_plugin_actions( $this, array(
-				'form_content_metaboxes_dashboard' => 1,	// show four-column metaboxes
-			) );
 			$this->p->util->add_plugin_filters( $this, array(
-				'action_buttons' => 1,
+				'form_button_rows' => 1,
+			) );
+
+			$this->p->util->add_plugin_actions( $this, array(
+				'form_content_metaboxes_dashboard' => 1,	// Show four-column metaboxes.
 			) );
 		}
 
-		// called by the extended WpssoAdmin class
+		/**
+		 * Remove all submit / action buttons from the Dashboard page.
+		 */
+		public function filter_form_button_rows( $form_button_rows ) {
+
+			return array();
+		}
+
+		public function action_form_content_metaboxes_dashboard( $pagehook ) {
+
+			foreach ( range( 1, $this->max_cols ) as $dashboard_col ) {
+
+				/**
+				 * CSS id values must use underscores instead of hyphens to order the metaboxes.
+				 */
+				echo '<div id="dashboard_col_' . $dashboard_col . '" class="max_cols_' . $this->max_cols . ' dashboard_col">';
+
+				do_meta_boxes( $pagehook, 'dashboard_col_' . $dashboard_col, null );
+
+				echo '</div><!-- #dashboard_col_' . $dashboard_col . ' -->' . "\n";
+			}
+
+			echo '<div style="clear:both;"></div>' . "\n";
+		}
+
 		protected function add_meta_boxes() {
 
-			$col = 0;
+			$dashboard_col = 0;
+
 			$using_external_cache = wp_using_ext_object_cache();
 
 			/**
@@ -62,8 +88,8 @@ if ( ! class_exists( 'WpssoSubmenuDashboard' ) && class_exists( 'WpssoAdmin' ) )
 					/**
 					 * Second row.
 					 */
-					'status_gpl'   => _x( 'Free / Standard Features', 'metabox title', 'wpsso' ),
-					'status_pro'   => _x( 'Pro / Additional Features', 'metabox title', 'wpsso' ),
+					'status_gpl'   => _x( 'Standard Features', 'metabox title', 'wpsso' ),
+					'status_pro'   => _x( 'Additional Features (Pro version)', 'metabox title', 'wpsso' ),
 				);
 
 			} else {
@@ -80,32 +106,28 @@ if ( ! class_exists( 'WpssoSubmenuDashboard' ) && class_exists( 'WpssoAdmin' ) )
 					/**
 					 * Second row.
 					 */
-					'status_gpl'   => _x( 'Free / Standard Features', 'metabox title', 'wpsso' ),
-					'status_pro'   => _x( 'Pro / Additional Features', 'metabox title', 'wpsso' ),
+					'status_gpl'   => _x( 'Standard Features', 'metabox title', 'wpsso' ),
+					'status_pro'   => _x( 'Additional Features (Pro version)', 'metabox title', 'wpsso' ),
 					'version_info' => _x( 'Version Information', 'metabox title', 'wpsso' ), 
 				);
 			}
 
-			foreach ( $metabox_ids as $id => $name ) {
+			foreach ( $metabox_ids as $metabox_id => $metabox_title ) {
 
-				$col    = $col >= $this->max_cols ? 1 : $col + 1;
-				$pos_id = 'dashboard_col_' . $col;	// Use underscores instead of hyphens to order metaboxes.
-				$prio   = 'default';
-				$args   = array( 'id' => $id, 'name' => $name );
+				$dashboard_col   = $dashboard_col >= $this->max_cols ? 1 : $dashboard_col + 1;
+				$metabox_screen  = $this->pagehook;
+				$metabox_context = 'dashboard_col_' . $dashboard_col;	// Use underscores (not hyphens) to order metaboxes.
+				$metabox_prio    = 'default';
+				$callback_args   = array(	// Second argument passed to the callback function / method.
+				);
 
-				add_meta_box( $this->pagehook . '_' . $id, $name,
-					array( $this, 'show_metabox_' . $id ), $this->pagehook, $pos_id, $prio, $args );
+				add_meta_box( $this->pagehook . '_' . $metabox_id, $metabox_title,
+					array( $this, 'show_metabox_' . $metabox_id ), $metabox_screen,
+						$metabox_context, $metabox_prio, $callback_args );
 
-				add_filter( 'postbox_classes_' . $this->pagehook . '_' . $this->pagehook . '_' . $id,
+				add_filter( 'postbox_classes_' . $this->pagehook . '_' . $this->pagehook . '_' . $metabox_id,
 					array( $this, 'add_class_postbox_dashboard' ) );
 			}
-		}
-
-		public function filter_action_buttons( $action_buttons ) {
-
-			unset ( $action_buttons[0] );
-
-			return $action_buttons;
 		}
 
 		public function add_class_postbox_dashboard( $classes ) {
@@ -119,23 +141,6 @@ if ( ! class_exists( 'WpssoSubmenuDashboard' ) && class_exists( 'WpssoAdmin' ) )
 			$classes[] = 'postbox-' . $postbox_name;
 
 			return $classes;
-		}
-
-		public function action_form_content_metaboxes_dashboard( $pagehook ) {
-
-			foreach ( range( 1, $this->max_cols ) as $col ) {
-
-				/**
-				 * CSS id values must use underscores instead of hyphens to order the metaboxes.
-				 */
-				echo '<div id="dashboard_col_' . $col . '" class="max_cols_' . $this->max_cols . ' dashboard_col">';
-
-				do_meta_boxes( $pagehook, 'dashboard_col_' . $col, null );
-
-				echo '</div><!-- #dashboard_col_' . $col . ' -->' . "\n";
-			}
-
-			echo '<div style="clear:both;"></div>' . "\n";
 		}
 	}
 }

@@ -3,7 +3,7 @@
  * Plugin Name: WP Subscribe
  * Plugin URI: http://mythemeshop.com/plugins/wp-subscribe/
  * Description: WP Subscribe is a simple but powerful subscription plugin which supports MailChimp, Aweber and Feedburner.
- * Version: 1.2.10
+ * Version: 1.2.11
  * Author: MyThemeShop
  * Author URI: http://mythemeshop.com/
  * Text Domain: wp-subscribe
@@ -27,7 +27,7 @@ if( ! class_exists('MTS_WP_Subscribe') ) :
 		 * Plugin Version
 		 * @var string
 		 */
-		private $version = '1.2.10';
+		private $version = '1.2.11';
 
 		/**
 		 * Hold an instance of MTS_WP_Subscribe class

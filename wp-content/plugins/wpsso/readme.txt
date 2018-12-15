@@ -1,4 +1,4 @@
-=== WPSSO Core - Advanced Open Graph & Schema Meta Tags for Facebook, Pinterest, LinkedIn, SEO and More ===
+=== WPSSO Core - Advanced Meta Tags and Schema Markup for Facebook, Pinterest, LinkedIn, SEO and More ===
 Plugin Name: WPSSO Core [Main Plugin]
 Plugin Slug: wpsso
 Text Domain: wpsso
@@ -6,33 +6,33 @@ Domain Path: /languages
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl.txt
 Assets URI: https://surniaulula.github.io/wpsso/assets/
-Tags: facebook, pinterest, twitter, linkedin, meta tags, open graph, rich pins, rich cards, twitter cards, knowledge graph, schema, social sharing, share buttons, seo, woocommerce, nextgen gallery
+Tags: open graph, rich pins, rich cards, twitter cards, schema, social media, meta tags, seo, yoast seo, woocommerce, facebook, google, pinterest, twitter, linkedin, whatsapp, skype
 Contributors: jsmoriss
 Requires PHP: 5.4
 Requires At Least: 3.8
-Tested Up To: 4.9.8
-WC Tested Up To: 3.4.5
-Stable Tag: 4.15.0
+Tested Up To: 5.0
+WC Tested Up To: 3.5
+Stable Tag: 4.18.0
 
-Easy, complete, accurate, and automatic - give social sites and search engines better information about your content, business and authors.
+WPSSO Core makes sure your content looks great on all social and search sites, no matter how it's crawled, shared, re-shared, posted or embedded!
 
 == Description ==
 
 <p style="margin:0;"><img class="readme-icon" src="https://surniaulula.github.io/wpsso/assets/icon-256x256.png"></p>
 
-<h3>What makes WPSSO Core better?</h3>
+<h3 class="top">What makes WPSSO Core better?</h3>
 
-**Makes sure your WordPress content looks great - no matter how it's crawled, shared, re-shared, or posted!**
+**Makes sure your content looks great on all social and search sites - no matter how it's crawled, shared, re-shared, posted, or embedded!**
 
-WPSSO Core makes sure ALL social crawlers, search crawlers, web browser extensions, mail and messaging apps (Facebook Messenger, iMessage, Skype, WhatsApp, etc.), always get *optimized* and *accurate* information about your webpage content.
+WPSSO Core makes sure that all social crawlers, search crawlers, web browser extensions, mail and messaging apps (Facebook Messenger, iMessage, Skype, WhatsApp, etc.), and embedded object / iframe content, always get *accurate* and *complete* information about your webpage content, business, and authors.
 
 **Uses your *existing content* for meta tags and Schema markup:**
 
-There's no need to manually re-enter descriptions, titles, product information, select images / videos, etc. &mdash; WPSSO Core reads your existing WordPress content automatically, and you can also fine-tune and customize just about anything and everything. ;-)
+There's no need to manually re-enter descriptions, titles, product information, select images / videos, etc. &mdash; WPSSO Core reads your existing content automatically and offers fine-tuning and customization options for just about anything and everything. ;-)
 
-WPSSO Core is language / locale aware, allowing you to customize your site information, social pages and Knowledge Graph for different languages!
+WPSSO Core is language / locale aware, which means you can customize your site information, social page URLs and Knowledge Graph for different languages!
 
-**Creates *complete* and *accurate* meta tags and Schema markup:**
+**Creates *accurate* and *complete* meta tags and Schema markup:**
 
 WPSSO Core offers meta tags and Schema markup for Facebook / Open Graph, Google's Knowledge Graph and Rich Card SEO, Pinterest Rich Pins, Twitter Cards, Weibo and more &mdash; including complete image markup, video markup, extensive eCommerce product markup, author profile / authorship, co-authors, publisher information, local business markup, aggregate ratings, reviews, recipe information, event details, and much, much more &mdash; all from your existing content!
 
@@ -47,7 +47,7 @@ WPSSO Core offers meta tags and Schema markup for Facebook / Open Graph, Google'
 
 **A reliable WordPress plugin for today *and* tomorrow:**
 
-WPSSO Core is *extremely fast* and 100% compatible with the new <a href="https://wordpress.org/plugins/gutenberg/">Gutenberg block editor</a> in the upcoming release of WordPress 5.
+WPSSO Core is *extremely fast* and 100% compatible with the new <a href="https://wordpress.org/plugins/gutenberg/">Gutenberg block editor</a> in the upcoming release of WordPress v5.0.
 
 <h3>Users Love the WPSSO Core Plugin</h3>
 
@@ -61,42 +61,13 @@ WPSSO Core is *extremely fast* and 100% compatible with the new <a href="https:/
 
 <h3>WPSSO Core Standard Features</h3>
 
-* Complete and accurate meta tags for ALL social sites, search engines, and messaging apps:
+* Complete and accurate meta tags for all social sites, search engines, web browser extensions, mail and messaging apps, and embedded object / iframe content.
 
-	* Buffer
-	* Facebook / Open Graph
-	* Google+
-	* Google's Knowledge Graph
-	* Google's Rich Card SEO
-	* LinkedIn
-	* ManageWP
-	* Pinterest Rich Pins
-	* Pocket
-	* Skype
-	* Twitter Cards
-	* WhatsApp
-	* Weibo
-	* **And many more.** :)
+* Provides meta tags and markup for custom post types, custom taxonomy / terms, user profile pages, and attachment pages.
 
-* Pinterest Rich Pin meta tags and [Structured Data](https://developers.google.com/search/docs/guides/intro-structured-data) Schema markup for Google.
+* Uses images from several sources, including featured, attached, gallery shortcode, images from HTML tags, or a custom fallback image.
 
-* Configurable website / business social accounts for Schema markup and Google's Knowledge Graph.
-
-* Adds author, publisher, and website markup using Schema JSON-LD for Google's Knowledge Graph.
-
-* User profile contact fields for Facebook / Open Graph, Twitter Cards, Schema markup, and Google's Knowledge Graph.
-
-* Adds markup for the [Google Sitelinks Searchbox](https://developers.google.com/search/docs/data-types/sitelinks-searchbox).
-
-* Includes meta tags and markup for custom post types, custom taxonomy / terms, user profile pages, and attachment pages.
-
-* Uses images from several sources, including featured, attached, gallery shortcode, images from HTML tags in the content, or a custom fallback image.
-
-* Features customizable image dimensions for Facebook / Open Graph, Schema markup, Google Rich Card SEO, Pinterest Rich Pins, and Twitter Cards.
-
-* Configurable maximum title and description lengths, including both hard and soft limits.
-
-* Optional settings for robots noindex, nofollow, noarchive, and nosnippet for each post / page.
+* Customizable image dimensions for Facebook / Open Graph, Schema markup, Google Rich Card SEO, Pinterest Rich Pins, and Twitter Cards.
 
 * Contextual help for *every* plugin option and [comprehensive online documentation](https://wpsso.com/docs/plugins/wpsso/).
 
@@ -104,9 +75,9 @@ WPSSO Core is *extremely fast* and 100% compatible with the new <a href="https:/
 
 * Supports advanced WordPress configurations, including WordPress Network / Multisite installations and WordPress MU Domain Mapping.
 
-* And even includes an option to hide the preview of all Pro settings and features. ;-)
+* Includes an option to hide the preview of all Pro settings and features. ;-)
 
-* Optional Free add-ons (non-standard / specialized features) for WPSSO Core:
+* Free add-ons extra and advanced functionality:
 
 	* [WPSSO Mobile App Meta](https://wordpress.org/plugins/wpsso-am/) to manage mobile App information.
 	* [WPSSO Organization Markup](https://wordpress.org/plugins/wpsso-organization/) to manage multiple Organizations.
@@ -122,41 +93,179 @@ WPSSO Core is *extremely fast* and 100% compatible with the new <a href="https:/
 	* [WPSSO Tweet a Quote](https://wordpress.org/plugins/wpsso-tweet-a-quote) to add tweetable quotes to your content.
 	* [WPSSO User Locale Selector](https://wordpress.org/plugins/wpsso-user-locale) to switch languages quickly and easily.
 
-<h3>WPSSO Core Pro / Additional Features</h3>
+<h3>WPSSO Core Additional Features (Pro version)</h3>
 
-WPSSO Core Pro gives you the power to further integrate and customize your meta tags and Schema markup with third party plugins and APIs.
+* Customize default values in the Document SSO metabox when editing posts, pages, custom post types, terms (categories and tags, custom post types, and user profiles:
 
-* Includes a Document SSO (Social and Search Optimization) metabox for Posts, Pages, custom post type, user profile, category, tag, and custom taxonomy editing pages.
+	* Customize Text
+		* Open Graph Type
+		* Article Topic
+		* Default Title
+		* Default Description
+		* Search Description
+		* Schema Description
+		* Twitter Card Description
+		* Sharing URL
+		* Canonical URL
+		* Product Availability
+		* Product Brand
+		* Product Color
+		* Product Condition
+		* Product Material
+		* Product SKU
+		* Product EAN
+		* Product GTIN-8
+		* Product GTIN-12
+		* Product GTIN-13
+		* Product GTIN-14
+		* Product ISBN
+		* Product Price
+		* Product Size
+		* Product Target Gender
+	* Priority Media
+		* All Social WebSites / Open Graph
+			* Priority Image Information
+				* Maximum Images
+				* Image Dimensions
+				* Image ID
+				* or Image URL
+			* Priority Video Information
+				* Maximum Videos
+				* Video Dimensions
+				* or Video URL
+				* Video Name / Title
+				* Video Description
+		* Twitter Card
+			* Image Dimensions
+			* Image ID
+			* or Image URL
+		 * Structured Data / Schema Markup / Pinterest
+			* Maximum Images
+			* Image Dimensions
+			* Image ID
+			* or Image URL
 
-* Offers individual customization of the article topic, shared title, descriptions, shared image and/or video, product information, recipe information, event information, and much more.
+* Additional custom Schema property options are also available from the [WPSSO Schema JSON-LD Markup Pro](https://wpsso.com/extend/plugins/wpsso-schema-json-ld/) add-on:
 
-* Optionally upscale smaller images for social sharing and Schema markup, up to a maximum upscale percentage.
+	* All Schema Types
+		* Schema Type
+		* Name / Title
+		* Alternate Name
+		* Description
+		* Microdata Type URLs
+		* Same-As URLs
+	* Creative Work Information
+		* Headline
+		* Full Text
+		* Keywords
+		* Language
+		* Family Friendly
+		* Copyright Year
+		* Publisher
+		* Service Provider
+	* Event Information
+		* Event Language
+		* Event Organizer Org.
+		* Event Organizer Person
+		* Event Performer Org.
+		* Event Performer Person
+		* Event Venue
+		* Event Start (date, time, timezone)
+		* Event End (date, time, timezone)
+		* Offers Start (date, time, timezone)
+		* Offers End (date, time, timezone)
+		* Event Offers (name, price, currency, availability)
+	* How-To
+		* How-To Makes 
+		* How-To Preparation Time 
+		* How-To Total Time 
+		* How-To Supplies 
+		* How-To Tools 
+		* How-To Steps 
+	* Job Posting Information
+		* Job Posting Job Title
+		* Job Posting Hiring Organization
+		* Job Posting Job Location
+		* Job Posting Base Salary
+		* Job Posting Employment Type
+		* Job Posting Expires
+	* Movie Information
+		* Cast Names
+		* Director Names
+		* Production Company
+		* Movie Runtime
+	* Organization Information
+		* Organization
+	* Person Information
+		* Person
+	* QA Page Information
+		* QA Heading
+	* Recipe Information
+		* Recipe Cuisine 
+		* Recipe Course 
+		* Recipe Makes 
+		* Recipe Cooking Method 
+		* Recipe Preparation Time 
+		* Recipe Cooking Time 
+		* Recipe Total Time 
+		* Recipe Total Calories 
+		* Recipe Ingredients 
+		* Recipe Instructions 
+		* Recipe Nutrition Information per Serving 
+			* Serving Size
+			* Calories
+			* Protein
+			* Fiber
+			* Carbohydrates
+			* Sugar
+			* Sodium
+			* Fat
+			* Saturated Fat
+			* Unsaturated Fat
+			* Trans Fat
+			* Cholesterol
+	* Review Information
+		* Subject Webpage URL 
+		* Review Rating 
+		* Review Rating Name
+	* Claim Review Information
+		* Specific Claims Reviewed
+	* Software Application Information
+		* Operating System
 
-* Optionally validate all image minimum / maximum dimensions and aspect ratios.
+* Optionally upscale small images from the Media Library for social sharing and Schema markup.
 
-* Optionally renders shortcodes for accurate description texts and embedded video detection.
+* Automatically validate all image minimum / maximum dimensions and aspect ratios.
+
+* Render shortcodes and blocks for accurate description texts and embedded video detection.
+
+* Additional Facebook, Open Graph, Rich Pin meta tags and Schema markup for videos and eCommerce products.
 
 * Support for embedded videos from Facebook, Slideshare, Vimeo, Wistia, and Youtube in content text.
 
-* Additional Facebook / Open Graph / Rich Pin meta tags and Schema markup for videos and eCommerce products.
+* Twitter [Player Card](https://dev.twitter.com/cards/types/player) for embedded videos from Facebook, Slideshare, Vimeo, Wistia, and Youtube.
 
-* Twitter [Player Card](https://dev.twitter.com/cards/types/player) meta tags for embedded videos from Facebook, Slideshare, Vimeo, Wistia, and Youtube.
+* URL shortening with Bitly, DLMY.App, Google, Ow.ly, TinyURL, or YOURLS.
 
-* Include or exclude individual Facebook, Open Graph, Twitter Card, Pinterest, Schema, and SEO meta tag from the webpage head section.
+* Integrates with services and 3rd party plugins for additional image, video, eCommerce product details, SEO settings, and more.
 
-* Allows customization of field names, labels, and add / remove contacts on user profile pages and Co-Authors Plus guest author profiles.
+* The following integration modules are provided with the Pro version, and are automatically loaded when the supported services are required or 3rd party plugins detected.
 
-* Optional URL shortening with Bitly, DLMY.App, Google, Ow.ly, TinyURL, or YOURLS.
+	* **Integration with Service APIs**
 
-* Integrates with 3rd party plugins and services for additional image, video, eCommerce product details, SEO settings, and more.
-
-	**Optionally integrates and improves your favorite SEO plugin:**
-
-	WPSSO Core specializes in providing all the meta tags and Schema markup social sites and search engines need &mdash; and, if you desire, you can continue to use your favorite SEO content / keyword analysis tools without any conflicts!
-	
-	*The Pro version comes with special integration modules for All in One SEO Pack, The SEO Framework, WP Meta SEO, Yoast SEO, and more.*
-
-* The following modules are included with the Pro version, and are automatically loaded if/when the supported plugins and/or services are required.
+		* Bitly
+		* DLMY.App
+		* Facebook Embedded Videos
+		* Gravatar (Author Image)
+		* Ow.ly
+		* Slideshare Presentations
+		* Soundcloud Tracks (for the Twitter Player Card)
+		* TinyURL
+		* Vimeo Videos
+		* Wistia Videos
+		* WordPress Video Shortcode (and Self-Hosted Videos)
+		* Your Own URL Shortener (YOURLS)
+		* YouTube Videos and Playlists
 
 	* **Integration with 3rd Party Plugins** 
 
@@ -181,24 +290,7 @@ WPSSO Core Pro gives you the power to further integrate and customize your meta 
 		* Yoast SEO (aka WordPress SEO)
 		* Yotpo Social Reviews for WooCommerce
 
-	* **Integration with Service APIs**
-
-		* Bitly
-		* DLMY.App
-		* Facebook Embedded Videos
-		* Google URL Shortener
-		* Gravatar (Author Image)
-		* Ow.ly
-		* Slideshare Presentations
-		* Soundcloud Tracks (for the Twitter Player Card)
-		* TinyURL
-		* Vimeo Videos
-		* Wistia Videos
-		* WordPress Video Shortcode (and Self-Hosted Videos)
-		* Your Own URL Shortener (YOURLS)
-		* YouTube Videos and Playlists
-
-* Optional Pro add-ons (non-standard / specialized features) for WPSSO Core Pro:
+* Pro add-ons for even more advanced functionality:
 
 	* [WPSSO Mobile App Meta Pro](https://wpsso.com/extend/plugins/wpsso-am/) to manage mobile App information.
 	* [WPSSO Organization Markup Pro](https://wpsso.com/extend/plugins/wpsso-organization/) to manage multiple Organizations.
@@ -264,7 +356,7 @@ WPSSO Core offers hundreds of filter hooks to customize its behavior and output,
 * [Why is the Open Graph title the same for every webpage?](https://wpsso.com/docs/plugins/wpsso/faqs/why-is-the-open-graph-title-the-same-for-every-webpage/)
 * [Why shouldn't I upload small images to the Media library?](https://wpsso.com/docs/plugins/wpsso/faqs/why-shouldnt-i-upload-small-images-to-the-media-library/)
 
-<h3>Documentation and Notes</h3>
+<h3>Advanced Documentation and Notes</h3>
 
 * [About WPSSO Core Pro Integration Modules](https://wpsso.com/docs/plugins/wpsso/notes/modules/)
 	* [Author Gravatar](https://wpsso.com/docs/plugins/wpsso/notes/modules/author-gravatar/)
@@ -309,8 +401,8 @@ WPSSO Core offers hundreds of filter hooks to customize its behavior and output,
 
 == Screenshots ==
 
-01. WPSSO Core includes a Facebook / Open Graph preview, customization tabs for content details, image, video, head tags list, and validation tools.
-02. WPSSO Core offers a quick and easy Essential settings page (shown here), more detailed General and Advanced settings pages, several Free add-ons, a dashboard / status page, along with an easy to follow setup guide / check list.
+01. [WordPress v5.0] The document SSO metabox provides tabs to customize text, select priority media, preview social shares (shown here), view head markup, and several validation tools.
+02. [WordPress v5.0] The essential settings page (shown here) provides a quick and easy setup.
 
 == Changelog ==
 
@@ -342,126 +434,52 @@ Version components: `{major}.{minor}.{bugfix}[-{stage}.{level}]`
 
 <h3>Changelog / Release Notes</h3>
 
-**Version 4.16.0-dev.2 (2018/10/06)**
+**Version 4.18.0 (2018/12/14)**
 
 * *New Features*
-	* None.
+	* Added a new SSO &gt; Tools settings page.
+	* Added new action buttons in the SSO &gt; Tools settings page:
+		* Export Plugin and Add-on Settings
+		* Import Plugin and Add-on Settings
+	* Added new options under the SSO &gt; Advanced &gt; Custom Meta tab:
+		* Product EAN Custom Field
+		* Product GTIN-8 Custom Field
+		* Product GTIN-12 Custom Field
+		* Product GTIN-13 Custom Field
+		* Product GTIN-14 Custom Field
+		* Product ISBN Custom Field
+	* Added new options in the Document SSO metabox for products (Pro version):
+		* Product EAN
+		* Product GTIN-8
+		* Product GTIN-12
+		* Product GTIN-13
+		* Product GTIN-14
+		* Product ISBN
 * *Improvements*
-	* Changed the Document SSO metabox tabs from a horizontal to a vertical layout.
+	* Moved action buttons to the SSO &gt; Tools settings page:
+		* Clear All Caches
+		* Clear All Caches and Short URLs
+		* Reset Metabox Layout
+		* Reset Dismissed Notices
 * *Bugfixes*
 	* None.
 * *Developer Notes*
 	* None.
 
-**Version 4.15.0 (2018/10/04)**
+**Version 4.17.3.1 (2018/12/06)**
 
 * *New Features*
 	* None.
 * *Improvements*
-	* Added icons to most metabox tabs and the SSO &gt; Dashboard metabox titles.
-* *Bugfixes*
-	* None.
-* *Developer Notes*
-	* Added the Schema SoftwareApplication type and its sub-types:
-		* Schema MobileApplication
-		* Schema VideoGame
-		* Schema WebApplication
-
-**Version 4.14.1 (2018/09/29)**
-
-* *New Features*
-	* None.
-* *Improvements*
-	* Moved all column related options from the SSO &gt; Advanced &gt; Custom Meta tab to a new Columns tab.
+	* Update to avoid a known bug in the WordPress v5.0 `use_block_editor_for_post()` function that hangs the browser ([core trac ticket ID #45253](https://core.trac.wordpress.org/ticket/45253)).
 * *Bugfixes*
 	* None.
 * *Developer Notes*
 	* None.
-
-**Version 4.14.0 (2018/09/26)**
-
-* *New Features*
-	* None.
-* *Improvements*
-	* Added the Open Graph 'product:price:amount' and 'product:price:currency' meta tags for each product variation, if available.
-* *Bugfixes*
-	* None.
-* *Developer Notes*
-	* None.
-
-**Version 4.13.1 (2018/09/23)**
-
-* *New Features*
-	* None.
-* *Improvements*
-	* None.
-* *Bugfixes*
-	* Fixed deprecated call to generate_description() for The SEO Framework (Pro version).
-* *Developer Notes*
-	* Added detection of the BuddyBlog plugin in the WpssoCheck get_avail() method.
-	* Renamed the SucomUtil get_json_decode_scripts() method to get_json_scripts() and added a $do_encode = true argument.
-	* Fine-tuned the "show" and "hide" jQuery function hooks to trigger only for specific table rows.
-
-**Version 4.13.0 (2018/09/16)**
-
-* *New Features*
-	* None.
-* *Improvements*
-	* Refactored the BuddyPress integration modules to support ajax queries in the new BuddyPress templates (Pro version).
-	* Added clearing of the LiteSpeed Cache when using the "Clear All Cache" button.
-	* Removed the Pinterest "Author Name Format" option.
-* *Bugfixes*
-	* Fixed the jQuery ajaxNoticesData '_notice_types' query to avoid matching a Comodo request filter.
-* *Developer Notes*
-	* Changed the WPSSO_META_SAVE_PRIORITY constant from 5 to -10.
-	* Changed the WPSSO_META_CACHE_PRIORITY constant from 10 to 0 in order to run before caching plugins clear their cache.
-	* Optimized the clearing of user meta columns in WpssoUtil::delete_all_column_meta().
-	* Increased the PHP set_time_limit() value when running the following methods in the WordPress scheduler:
-		* WpssoUtil::add_user_roles()
-		* WpssoUtil::clear_all_cache()
-		* WpssoUtil::refresh_all_cache()
-
-**Version 4.12.0 (2018/09/09)**
-
-* *New Features*
-	* None.
-* *Improvements*
-	* Added new options under the SSO &gt; Advanced &gt; Cache tab:
-		* Clear All Caches on Activate
-		* Clear All Caches on Deactivate
-		* Clear Term Cache for Published Post
-	* The "Clear All Caches" button and link now start the clear cache task in the background.
-	* The "Auto-Refresh Cache After Clearing" task is now started in the background as well.
-	* Added support for the "product:retailer_item_id" meta tag (aka "Product SKU").
-	* Added a new "Product SKU" option in the Document SSO metabox.
-	* Added a new "Product SKU Custom Field" option under the SSO &gt; Advanced &gt; Custom Meta tab.
-	* Added sub-types to the Schema AdministrativeArea type:
-		* City
-		* Country
-		* State
-	* Updated the WooCommerce and Easy Digital Downloads integration modules to provide a default "Product SKU" value.
-	* Renamed the "Preserve Settings on Uninstall" option to "Remove All Settings on Uninstall" (unchecked by default).
-	* Removed support for automatically hidden notifications.
-* *Bugfixes*
-	* Fixed an incorrect reference to 'price_high' (should have been 'price_highest') in the Easy Digital Download integration module.
-* *Developer Notes*
-	* Added a new 'unhide_rows_on_show' event for the SucomForm::get_select() method.
-	* Moved the "person" role additional from the plugin activation method to a scheduled task.
-	* Reviewed all calls to get_users(), get_posts(), and get_terms() to minimize memory usage.
-	* Minor code changes to rename the package check method.
-	* Added new methods in the WpssoUtil class to optionally run some tasks in background:
-		* schedule_add_user_roles()
-		* schedule_clear_all_cache()
-		* schedule_refresh_all_cache()
-	* Refactored SucomNotice methods to handle / store notices for different user IDs than the current user ID.
 
 == Upgrade Notice ==
 
-= 4.16.0-dev.2 =
+= 4.18.0 =
 
-(2018/10/06) Changed the Document SSO metabox tabs from a horizontal to a vertical layout.
-
-= 4.15.0 =
-
-(2018/10/04) Added icons to most metabox tabs and the SSO &gt; Dashboard metabox titles. Added the Schema SoftwareApplication type and its sub-types.
+(2018/12/14) Added a new SSO &gt; Tools settings page and new export / import action buttons. Added new options in the Document SSO metabox for products (Pro version).
 

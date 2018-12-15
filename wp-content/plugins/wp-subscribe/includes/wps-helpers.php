@@ -48,10 +48,10 @@ function wps_the_form( $options = null ) {
 			<form action="<?php echo $current_url ?>" method="post" class="wp-subscribe-form wp-subscribe-<?php echo $options['service'] ?>" id="wp-subscribe-form-<?php echo $wp_subscribe_forms ?>">
 
 				<?php if( !empty( $options['include_name_field'] ) ) : ?>
-					<input class="regular-text name-field" type="text" name="name" placeholder="<?php echo esc_attr( $options['name_placeholder'] ) ?>">
+					<input class="regular-text name-field" type="text" name="name" placeholder="<?php echo esc_attr( $options['name_placeholder'] ) ?>" required>
 				<?php endif; ?>
 
-				<input class="regular-text email-field" type="text" name="email" placeholder="<?php echo esc_attr( $options['email_placeholder'] ) ?>">
+				<input class="regular-text email-field" type="email" name="email" placeholder="<?php echo esc_attr( $options['email_placeholder'] ) ?>" required>
 
 				<input type="hidden" name="form_type" value="<?php echo $options['form_type'] ?>">
 

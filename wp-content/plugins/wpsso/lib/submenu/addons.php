@@ -32,18 +32,44 @@ if ( ! class_exists( 'WpssoSubmenuAddons' ) && class_exists( 'WpssoAdmin' ) ) {
 			$this->menu_ext  = $ext;
 		}
 
+		protected function add_plugin_hooks() {
+
+			$this->p->util->add_plugin_filters( $this, array(
+				'form_button_rows' => 1,
+			) );
+		}
+
+		/**
+		 * Remove all submit / action buttons from the Add-ons page.
+		 */
+		public function filter_form_button_rows( $form_button_rows ) {
+
+			return array();
+		}
+
 		/**
 		 * Called by the extended WpssoAdmin class.
 		 */
 		protected function add_meta_boxes() {
 	
-			add_meta_box( $this->pagehook.'_addons',
-				_x( 'Optional Core Add-ons', 'metabox title', 'wpsso' ),
-					array( $this, 'show_metabox_addons' ), $this->pagehook, 'normal' );
+			$short_name = $this->p->cf[ 'plugin' ][ $this->p->lca ][ 'short' ];
+
+			$metabox_id      = 'addons';
+			$metabox_title   = sprintf( _x( 'Add-ons for %s', 'metabox title', 'wpsso' ), $short_name );
+			$metabox_screen  = $this->pagehook;
+			$metabox_context = 'normal';
+			$metabox_prio    = 'default';
+			$callback_args   = array(	// Second argument passed to the callback function / method.
+			);
+
+			add_meta_box( $this->pagehook . '_' . $metabox_id, $metabox_title,
+				array( $this, 'show_metabox_addons' ), $metabox_screen,
+					$metabox_context, $metabox_prio, $callback_args );
 		}
 
 		public function show_metabox_addons() {
-			$this->addons_metabox_content( false );	// $network = false
+
+			$this->addons_metabox_content( $network = false );
 		}
 	}
 }

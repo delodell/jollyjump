@@ -56,38 +56,44 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 					'schema_add_type_url' => 'schema_addl_type_url_0',
 				),
 				569 => array(
-					'schema_add_type_url' => 'schema_addl_type_url',	// option modifiers are preserved
+					'schema_add_type_url' => 'schema_addl_type_url',	// Option modifiers are preserved.
+				),
+				615 => array(
+					'org_type' => 'org_schema_type',
 				),
 			),
 		);
 
 		public static $mod_defaults = array(
-			'id' => 0,
-			'name' => false,
-			'obj' => false,
+			'id'   => 0,			// Post, term, or user ID.
+			'name' => false,		// Module name ('post', 'term', or 'user').
+			'obj'  => false,		// Module object.
+
 			/**
 			 * Post
 			 */
-			'use_post' => false,
-			'is_post' => false,		// is post module
-			'is_home' => false,		// home page (index or static)
-			'is_home_page' => false,	// static front page
-			'is_home_index' => false,	// static posts page or home index
-			'post_slug' => false,		// post name (aka slug)
-			'post_type' => false,		// post type name
-			'post_mime' => false,		// post mime type (ie. image/jpg)
-			'post_status' => false,		// post status name
-			'post_author' => false,		// post author id
+			'use_post'       => false,
+			'is_post'        => false,	// Is post module.
+			'is_home'        => false,	// Home page (index or static)
+			'is_home_page'   => false,	// Static front page.
+			'is_home_index'  => false,	// Static posts page or home index.
+			'post_slug'      => false,	// Post name (aka slug).
+			'post_type'      => false,	// Post type name.
+			'post_mime'      => false,	// Post mime type (ie. image/jpg).
+			'post_status'    => false,	// Post status name.
+			'post_author'    => false,	// Post author id.
 			'post_coauthors' => array(),
+
 			/**
 			 * Term
 			 */
-			'is_term' => false,		// is term module
-			'tax_slug' => '',		// empty string by default
+			'is_term'  => false,		// Is term module.
+			'tax_slug' => '',		// Empty string by default.
+
 			/**
 			 * User
 			 */
-			'is_user' => false,		// is user module
+			'is_user' => false,		// Is user module.
 		);
 
 		public function __construct() {
@@ -111,7 +117,7 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 					$this->p->debug->log( 'getting mod for post object ID ' . $post_id );
 				}
 
-				$posts_mods[] = $this->p->m['util']['post']->get_mod( $post_id );
+				$posts_mods[] = $this->p->m[ 'util' ][ 'post' ]->get_mod( $post_id );
 			}
 
 			return $posts_mods;
@@ -125,7 +131,15 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 			return $this->must_be_extended( __METHOD__ );
 		}
 
+		public function ajax_metabox_custom_meta() {
+			return $this->must_be_extended( __METHOD__ );
+		}
+
 		public function show_metabox_custom_meta( $obj ) {
+			return $this->must_be_extended( __METHOD__ );
+		}
+
+		public function get_metabox_custom_meta( $obj ) {
 			return $this->must_be_extended( __METHOD__ );
 		}
 
@@ -137,9 +151,11 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 		 * tags array.
 		 */
 		public static function is_meta_page() {
+
 			if ( ! empty( WpssoMeta::$head_meta_tags ) ) {
 				return true;
 			}
+
 			return false;
 		}
 
@@ -147,7 +163,7 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 
 			switch ( $metabox_id ) {
 
-				case $this->p->cf['meta']['id']:
+				case $this->p->cf['meta'][ 'id' ]:
 
 					$tabs = array(
 						'edit'     => _x( 'Customize', 'metabox tab', 'wpsso' ),
@@ -166,7 +182,7 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 					break;
 			}
 
-			return apply_filters( $this->p->lca . '_' . $mod['name'] . '_custom_meta_tabs', $tabs, $mod, $metabox_id );
+			return apply_filters( $this->p->lca . '_' . $mod[ 'name' ] . '_custom_meta_tabs', $tabs, $mod, $metabox_id );
 		}
 
 		protected function get_table_rows( $metabox_id, $tab_key, $head_info, $mod ) {
@@ -236,10 +252,10 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 					_x( 'No Open Graph Image Found', 'preview image error', 'wpsso' ) . '</p></div>';
 			}
 
-			if ( isset( $mod['post_status'] ) && $mod['post_status'] === 'auto-draft' ) {
+			if ( isset( $mod[ 'post_status' ] ) && $mod[ 'post_status' ] === 'auto-draft' ) {
 
 				$auto_draft_msg = sprintf( __( 'Save a draft version or publish the %s to update this value.',
-					'wpsso' ), SucomUtil::titleize( $mod['post_type'] ) );
+					'wpsso' ), SucomUtil::titleize( $mod[ 'post_type' ] ) );
 
 				$table_rows[] = '' . 
 				$form->get_th_html( _x( 'Sharing URL', 'option label', 'wpsso' ), 'medium' ) .
@@ -255,15 +271,14 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 	
 			} else {
 
-				$sharing_url = $this->p->util->get_sharing_url( $mod, false );     // $add_page is false.
+				$sharing_url   = $this->p->util->get_sharing_url( $mod, false );     // $add_page is false.
 				$canonical_url = $this->p->util->get_canonical_url( $mod, false ); // $add_page is false.
 
-				if ( $mod['is_post'] ) {
-					$shortlink_url = SucomUtilWP::wp_get_shortlink( $mod['id'], 'post' );	// $context is post.
+				if ( $mod[ 'is_post' ] ) {
+					$shortlink_url = SucomUtilWP::wp_get_shortlink( $mod[ 'id' ], 'post' );	// $context is post.
 				} else {
-					$service_key = $this->p->options['plugin_shortener'];
-					$shortlink_url = apply_filters( $this->p->lca . '_get_short_url',
-						$sharing_url, $service_key, $mod, $mod['name'] );
+					$shortlink_url = apply_filters( $this->p->lca . '_get_short_url', $sharing_url,
+						$this->p->options['plugin_shortener'], $mod );
 				}
 
 				$table_rows[] = '' . 
@@ -347,9 +362,11 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 					 * Skip meta tags with reserved values but display empty values.
 					 */
 					if ( $parts[5] === WPSSO_UNDEF || $parts[5] === (string) WPSSO_UNDEF ) {
+
 						if ( $this->p->debug->enabled ) {
 							$this->p->debug->log( $parts[3] . ' value is ' . WPSSO_UNDEF . ' (skipped)' );
 						}
+
 						continue;
 					}
 
@@ -359,17 +376,36 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 						$match_name = $parts[3];
 					}
 
+					$opt_name    = strtolower( 'add_' . $parts[1] . '_' . $parts[2] . '_' . $parts[3] );
+					$opt_exists  = isset( $this->p->options[ $opt_name ] ) ? true : false;
+					$opt_enabled = empty( $this->p->options[ $opt_name ] ) ? false : true;
+
+					$tr_class = empty( $script_class ) ? '' : ' ' . $script_class;
+
 					/**
-					 * Convert mixed case itemprop names (for example) to lower case.
+					 * If there's no HTML to include in the webpage head section,
+					 * then mark the meta tag as disabled and hide it in basic view.
 					 */
-					$opt_name = strtolower( 'add_' . $parts[1] . '_' . $parts[2] . '_' . $parts[3] );
+					if ( empty( $parts[ 0 ] ) ) {
+						$tr_class .= ' is_disabled hide_row_in_basic';
+					} else {
+						$tr_class .= ' is_enabled';
+					}
 
-					$tr_class = ( empty( $script_class ) ? '' : ' ' . $script_class ) . 
-						( empty( $parts[0] ) ? ' is_disabled' : ' is_enabled' ) . 
-						( empty( $parts[5] ) && ! empty( $this->p->options[$opt_name] ) ? ' is_empty' : '' ) . 
-						( isset( $this->p->options[$opt_name] ) ? ' is_standard' : ' is_internal hide_row_in_basic' ) . '">';
+					/**
+					 * The meta tag is enabled, but its value is empty (and not 0).
+					 */
+					if ( $opt_enabled && isset( $parts[ 5 ] ) && empty( $parts[ 5 ] ) && ! is_numeric( $parts[ 5 ] ) ) {
+						$tr_class .= ' is_empty';
+					}
 
-					$table_rows[] = '<tr class="' . trim( $tr_class ) . 
+					/**
+					 * The meta tag is "standard" if an option exists to enable / disable
+					 * the meta tag, otherwise it's a meta tag meant for internal use.
+					 */
+					$tr_class .= $opt_exists ? ' is_standard' : ' is_internal';
+
+					$table_rows[] = '<tr class="' . trim( $tr_class ) . '">' .
 						'<th class="xshort">' . $parts[1] . '</th>' . 
 						'<th class="xshort">' . $parts[2] . '</th>' . 
 						'<td class="">' . ( empty( $parts[6] ) ? '' : '<!-- ' . $parts[6] . ' -->' ) . $match_name . '</td>' . 
@@ -388,58 +424,62 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 				$this->p->debug->mark();
 			}
 
-			$table_rows = array();
-
 			$sharing_url = $this->p->util->get_sharing_url( $mod, false );	// $add_page = false
 
 			$sharing_url_encoded = urlencode( $sharing_url );
 
-			$amp_url = $mod['is_post'] && function_exists( 'amp_get_permalink' ) ?
-				'https://validator.ampproject.org/#url=' . urlencode( amp_get_permalink( $mod['id'] ) ) : '';
+			$buttons = array(
+				'facebook' => array(
+					'title' => _x( 'Facebook Open Graph Object Debugger', 'option label', 'wpsso' ),
+					'label' => _x( 'Validate Open Graph', 'submit button', 'wpsso' ),
+					'url'   => 'https://developers.facebook.com/tools/debug/og/object?q=' . $sharing_url_encoded,
+				),
+				'linkedin' => array(
+					'title' => _x( 'LinkedIn Post Inspector', 'option label', 'wpsso' ),
+					'label' => _x( 'Validate Metadata', 'submit button', 'wpsso' ),
+					'url'   => 'https://www.linkedin.com/post-inspector/inspect/' . $sharing_url_encoded,
+				),
+				'google' => array(
+					'title' => _x( 'Google Structured Data Testing Tool', 'option label', 'wpsso' ),
+					'label' => _x( 'Validate Structured Data', 'submit button', 'wpsso' ),
+					'url'   => 'https://search.google.com/structured-data/testing-tool/u/0/#url=' . $sharing_url_encoded,
+				),
+				'pinterest' => array(
+					'title' => _x( 'Pinterest Rich Pins Validator', 'option label', 'wpsso' ),
+					'label' => _x( 'Validate Rich Pins', 'submit button', 'wpsso' ),
+					'url'   => 'https://developers.pinterest.com/tools/url-debugger/?link=' . $sharing_url_encoded,
+				),
+				'twitter' => array(
+					'title' => _x( 'Twitter Card Validator', 'option label', 'wpsso' ),
+					'label' => _x( 'Validate Twitter Card', 'submit button', 'wpsso' ),
+					'url'   => 'https://cards-dev.twitter.com/validator',
+					'msg'   => $this->p->msgs->get( 'info-meta-validate-twitter' ) . $form->get_input_copy_clipboard( $sharing_url ),
+				),
+				'w3c' => array(
+					'title' => _x( 'W3C Markup Validation', 'option label', 'wpsso' ),
+					'label' => _x( 'Validate HTML Markup', 'submit button', 'wpsso' ),
+					'url'   => 'https://validator.w3.org/nu/?doc=' . $sharing_url_encoded,
+				),
+				'amp' => array(
+					'title' => $mod[ 'is_post' ] ? _x( 'The AMP Validator', 'option label', 'wpsso' ) : '',
+					'label' => $mod[ 'is_post' ] ? _x( 'Validate AMP Markup', 'submit button', 'wpsso' ) : '',
+					'url'   => $mod[ 'is_post' ] && function_exists( 'amp_get_permalink' ) ?
+						'https://validator.ampproject.org/#url=' . urlencode( amp_get_permalink( $mod[ 'id' ] ) ) : '',
+				),
+			);
 
-			$bing_url      = 'https://www.bing.com/webmaster/diagnostics/markup/validator?url=' . $sharing_url_encoded;
-			$facebook_url  = 'https://developers.facebook.com/tools/debug/og/object?q=' . $sharing_url_encoded;
-			$google_url    = 'https://search.google.com/structured-data/testing-tool/u/0/#url=' . $sharing_url_encoded;
-			$pinterest_url = 'https://developers.pinterest.com/tools/url-debugger/?link=' . $sharing_url_encoded;
-			$twitter_url   = 'https://cards-dev.twitter.com/validator';
-			$w3c_url       = 'https://validator.w3.org/nu/?doc=' . $sharing_url_encoded;
+			$table_rows = array();
 
-			// Facebook
-			$table_rows['validate_facebook'] = $form->get_th_html( _x( 'Facebook Debugger', 'option label', 'wpsso' ), 'medium' ) . 
-			'<td class="validate">' . $this->p->msgs->get( 'info-meta-validate-facebook' ) . '</td>' . 
-			'<td class="validate">' . $form->get_button( _x( 'Validate Open Graph', 'submit button', 'wpsso' ),
-				'button-secondary', '', $facebook_url, true ) . '</td>';
+			foreach ( $buttons as $key => $btn ) {
 
-			// Google
-			$table_rows['validate_google'] = $form->get_th_html( _x( 'Google Structured Data Testing Tool', 'option label', 'wpsso' ), 'medium' ) . 
-			'<td class="validate">' . $this->p->msgs->get( 'info-meta-validate-google' ) . '</td>' . 
-			'<td class="validate">' . $form->get_button( _x( 'Validate Data Markup', 'submit button', 'wpsso' ),
-				'button-secondary', '', $google_url, true ) . '</td>';
+				if ( ! empty( $btn[ 'title' ] ) ) {	// The amp validator title will be empty for non-post objects.
 
-			// Pinterest
-			$table_rows['validate_pinterest'] = $form->get_th_html( _x( 'Pinterest Rich Pin Validator', 'option label', 'wpsso' ), 'medium' ) . 
-			'<td class="validate">' . $this->p->msgs->get( 'info-meta-validate-pinterest' ) . '</td>' . 
-			'<td class="validate">' . $form->get_button( _x( 'Validate Rich Pins', 'submit button', 'wpsso' ),
-				'button-secondary', '', $pinterest_url, true ) . '</td>';
-
-			// Twitter
-			$table_rows['validate_twitter'] = $form->get_th_html( _x( 'Twitter Card Validator', 'option label', 'wpsso' ), 'medium' ) . 
-			'<td class="validate">' . $this->p->msgs->get( 'info-meta-validate-twitter' ) . $form->get_input_copy_clipboard( $sharing_url ) . '</td>' . 
-			'<td class="validate">' . $form->get_button( _x( 'Validate Twitter Card', 'submit button', 'wpsso' ),
-				'button-secondary', '', $twitter_url, true ) . '</td>';
-
-			// W3C
-			$table_rows['validate_w3c'] = $form->get_th_html( _x( 'W3C Markup Validation', 'option label', 'wpsso' ), 'medium' ) . 
-			'<td class="validate">' . $this->p->msgs->get( 'info-meta-validate-w3c' ) . '</td>' . 
-			'<td class="validate">' . $form->get_button( _x( 'Validate HTML Markup', 'submit button', 'wpsso' ),
-				'button-secondary', '', $w3c_url, true ) . '</td>';
-
-			// AMP
-			if ( $mod['is_post'] ) {
-				$table_rows['validate_amp'] = $form->get_th_html( _x( 'The AMP Validator', 'option label', 'wpsso' ), 'medium' ) . 
-				'<td class="validate">' . $this->p->msgs->get( 'info-meta-validate-amp' ) . '</td>' . 
-				'<td class="validate">' . $form->get_button( _x( 'Validate AMP Markup', 'submit button', 'wpsso' ),
-					'button-secondary', '', $amp_url, true, ( $amp_url ? false : true ) ) . '</td>';
+					$table_rows[ 'validate_' . $key ] = $form->get_th_html( $btn[ 'title' ], 'medium' ) . 
+					'<td class="validate">' . ( isset( $btn[ 'msg' ] ) ? $btn[ 'msg' ] :
+						$this->p->msgs->get( 'info-meta-validate-' . $key ) ). '</td>' . 
+					'<td class="validate">' . $form->get_button( $btn[ 'label' ], 'button-secondary', '', $btn[ 'url' ],
+						$newtab = true, ( $btn[ 'url' ] ? false : true ) ) . '</td>';
+				}
 			}
 
 			return $table_rows;
@@ -447,18 +487,18 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 
 		/**
 		 * Return a specific option from the custom social settings meta with fallback for 
-		 * multiple option keys. If $md_idx is an array, then get the first non-empty option 
+		 * multiple option keys. If $md_key is an array, then get the first non-empty option 
 		 * from the options array. This is an easy way to provide a fallback value for the 
 		 * first array key. Use 'none' as a key name to skip this fallback behavior.
 		 *
 		 * Example: get_options_multi( $id, array( 'p_desc', 'og_desc' ) );
 		 */
-		public function get_options_multi( $mod_id, $md_idx = false, $filter_opts = true ) {
+		public function get_options_multi( $mod_id, $md_key = false, $filter_opts = true ) {
 
 			if ( $this->p->debug->enabled ) {
 				$this->p->debug->log_args( array( 
 					'mod_id'      => $mod_id, 
-					'md_idx'      => $md_idx, 
+					'md_key'      => $md_key, 
 					'filter_opts' => $filter_opts, 
 				) );
 			}
@@ -467,48 +507,62 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 				return null;
 			}
 
-			if ( false === $md_idx ) {	// return the whole options array
+			if ( false === $md_key ) {					// Return the whole options array.
 
-				$md_val = $this->get_options( $mod_id, $md_idx, $filter_opts );
+				$md_val = $this->get_options( $mod_id, $md_key, $filter_opts );
 
-			} elseif ( true === $md_idx ) {	// true is not valid for a custom meta key
+			} elseif ( true === $md_key ) {					// True is not valid for a custom meta key.
 
 				$md_val = null;
 
-			} else {	// return the first matching index value
+			} else {							// Return the first matching index value.
 
-				if ( ! is_array( $md_idx ) ) {		// convert a string to an array
-					$md_idx = array( $md_idx );
+				if ( is_array( $md_key ) ) {
+					$check_md_keys = array_unique( $md_key );	// Prevent duplicate key values.
 				} else {
-					$md_idx = array_unique( $md_idx );	// prevent duplicate idx values
+					$check_md_keys = array( $md_key );		// Convert a string to an array.
 				}
 
-				foreach ( $md_idx as $md_idx ) {
-					if ( 'none' === $md_idx ) {		// special index keyword
+				foreach ( $check_md_keys as $md_key ) {
+
+					if ( 'none' === $md_key ) {			// Special index keyword - stop here.
+
 						return null;
-					} elseif ( empty( $md_idx ) ) {		// skip empty array keys
+
+					} elseif ( empty( $md_key ) ) {			// Skip empty array keys.
+
 						continue;
-					} elseif ( is_array( $md_idx ) ) {	// an array of arrays is not valid
+
+					} elseif ( is_array( $md_key ) ) {		// An array of arrays is not valid.
+
 						continue;
+
 					} else {
+
 						if ( $this->p->debug->enabled ) {
-							$this->p->debug->log( 'getting id ' . $mod_id . ' option ' . $md_idx . ' value' );
+							$this->p->debug->log( 'getting id ' . $mod_id . ' option ' . $md_key . ' value' );
 						}
-						if ( ( $md_val = $this->get_options( $mod_id, $md_idx, $filter_opts ) ) !== null ) {
+
+						if ( ( $md_val = $this->get_options( $mod_id, $md_key, $filter_opts ) ) !== null ) {
+
 							if ( $this->p->debug->enabled ) {
-								$this->p->debug->log( 'option ' . $md_idx . ' value found (not null)' );
+								$this->p->debug->log( 'option ' . $md_key . ' value found (not null)' );
 							}
-							break;		// stop after first match
+
+							break;				// Stop after first match.
 						}
 					}
 				}
 			}
 
 			if ( $md_val !== null ) {
+
 				if ( $this->p->debug->enabled ) {
+
 					$mod = $this->get_mod( $mod_id );
-					$this->p->debug->log( 'custom ' . $mod['name'] . ' ' . ( false === $md_idx ? 'options' : 
-						( is_array( $md_idx ) ? implode( ', ', $md_idx ) : $md_idx ) ) . ' = ' . 
+
+					$this->p->debug->log( 'custom ' . $mod[ 'name' ] . ' ' . ( false === $md_key ? 'options' : 
+						( is_array( $md_key ) ? implode( ', ', $md_key ) : $md_key ) ) . ' = ' . 
 						( is_array( $md_val ) ? print_r( $md_val, true ) : '"' . $md_val . '"' ) );
 				}
 			}
@@ -516,11 +570,22 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 			return $md_val;
 		}
 
-		public function get_options( $mod_id, $idx = false, $filter_opts = true ) {
-			return $this->must_be_extended( __METHOD__, ( $idx !== false ? null : array() ) );	// return an empty array or null
+		public function get_options( $mod_id, $md_key = false, $filter_opts = true, $def_fallback = false ) {
+
+			$ret_val = array();
+
+			if ( false !== $md_key ) {
+				if ( $def_fallback ) {
+					$ret_val = $this->get_defaults( $mod_id, $md_key );
+				} else {
+					$ret_val = null;
+				}
+			}
+
+			return $this->must_be_extended( __METHOD__, $ret_val );
 		}
 
-		public function get_defaults( $mod_id, $idx = false ) {
+		public function get_defaults( $mod_id, $md_key = false ) {
 
 			if ( $this->p->debug->enabled ) {
 				$this->p->debug->mark();
@@ -530,13 +595,15 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 			 * Maybe initialize the cache.
 			 */
 			if ( ! isset( $this->defs[$mod_id] ) ) {
+
 				if ( $this->p->debug->enabled ) {
 					$this->p->debug->log( 'initializing the default options cache array' );
 				}
-				$this->defs[$mod_id] = array();
+
+				$this->defs[ $mod_id ] = array();
 			}
 
-			$md_defs =& $this->defs[$mod_id];	// Shortcut variable name.
+			$md_defs =& $this->defs[ $mod_id ];	// Shortcut variable name.
 
 			if ( ! WpssoOptions::can_cache() || empty( $md_defs['options_filtered'] ) ) {
 
@@ -549,6 +616,7 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 				$md_defs = array(
 					'options_filtered' => '',
 					'options_version'  => '',
+
 					/**
 					 * Customize Tab.
 					 */
@@ -561,6 +629,7 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 					'sharing_url'    => '',
 					'canonical_url'  => '',
 					'schema_desc'    => '',
+
 					/**
 					 * Open Graph - Product Information.
 					 */
@@ -570,10 +639,17 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 					'product_condition' => 'none',
 					'product_material'  => '',
 					'product_sku'       => '',
+					'product_ean'       => '',
+					'product_gtin8'     => '',
+					'product_gtin12'    => '',
+					'product_gtin13'    => '',
+					'product_gtin14'    => '',
+					'product_isbn'      => '',
 					'product_price'     => '0.00',
 					'product_currency'  => empty( $opts['plugin_def_currency'] ) ? 'USD' : $opts['plugin_def_currency'],
 					'product_size'      => '',
 					'product_gender'    => 'none',
+
 					/**
 					 * Open Graph - Priority Image.
 					 */
@@ -586,6 +662,7 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 					'og_img_id'     => '',
 					'og_img_id_pre' => empty( $opts['og_def_img_id_pre'] ) ? '' : $opts['og_def_img_id_pre'],	// Default library prefix.
 					'og_img_url'    => '',
+
 					/**
 					 * Open Graph - Priority Video.
 					 */
@@ -597,6 +674,7 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 					'og_vid_url'      => '',
 					'og_vid_title'    => '',	// Custom value for first video.
 					'og_vid_desc'     => '',	// Custom value for first video.
+
 					/**
 					 * Twitter Card.
 					 */
@@ -614,6 +692,7 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 					'tc_sum_img_crop_y' => empty( $opts['tc_sum_img_crop_y'] ) ? 'center' : $opts['tc_sum_img_crop_y'],
 					'tc_sum_img_id_pre' => empty( $opts['og_def_img_id_pre'] ) ? '' : $opts['og_def_img_id_pre'],	// Default library prefix.
 					'tc_sum_img_url'    => '',
+
 					/**
 					 * Structured Data / Schema Markup / Pinterest.
 					 */
@@ -626,6 +705,7 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 					'schema_img_id'     => '',
 					'schema_img_id_pre' => empty( $opts['og_def_img_id_pre'] ) ? '' : $opts['og_def_img_id_pre'],	// Default library prefix.
 					'schema_img_url'    => '',
+
 					/**
 					 * Gravity View (Side Metabox).
 					 */
@@ -656,12 +736,14 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 				$this->p->debug->log( 'get_md_defaults filter skipped' );
 			}
 
-			if ( $idx !== false ) {
-				if ( isset( $md_defs[$idx] ) ) {
-					return $md_defs[$idx];
+			if ( false !== $md_key ) {
+
+				if ( isset( $md_defs[ $md_key ] ) ) {
+					return $md_defs[ $md_key ];
 				} else {
 					return null;
 				}
+
 			} else {
 				return $md_defs;
 			}
@@ -710,14 +792,14 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 
 			foreach ( $cache_types as $type_name => $type_keys ) {
 
-				$filter_name = $this->p->lca . '_' . $mod['name'] . '_cache_' . $type_name . '_keys';
+				$filter_name = $this->p->lca . '_' . $mod[ 'name' ] . '_cache_' . $type_name . '_keys';
 				$type_keys = (array) apply_filters( $filter_name, $type_keys, $mod, $sharing_url, $mod_salt );
 
 				foreach ( $type_keys as $mixed ) {
 
-					if ( is_array( $mixed ) && isset( $mixed['id'] ) ) {
+					if ( is_array( $mixed ) && isset( $mixed[ 'id' ] ) ) {
 
-						$cache_id = $mixed['id'];
+						$cache_id = $mixed[ 'id' ];
 
 						$cache_key = '';
 						$cache_key .= isset( $mixed['pre'] ) ? $mixed['pre'] : '';
@@ -737,14 +819,23 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 					}
 
 					switch ( $type_name ) {
+
 						case 'transient':
+
 							$ret = delete_transient( $cache_id );
+
 							break;
+
 						case 'wp_cache':
+
 							$ret = wp_cache_delete( $cache_id );
+
 							break;
+
 						default:
+
 							$ret = false;
+
 							break;
 					}
 
@@ -805,22 +896,22 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 		protected function get_submit_opts( $mod_id ) {
 
 			$mod     = $this->get_mod( $mod_id );
-			$md_defs = $this->get_defaults( $mod['id'] );
-			$md_prev = $this->get_options( $mod['id'] );
+			$md_defs = $this->get_defaults( $mod[ 'id' ] );
+			$md_prev = $this->get_options( $mod[ 'id' ] );
 
 			/**
 			 * Remove plugin version strings.
 			 */
-			$unset_idx = array( 'options_filtered', 'options_version' );
+			$md_unset_keys = array( 'options_filtered', 'options_version' );
 
-			foreach ( $this->p->cf['plugin'] as $ext => $info ) {
+			foreach ( $this->p->cf[ 'plugin' ] as $ext => $info ) {
 				if ( isset( $info['opt_version'] ) ) {
-					$unset_idx[] = 'plugin_' . $ext . '_opt_version';
+					$md_unset_keys[] = 'plugin_' . $ext . '_opt_version';
 				}
 			}
 
-			foreach ( $unset_idx as $md_idx ) {
-				unset( $md_defs[$md_idx], $md_prev[$md_idx] );
+			foreach ( $md_unset_keys as $md_key ) {
+				unset( $md_defs[$md_key], $md_prev[$md_key] );
 			}
 
 			/**
@@ -828,8 +919,8 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 			 */
 			$md_opts = empty( $_POST[ WPSSO_META_NAME ] ) ? array() : $_POST[ WPSSO_META_NAME ];
 			$md_opts = SucomUtil::restore_checkboxes( $md_opts );
-			$md_opts = array_merge( $md_prev, $md_opts );				// update the previous options array
-			$md_opts = $this->p->opt->sanitize( $md_opts, $md_defs, false, $mod );	// $network = false
+			$md_opts = array_merge( $md_prev, $md_opts );	// Update the previous options array.
+			$md_opts = $this->p->opt->sanitize( $md_opts, $md_defs, $network = false, $mod );
 
 			/**
 			 * Check image size options (id, prefix, width, height, crop, etc.).
@@ -871,7 +962,7 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 					}
 				}
 
-				if ( $force_regen !== false ) {
+				if ( false !== $force_regen ) {
 					$this->p->util->set_force_regen( $mod, $md_pre );
 				}
 			}
@@ -879,15 +970,15 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 			/**
 			 * Remove "use plugin settings", or "same as default" option values, or empty strings.
 			 */
-			foreach ( $md_opts as $md_idx => $md_val ) {
+			foreach ( $md_opts as $md_key => $md_val ) {
 
 				/**
 				 * Use strict comparison to manage conversion (don't allow string to integer conversion, for example).
 				 */
 				if ( $md_val === '' || $md_val === WPSSO_UNDEF || $md_val === (string) WPSSO_UNDEF || 
-					( isset( $md_defs[$md_idx] ) && ( $md_val === $md_defs[$md_idx] || $md_val === (string) $md_defs[$md_idx] ) ) ) {
+					( isset( $md_defs[$md_key] ) && ( $md_val === $md_defs[$md_key] || $md_val === (string) $md_defs[$md_key] ) ) ) {
 
-					unset( $md_opts[$md_idx] );
+					unset( $md_opts[$md_key] );
 				}
 			}
 
@@ -896,19 +987,25 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 			 */
 			foreach ( $this->p->cf['opt']['cf_md_multi'] as $md_multi => $is_multi ) {
 
-				$md_renum = array();	// start with a fresh array
+				if ( ! $is_multi ) {	// Just in case.
+					continue;
+				}
 
-				foreach ( SucomUtil::preg_grep_keys( '/^' . $md_multi . '_[0-9]+$/', $md_opts ) as $md_idx => $md_val ) {
+				$md_seq = array();	// Start with a fresh array.
 
-					unset( $md_opts[$md_idx] );
+				$md_orig = SucomUtil::preg_grep_keys( '/^' . $md_multi . '_[0-9]+$/', $md_opts );
+
+				foreach ( $md_orig as $md_key => $md_val ) {
+
+					unset( $md_opts[ $md_key ] );
 
 					if ( $md_val !== '' ) {
-						$md_renum[] = $md_val;
+						$md_seq[] = $md_val;
 					}
 				}
 
-				foreach ( $md_renum as $num => $md_val ) {	// start at 0
-					$md_opts[$md_multi . '_' . $num] = $md_val;
+				foreach ( $md_seq as $num => $md_val ) {	// Start at 0.
+					$md_opts[ $md_multi . '_' . $num ] = $md_val;
 				}
 			}
 
@@ -917,9 +1014,9 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 			 */
 			if ( ! empty( $md_opts ) ) {
 
-				$md_opts['options_version'] = $this->p->cf['opt']['version'];
+				$md_opts['options_version'] = $this->p->cf['opt'][ 'version' ];
 
-				foreach ( $this->p->cf['plugin'] as $ext => $info ) {
+				foreach ( $this->p->cf[ 'plugin' ] as $ext => $info ) {
 					if ( isset( $info['opt_version'] ) ) {
 						$md_opts['plugin_' . $ext . '_opt_version'] = $info['opt_version'];
 					}
@@ -932,7 +1029,7 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 		/**
 		 * Return sortable column keys and their query sort info.
 		 */
-		public static function get_sortable_columns( $col_idx = false ) { 
+		public static function get_sortable_columns( $col_key = false ) { 
 
 			static $sort_cols = null;
 
@@ -943,9 +1040,9 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 				$sort_cols = (array) apply_filters( $wpsso->lca . '_get_sortable_columns', $wpsso->cf['edit']['columns'] );
 			}
 
-			if ( $col_idx !== false ) {
-				if ( isset( $sort_cols[$col_idx] ) ) {
-					return $sort_cols[$col_idx];
+			if ( false !== $col_key ) {
+				if ( isset( $sort_cols[$col_key] ) ) {
+					return $sort_cols[$col_key];
 				} else {
 					return null;
 				}
@@ -959,9 +1056,9 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 			$meta_keys = array();
 			$sort_cols = self::get_sortable_columns();
 
-			foreach ( $sort_cols as $col_idx => $col_info ) {
+			foreach ( $sort_cols as $col_key => $col_info ) {
 				if ( ! empty( $col_info['meta_key'] ) ) {
-					$meta_keys[$col_idx] = $col_info['meta_key'];
+					$meta_keys[$col_key] = $col_info['meta_key'];
 				}
 			}
 
@@ -973,9 +1070,9 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 			$headers   = array();
 			$sort_cols = self::get_sortable_columns();
 
-			foreach ( $sort_cols as $col_idx => $col_info ) {
+			foreach ( $sort_cols as $col_key => $col_info ) {
 				if ( ! empty( $col_info['header'] ) ) {
-					$headers[$col_idx] = _x( $col_info['header'], 'column header', 'wpsso' );
+					$headers[$col_key] = _x( $col_info['header'], 'column header', 'wpsso' );
 				}
 			}
 
@@ -986,19 +1083,19 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 
 			$value = '';
 
-			if ( ! empty( $mod['id'] ) && strpos( $column_name, $this->p->lca . '_' ) === 0 ) {	// Just in case.
+			if ( ! empty( $mod[ 'id' ] ) && strpos( $column_name, $this->p->lca . '_' ) === 0 ) {	// Just in case.
 
-				$col_idx = str_replace( $this->p->lca . '_', '', $column_name );
+				$col_key = str_replace( $this->p->lca . '_', '', $column_name );
 
-				if ( ( $col_info = self::get_sortable_columns( $col_idx ) ) !== null ) {
+				if ( ( $col_info = self::get_sortable_columns( $col_key ) ) !== null ) {
 
 					if ( isset( $col_info['meta_key'] ) ) {	// Just in case.
 
-						$meta_cache = wp_cache_get( $mod['id'], $mod['name'] . '_meta' );
+						$meta_cache = wp_cache_get( $mod[ 'id' ], $mod[ 'name' ] . '_meta' );
 
 						if ( ! $meta_cache ) {
-							$meta_cache = update_meta_cache( $mod['name'], array( $mod['id'] ) );
-							$meta_cache = $meta_cache[$mod['id']];
+							$meta_cache = update_meta_cache( $mod[ 'name' ], array( $mod[ 'id' ] ) );
+							$meta_cache = $meta_cache[$mod[ 'id' ]];
 						}
 
 						if ( isset( $meta_cache[$col_info['meta_key']] ) ) {
@@ -1012,23 +1109,28 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 		}
 
 		public function get_column_content( $value, $column_name, $id ) {
+
 			return $this->must_be_extended( __METHOD__, $value );
 		}
 
 		public function get_meta_cache_value( $id, $meta_key, $none = '' ) {
+
 			return $this->must_be_extended( __METHOD__, $none );
 		}
 
-		public function update_sortable_meta( $obj_id, $col_idx, $content ) { 
+		public function update_sortable_meta( $obj_id, $col_key, $content ) { 
+
 			return $this->must_be_extended( __METHOD__ );
 		}
 
 		public function add_sortable_columns( $columns ) { 
-			foreach ( self::get_sortable_columns() as $col_idx => $col_info ) {
+
+			foreach ( self::get_sortable_columns() as $col_key => $col_info ) {
 				if ( ! empty( $col_info['orderby'] ) ) {
-					$columns[$this->p->lca . '_' . $col_idx] = $this->p->lca . '_' . $col_idx;
+					$columns[$this->p->lca . '_' . $col_key] = $this->p->lca . '_' . $col_key;
 				}
 			}
+
 			return $columns;
 		}
 
@@ -1038,9 +1140,9 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 
 			if ( is_string( $col_name ) && strpos( $col_name, $this->p->lca . '_' ) === 0 ) {
 
-				$col_idx = str_replace( $this->p->lca . '_', '', $col_name );
+				$col_key = str_replace( $this->p->lca . '_', '', $col_name );
 
-				if ( ( $col_info = self::get_sortable_columns( $col_idx ) ) !== null ) {
+				if ( ( $col_info = self::get_sortable_columns( $col_key ) ) !== null ) {
 
 					foreach ( array( 'meta_key', 'orderby' ) as $set_name ) {
 
@@ -1056,14 +1158,14 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 
 			if ( ! empty( $mod_name ) ) {
 
-				foreach ( self::get_column_headers() as $col_idx => $col_header ) {
+				foreach ( self::get_column_headers() as $col_key => $col_header ) {
 
-					if ( ! empty( $this->p->options['plugin_' . $col_idx . '_col_' . $mod_name] ) ) {
+					if ( ! empty( $this->p->options['plugin_' . $col_key . '_col_' . $mod_name] ) ) {
 
-						$columns[$this->p->lca . '_' . $col_idx] = $col_header;
+						$columns[$this->p->lca . '_' . $col_key] = $col_header;
 
 						if ( $this->p->debug->enabled ) {
-							$this->p->debug->log( 'adding ' . $this->p->lca . '_' . $col_idx . ' column' );
+							$this->p->debug->log( 'adding ' . $this->p->lca . '_' . $col_key . ' column' );
 						}
 					}
 				}
@@ -1158,7 +1260,7 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 
 			$mt_ret = array();
 
-			if ( empty( $mod['id'] ) ) {
+			if ( empty( $mod[ 'id' ] ) ) {
 				return $mt_ret;
 			}
 
@@ -1181,9 +1283,9 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 				/**
 				 * Get the image id, library prefix, and/or url values.
 				 */
-				$pid = $this->get_options( $mod['id'], $opt_pre . '_img_id' );
-				$pre = $this->get_options( $mod['id'], $opt_pre . '_img_id_pre' );	// Default library prefix.
-				$url = $this->get_options( $mod['id'], $opt_pre . '_img_url' );
+				$pid = $this->get_options( $mod[ 'id' ], $opt_pre . '_img_id' );
+				$pre = $this->get_options( $mod[ 'id' ], $opt_pre . '_img_id_pre' );	// Default library prefix.
+				$url = $this->get_options( $mod[ 'id' ], $opt_pre . '_img_url' );
 
 				if ( $pid > 0 ) {
 
@@ -1204,8 +1306,8 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 							get_class( $this ) );	// log extended class name
 					}
 
-					$img_width  = $this->get_options( $mod['id'], $opt_pre . '_img_url:width' );
-					$img_height = $this->get_options( $mod['id'], $opt_pre . '_img_url:height' );
+					$img_width  = $this->get_options( $mod[ 'id' ], $opt_pre . '_img_url:width' );
+					$img_height = $this->get_options( $mod[ 'id' ], $opt_pre . '_img_url:height' );
 
 					$mt_single_image[ $mt_pre . ':image:url' ]    = $url;
 					$mt_single_image[ $mt_pre . ':image:width' ]  = $img_width > 0 ? $img_width : WPSSO_UNDEF;
@@ -1219,7 +1321,7 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 				}
 			}
 
-			foreach ( apply_filters( $this->p->lca . '_' . $mod['name'] . '_image_ids', array(), $size_name, $mod['id'], $mod ) as $pid ) {
+			foreach ( apply_filters( $this->p->lca . '_' . $mod[ 'name' ] . '_image_ids', array(), $size_name, $mod[ 'id' ], $mod ) as $pid ) {
 
 				if ( $pid > 0 ) {	// Quick sanity check.
 
@@ -1239,9 +1341,9 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 				}
 			}
 
-			foreach ( apply_filters( $this->p->lca . '_' . $mod['name'] . '_image_urls', array(), $size_name, $mod['id'], $mod ) as $url ) {
+			foreach ( apply_filters( $this->p->lca . '_' . $mod[ 'name' ] . '_image_urls', array(), $size_name, $mod[ 'id' ], $mod ) as $url ) {
 
-				if ( strpos( $url, '://' ) !== false ) {	// Quick sanity check.
+				if ( false !== strpos( $url, '://' ) ) {	// Quick sanity check.
 
 					if ( $this->p->debug->enabled ) {
 						$this->p->debug->log( 'adding image url: ' . $url );
@@ -1321,7 +1423,7 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 						'api'      => '',
 					);
 
-					$og_videos = $this->p->media->get_video_info( $args, $check_dupes, true );
+					$og_videos = $this->p->media->get_video_details( $args, $check_dupes, true );
 
 					if ( $this->p->util->push_max( $og_ret, $og_videos, $num ) )  {
 						return $og_ret;
@@ -1360,7 +1462,7 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 
 			/* Example config:
 			 *
-			 *	'cf_md_idx' => array(
+			 *	'cf_md_key' => array(
 			 *		'plugin_cf_img_url'             => 'og_img_url',
 			 *		'plugin_cf_vid_url'             => 'og_vid_url',
 			 *		'plugin_cf_vid_embed'           => 'og_vid_embed',
@@ -1380,26 +1482,31 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 			 *		'plugin_cf_sameas_urls'         => 'schema_sameas_url',
 			 *	),
 			 */
-			$cf_md_idx = (array) apply_filters( $this->p->lca . '_get_cf_md_idx', $this->p->cf['opt']['cf_md_idx'] );
+			$cf_md_keys = (array) apply_filters( $this->p->lca . '_cf_md_keys', $this->p->cf['opt']['cf_md_key'] );
 
-			foreach ( $cf_md_idx as $cf_idx => $md_idx ) {
+			foreach ( $cf_md_keys as $cf_key => $md_key ) {
 
-				if ( empty( $md_idx ) ) {	// Custom fields can be disabled by filters.
+				if ( empty( $md_key ) ) {	// Custom fields can be disabled by filters.
+
 					if ( $this->p->debug->enabled ) {
-						$this->p->debug->log( 'custom field ' . $cf_idx . ' index is disabled' );
+						$this->p->debug->log( 'custom field ' . $cf_key . ' index is disabled' );
 					}
+
 					continue;
-				} elseif ( empty( $this->p->options[$cf_idx] ) ) {	// Check that a custom field meta key has been defined.
+
+				} elseif ( empty( $this->p->options[ $cf_key ] ) ) {	// Check that a custom field meta key has been defined.
+
 					if ( $this->p->debug->enabled ) {
-						$this->p->debug->log( 'custom field ' . $cf_idx . ' option is empty' );
+						$this->p->debug->log( 'custom field ' . $cf_key . ' option is empty' );
 					}
+
 					continue;
 				}
 
-				$meta_key = $this->p->options[$cf_idx];
+				$meta_key = $this->p->options[ $cf_key ];
 
 				if ( $this->p->debug->enabled ) {
-					$this->p->debug->log( 'custom field ' . $cf_idx . ' option has meta key ' . $meta_key );
+					$this->p->debug->log( 'custom field ' . $cf_key . ' option has meta key ' . $meta_key );
 				}
 
 				if ( ! isset( $wp_meta[$meta_key][0] ) ) {	// If the array element is not set, then skip it.
@@ -1410,7 +1517,7 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 				}
 
 				if ( $this->p->debug->enabled ) {
-					$this->p->debug->log( $meta_key . ' meta key found for ' . $md_idx . ' option' );
+					$this->p->debug->log( $meta_key . ' meta key found for ' . $md_key . ' option' );
 				}
 
 				$mixed  = maybe_unserialize( $wp_meta[$meta_key][0] );	// Could be a string or an array.
@@ -1439,15 +1546,21 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 				/**
 				 * Check if the value should be split into numeric option increments.
 				 */
-				if ( empty( $this->p->cf['opt']['cf_md_multi'][$md_idx] ) ) {
+				if ( empty( $this->p->cf[ 'opt' ][ 'cf_md_multi' ][ $md_key ] ) ) {
+
 					$is_multi = false;
+
 				} else {
+
 					if ( ! is_array( $mixed ) ) {
+
 						$values = array_map( 'trim', explode( PHP_EOL, reset( $values ) ) );	// Explode first element into an array.
+
 						if ( $this->p->debug->enabled ) {
 							$this->p->debug->log( 'exploded ' . $meta_key . ' into array of ' . count( $values ) . ' elements' );
 						}
 					}
+
 					$is_multi = true;	// Increment the option name.
 				}
 
@@ -1459,15 +1572,18 @@ if ( ! class_exists( 'WpssoMeta' ) ) {
 					/**
 					 * Remove any old values from the options array.
 					 */
-					$md_opts = SucomUtil::preg_grep_keys( '/^' . $md_idx . '_[0-9]+$/', $md_opts, true );	// $invert is true.
+					$md_opts = SucomUtil::preg_grep_keys( '/^' . $md_key . '_[0-9]+$/', $md_opts, true );	// $invert is true.
 
 					foreach ( $values as $num => $val ) {
-						$md_opts[$md_idx . '_' . $num] = $val;
-						$md_opts[$md_idx . '_' . $num . ':is'] = 'disabled';
+						$md_opts[ $md_key . '_' . $num ] = $val;
+						$md_opts[ $md_key . '_' . $num . ':is' ] = 'disabled';
 					}
+
 				} else {
-					$md_opts[$md_idx] = reset( $values );	// Get first element of $values array.
-					$md_opts[$md_idx . ':is'] = 'disabled';
+
+					$md_opts[ $md_key ] = reset( $values );	// Get first element of $values array.
+
+					$md_opts[ $md_key . ':is' ] = 'disabled';
 				}
 			}
 

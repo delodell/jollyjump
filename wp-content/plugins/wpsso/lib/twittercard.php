@@ -79,17 +79,17 @@ if ( ! class_exists( 'WpssoTwitterCard' ) ) {
 				if ( $this->p->debug->enabled ) {
 					$this->p->debug->log( 'getting description for twitter:description meta tag' );
 				}
-				$mt_tc['twitter:description'] = $this->p->page->get_description( $this->p->options['tc_desc_len'], 
+				$mt_tc['twitter:description'] = $this->p->page->get_description( $this->p->options['tc_desc_max_len'], 
 					'...', $mod, true, true, true, 'tc_desc' );	// $add_hashtags is true.
 			}
 
 			if ( ! isset( $mt_tc['twitter:creator'] ) ) {
-				if ( $mod['is_post'] ) {
-					if ( $mod['post_author'] ) {
-						$mt_tc['twitter:creator'] = get_the_author_meta( $this->p->options['plugin_cm_twitter_name'], $mod['post_author'] );
+				if ( $mod[ 'is_post' ] ) {
+					if ( $mod[ 'post_author' ] ) {
+						$mt_tc['twitter:creator'] = get_the_author_meta( $this->p->options['plugin_cm_twitter_name'], $mod[ 'post_author' ] );
 					}
-				} elseif ( $mod['is_user'] ) {
-					$mt_tc['twitter:creator'] = get_the_author_meta( $this->p->options['plugin_cm_twitter_name'], $mod['id'] );
+				} elseif ( $mod[ 'is_user' ] ) {
+					$mt_tc['twitter:creator'] = get_the_author_meta( $this->p->options['plugin_cm_twitter_name'], $mod[ 'id' ] );
 				}
 			}
 
@@ -264,7 +264,7 @@ if ( ! class_exists( 'WpssoTwitterCard' ) ) {
 			 */
 			if ( ! isset( $mt_tc['twitter:card'] ) ) {
 
-				if ( $mod['is_post'] ) {
+				if ( $mod[ 'is_post' ] ) {
 
 					list( $card_type, $size_name, $md_pre ) = $this->get_card_type_size( 'post' );
 					
@@ -275,7 +275,7 @@ if ( ! class_exists( 'WpssoTwitterCard' ) ) {
 						$this->p->debug->log( $card_type . ' card: getting post image (meta, featured, attached)' );
 					}
 
-					$og_images = $this->p->media->get_post_images( 1, $size_name, $mod['id'], $check_dupes, $md_pre );
+					$og_images = $this->p->media->get_post_images( 1, $size_name, $mod[ 'id' ], $check_dupes, $md_pre );
 
 					if ( count( $og_images ) > 0 ) {
 
@@ -304,7 +304,7 @@ if ( ! class_exists( 'WpssoTwitterCard' ) ) {
 	
 								$ngg_obj =& $this->p->m['media']['ngg'];
 
-								$og_images = $ngg_obj->get_singlepic_og_images( 1, $size_name, $mod['id'], $check_dupes );
+								$og_images = $ngg_obj->get_singlepic_og_images( 1, $size_name, $mod[ 'id' ], $check_dupes );
 	
 								if ( ! empty( $og_images ) ) {
 

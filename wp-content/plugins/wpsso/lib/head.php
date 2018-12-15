@@ -34,7 +34,7 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 		}
 
 		public function add_vary_user_agent_header( $headers ) {
-			$headers['Vary'] = 'User-Agent';
+			$headers ['Vary' ] = 'User-Agent';
 			return $headers;
 		}
 
@@ -51,11 +51,11 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 
 			$cache_index = '';
 
-			if ( $mixed !== false ) {
+			if ( false !== $mixed ) {
 				$cache_index .= '_locale:' . SucomUtil::get_locale( $mixed );
 			}
 
-			if ( $sharing_url !== false ) {
+			if ( false !== $sharing_url ) {
 				$cache_index .= '_url:' . $sharing_url;
 			}
 
@@ -88,7 +88,7 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 				$this->p->debug->mark();
 			}
 
-			if ( ! empty( $this->p->options['add_link_rel_canonical'] ) ) {
+			if ( ! empty( $this->p->options[ 'add_link_rel_canonical' ] ) ) {
 
 				$current = current_filter();	// Since wp v2.5, aka current_action() in wp v3.9.
 
@@ -138,10 +138,10 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 				$this->p->util->log_is_functions();
 			}
 
-			$add_head_html = apply_filters( $this->p->lca . '_add_head_html', $this->p->avail['*']['head_html'], $mod );
+			$add_head_html = apply_filters( $this->p->lca . '_add_head_html', $this->p->avail[ '*' ][ 'head_html' ], $mod );
 
 			if ( $this->p->debug->enabled ) {
-				$this->p->debug->log( 'avail head_html = ' . ( $this->p->avail['*']['head_html'] ? 'true' : 'false' ) );
+				$this->p->debug->log( 'avail head_html = ' . ( $this->p->avail[ '*' ][ 'head_html' ] ? 'true' : 'false' ) );
 				$this->p->debug->log( 'add_head_html = ' . ( $add_head_html ? 'true' : 'false' ) );
 			}
 
@@ -165,11 +165,11 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 
 			foreach ( $head_mt as $mt ) {
 
-				if ( ! isset( $mt[2] ) || ! isset( $mt[3] ) ) {
+				if ( ! isset( $mt[ 2 ] ) || ! isset( $mt[ 3 ] ) ) {
 					continue;
 				}
 
-				$mt_match = $mt[2] . '-' . $mt[3];
+				$mt_match = $mt[ 2 ] . '-' . $mt[ 3 ];
 
 				switch ( $mt_match ) {
 
@@ -180,16 +180,16 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 					case 'property-article:author:name':
 					case ( strpos( $mt_match, 'name-schema:' ) === 0 ? true : false ):
 
-						if ( ! isset( $head_info[$mt[3]] ) ) {	// Only save the first meta tag value.
-							$head_info[$mt[3]] = $mt[5];
+						if ( ! isset( $head_info[$mt[ 3 ]] ) ) {	// Only save the first meta tag value.
+							$head_info[$mt[ 3 ]] = $mt[ 5 ];
 						}
 
 						break;
 
 					case ( preg_match( '/^property-((og|p):(image|video))(:secure_url|:url)?$/', $mt_match, $m ) ? true : false ):
 
-						if ( ! empty( $mt[5] ) ) {
-							$has_media[$m[1]] = true;	// Optimize media loop.
+						if ( ! empty( $mt[ 5 ] ) ) {
+							$has_media[ $m[ 1 ] ] = true;	// Optimize media loop.
 						}
 
 						break;
@@ -210,11 +210,11 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 
 				foreach ( $head_mt as $mt ) {
 
-					if ( ! isset( $mt[2] ) || ! isset( $mt[3] ) ) {
+					if ( ! isset( $mt[ 2 ] ) || ! isset( $mt[ 3 ] ) ) {
 						continue;
 					}
 
-					if ( strpos( $mt[3], $mt_prefix ) !== 0 ) {
+					if ( strpos( $mt[ 3 ], $mt_prefix ) !== 0 ) {
 
 						$is_first = false;
 
@@ -228,18 +228,18 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 						}
 					}
 
-					$mt_match = $mt[2] . '-' . $mt[3];
+					$mt_match = $mt[ 2 ] . '-' . $mt[ 3 ];
 
 					switch ( $mt_match ) {
 
 						case ( preg_match( '/^property-' . $mt_prefix . '(:secure_url|:url)?$/', $mt_match, $m ) ? true : false ):
 
-							if ( ! empty( $head_info[$mt_prefix] ) ) {	// Only save the media URL once.
+							if ( ! empty( $head_info[ $mt_prefix ] ) ) {	// Only save the media URL once.
 								continue 2;				// Get the next meta tag.
 							}
 
-							if ( ! empty( $mt[5] ) ) {
-								$head_info[$mt_prefix] = $mt[5];	// Save the media URL.
+							if ( ! empty( $mt[ 5 ] ) ) {
+								$head_info[ $mt_prefix ] = $mt[ 5 ];	// Save the media URL.
 								$is_first = true;
 							}
 
@@ -247,11 +247,11 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 
 						case ( preg_match( '/^property-' . $mt_prefix . ':(width|height|cropped|id|title|description)$/', $mt_match, $m ) ? true : false ):
 
-							if ( $is_first !== true ) {	// Only save for first media found.
+							if ( true !== $is_first ) {	// Only save for first media found.
 								continue 2;		// Get the next meta tag.
 							}
 
-							$head_info[$mt[3]] = $mt[5];
+							$head_info[$mt[ 3 ]] = $mt[ 5 ];
 
 							break;
 					}
@@ -261,9 +261,9 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 			/**
 			 * Save meta tag values for later sorting in list tables.
 			 */
-			foreach ( WpssoMeta::get_sortable_columns() as $col_idx => $col_info ) {
+			foreach ( WpssoMeta::get_sortable_columns() as $col_key => $col_info ) {
 				
-				if ( empty( $col_info['meta_key'] ) || strpos( $col_info['meta_key'], '_' . $this->p->lca . '_head_info_' ) !== 0 ) {
+				if ( empty( $col_info[ 'meta_key' ] ) || strpos( $col_info[ 'meta_key' ], '_' . $this->p->lca . '_head_info_' ) !== 0 ) {
 					continue;
 				}
 
@@ -271,7 +271,7 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 
 				if ( ! empty( $col_info[ 'mt_name']  ) ) {
 					if ( $col_info[ 'mt_name'] === 'og:image' ) {	// Get the image thumbnail HTML.
-						if ( $og_img = $mod['obj']->get_og_img_column_html( $head_info, $mod ) ) {
+						if ( $og_img = $mod[ 'obj' ]->get_og_img_column_html( $head_info, $mod ) ) {
 							$meta_value = $og_img;
 						}
 					} elseif ( isset( $head_info[ $col_info[ 'mt_name' ] ] ) ) {
@@ -280,10 +280,10 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 				}
 
 				if ( $this->p->debug->enabled ) {
-					$this->p->debug->log( 'updating meta for ' . $mod['name'] . ' id ' . $mod['id'] . ' ' . $col_idx . ' = ' . $meta_value );
+					$this->p->debug->log( 'updating meta for ' . $mod[ 'name' ] . ' id ' . $mod[ 'id' ] . ' ' . $col_key . ' = ' . $meta_value );
 				}
 
-				$mod['obj']->update_sortable_meta( $mod['id'], $col_idx, $meta_value );
+				$mod[ 'obj' ]->update_sortable_meta( $mod[ 'id' ], $col_key, $meta_value );
 			}
 
 			return $head_info;
@@ -445,13 +445,13 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 
 					$cache_array = get_transient( $cache_id );
 
-					if ( isset( $cache_array[$cache_index] ) ) {
-						if ( is_array( $cache_array[$cache_index] ) ) {	// Just in case.
+					if ( isset( $cache_array[ $cache_index ] ) ) {
+						if ( is_array( $cache_array[ $cache_index ] ) ) {	// Just in case.
 							if ( $this->p->debug->enabled ) {
 								$this->p->debug->log( 'exiting early: cache index found in transient cache' );
 								$this->p->debug->mark( 'build head array' );	// end timer
 							}
-							return $cache_array[$cache_index];	// stop here
+							return $cache_array[ $cache_index ];	// stop here
 						} else {
 							if ( $this->p->debug->enabled ) {
 								$this->p->debug->log( 'cache index is not an array' );
@@ -520,28 +520,20 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 			 */
 			$mt_name = array();
 
-			/**
-			 * Fallback for article authors without a Facebook page URL in their user profile.
-			 */
 			if ( ! empty( $this->p->options['add_meta_name_author'] ) ) {
 
-				if ( ! empty( $mt_og['og:type'] ) && $mt_og['og:type'] === 'article' ) {
+				if ( isset( $mt_og['og:type'] ) && $mt_og['og:type'] === 'article' ) {
 
-					if ( empty( $mt_og['article:author'] ) ) {
+					if ( is_object( $this->p->m[ 'util' ][ 'user' ] ) ) {	// Just in case.
 
-						if ( is_object( $this->p->m['util']['user'] ) ) {
-							$mt_name['author'] = $this->p->m['util']['user']->get_author_meta( $author_id,
-								$this->p->options['fb_author_name'] );
-						} elseif ( $this->p->debug->enabled ) {
-							$this->p->debug->log( 'skipped fallback author meta tag - user module not defined' );
-						}
+						$mt_name['author'] = $this->p->m[ 'util' ][ 'user' ]->get_author_meta( $author_id, $this->p->options[ 'seo_author_name' ] );
 
 					} elseif ( $this->p->debug->enabled ) {
-						$this->p->debug->log( 'skipped fallback author meta tag - article:author is not empty' );
+						$this->p->debug->log( 'skipped author meta tag - user module not defined' );
 					}
 
 				} elseif ( $this->p->debug->enabled ) {
-					$this->p->debug->log( 'skipped fallback author meta tag - og:type is not an article' );
+					$this->p->debug->log( 'skipped author meta tag - og:type is not an article' );
 				}
 			}
 
@@ -549,7 +541,7 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 			$add_meta_name_description = apply_filters( $this->p->lca . '_add_meta_name_description', $add_meta_name_description, $mod );
 
 			if ( $add_meta_name_description ) {
-				$mt_name['description'] = $this->p->page->get_description( $this->p->options['seo_desc_len'],
+				$mt_name['description'] = $this->p->page->get_description( $this->p->options['seo_desc_max_len'],
 					'...', $mod, true, false, true, 'seo_desc' );	// $add_hashtags is false.
 			}
 
@@ -596,7 +588,7 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 			 */
 			$mt_og = $this->p->og->sanitize_array( $mod, $mt_og );	// Unset mis-matched og_type meta tags.
 
-			$cache_array[$cache_index] = array_merge(
+			$cache_array[ $cache_index ] = array_merge(
 				$this->get_mt_array( 'meta', 'name', $mt_generators, $mod ),
 				$this->get_mt_array( 'link', 'rel', $link_rel, $mod ),
 				$this->get_mt_array( 'meta', 'property', $mt_og, $mod ),
@@ -629,11 +621,11 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 				$this->p->debug->mark( 'build head array' );	// End timer.
 			}
 
-			return $cache_array[$cache_index];
+			return $cache_array[ $cache_index ];
 		}
 
 		/**
-		 * Loops through the arrays and calls get_single_mt() for each
+		 * Loops through the arrays and calls get_single_mt() for each.
 		 */
 		private function get_mt_array( $tag, $type, array &$mt_array, array &$mod ) {
 
@@ -752,7 +744,7 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 					$merged[] = $parts;
 				}
 
-				unset ( $singles[$num] );
+				unset ( $singles[ $num ] );
 			}
 
 			return $merged;
@@ -789,7 +781,7 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 					/**
 					 * If an "itemprop" contains a url, then make sure it's a "link".
 					 */
-					if ( $tag !== 'link' && filter_var( $value, FILTER_VALIDATE_URL ) !== false ) {
+					if ( $tag !== 'link' && false !== filter_var( $value, FILTER_VALIDATE_URL ) ) {
 						$tag = 'link';
 					}
 				}
@@ -816,50 +808,79 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 			}
 
 			if ( is_array( $value ) ) {
+
 				if ( $this->p->debug->enabled ) {
 					$this->p->debug->log( $log_prefix . ' value is an array (skipped)' );
 				}
+
 				return $singles;
+
 			} elseif ( is_object( $value ) ) {
+
 				if ( $this->p->debug->enabled ) {
 					$this->p->debug->log( $log_prefix . ' value is an object (skipped)' );
 				}
+
 				return $singles;
 			}
 
-			if ( strpos( $value, '%%' ) !== false ) {
+			if ( false !== strpos( $value, '%%' ) ) {
 				$value = $this->p->util->replace_inline_vars( $value, $mod );
 			}
+
+			static $secure_url = null;
 
 			switch ( $name ) {
 
 				case 'og:image:secure_url':
 				case 'og:video:secure_url':
 
-					if ( ! empty( $value ) && strpos( $value, 'https:' ) !== 0 ) {
+					if ( ! empty( $value ) ) {
 
-						if ( $this->p->debug->enabled ) {
-							$this->p->debug->log( $log_prefix . ' skipped: value not https' );
+						if ( SucomUtil::is_https( $value ) ) {	// Only HTTPS.
+							$singles[] = array( '', $tag, $type, $name, $attr, $value, $cmt );
 						}
 
-						return $singles;
+						$name_url_suffix = str_replace( ':secure_url', ':url', $name );
+						$name_no_suffix  = str_replace( ':secure_url', '', $name );
+
+						$singles[] = array( '', $tag, $type, $name_url_suffix, $attr, $value, $cmt );
+						$singles[] = array( '', $tag, $type, $name_no_suffix, $attr, $value, $cmt );
 					}
-					
-					$singles[] = array( '', $tag, $type, $name, $attr, $value, $cmt );
+
+					$secure_url = $value;
+
+					if ( $this->p->debug->enabled ) {
+						$this->p->debug->log_arr( 'singles', $singles );
+					}
 
 					break;
 
 				case 'og:image:url':
 				case 'og:video:url':
 
-					$addl_name = str_replace( ':url', '', $name );
+					if ( $secure_url !== $value ) {	// Just in case.
 
-					if ( $this->p->debug->enabled ) {
-						$this->p->debug->log( 'adding ' . $addl_name . ' meta tag with ' . $name . ' value' );
+						if ( ! empty( $this->p->options['add_meta_property_og:image:secure_url'] ) ) {
+
+							$name_secure_suffix = str_replace( ':url', ':secure_url', $name );
+							$value_secure_url   = set_url_scheme( $value, 'https' );	// Force https.
+							$value              = set_url_scheme( $value, 'http' );		// Force HTTP.
+
+							$singles[] = array( '', $tag, $type, $name_secure_suffix, $attr, $value_secure_url, $cmt );
+						}
+
+						$name_no_suffix = str_replace( ':url', '', $name );
+	
+						$singles[] = array( '', $tag, $type, $name, $attr, $value, $cmt );
+						$singles[] = array( '', $tag, $type, $name_no_suffix, $attr, $value, $cmt );
 					}
 
-					$singles[] = array( '', $tag, $type, $name, $attr, $value, $cmt );	// Add the url suffix first.
-					$singles[] = array( '', $tag, $type, $addl_name, $attr, $value, $cmt );
+					$secure_url = null;
+
+					if ( $this->p->debug->enabled ) {
+						$this->p->debug->log_arr( 'singles', $singles );
+					}
 
 					break;
 
@@ -870,16 +891,19 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 					break;
 			}
 
+
 			/**
 			 * $parts = array( $html, $tag, $type, $name, $attr, $value, $cmt );
 			 */
 			foreach ( $singles as $num => $parts ) {
 
-				if ( ! isset( $parts[6] ) ) {
+				if ( ! isset( $parts[ 6 ] ) ) {
+
 					if ( $this->p->debug->enabled ) {
 						$this->p->debug->log( 'parts array is incomplete (skipped)' );
 						$this->p->debug->log_arr( '$parts', $parts );
 					}
+
 					continue;
 				}
 
@@ -891,23 +915,23 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 					$parts = $this->apply_filters_single_mt( $parts, $mod );
 				}
 
-				$log_prefix = $parts[1] . ' ' . $parts[2] . ' ' . $parts[3];
+				$log_prefix = $parts[ 1 ] . ' ' . $parts[ 2 ] . ' ' . $parts[ 3 ];
 
 				if ( $this->p->debug->enabled ) {
-					$this->p->debug->log( $log_prefix . ' = "' . $parts[5] . '"' );
+					$this->p->debug->log( $log_prefix . ' = "' . $parts[ 5 ] . '"' );
 				}
 
-				if ( $parts[5] === '' || $parts[5] === null ) {	// Allow for 0.
+				if ( $parts[ 5 ] === '' || $parts[ 5 ] === null ) {	// Allow for 0.
 
 					if ( $this->p->debug->enabled ) {
 						$this->p->debug->log( $log_prefix . ' skipped: value is empty' );
 					}
 
-					$singles[$num][5] = '';	// Avoid null values in REST API output.
+					$singles[ $num ][ 5 ] = '';	// Avoid null values in REST API output.
 
 					continue;
 
-				} elseif ( $parts[5] === WPSSO_UNDEF || $parts[5] === (string) WPSSO_UNDEF ) {
+				} elseif ( $parts[ 5 ] === WPSSO_UNDEF || $parts[ 5 ] === (string) WPSSO_UNDEF ) {
 
 					if ( $this->p->debug->enabled ) {
 						$this->p->debug->log( $log_prefix . ' skipped: value is ' . WPSSO_UNDEF );
@@ -920,17 +944,17 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 				 * Encode and escape all values, regardless if the head tag is enabled or not.
 				 * If the head tag is enabled, HTML will be created and saved in $parts[0].
 				 */
-				if ( $parts[2] === 'itemprop' && strpos( $parts[3], '.' ) !== 0 ) {
-					$match_name = preg_replace( '/^.*\./', '', $parts[3] );
+				if ( $parts[ 2 ] === 'itemprop' && strpos( $parts[ 3 ], '.' ) !== 0 ) {
+					$match_name = preg_replace( '/^.*\./', '', $parts[ 3 ] );
 				} else {
-					$match_name = $parts[3];
+					$match_name = $parts[ 3 ];
 				}
 
 				/**
 				 * Boolean values are converted to their string equivalent.
 				 */
-				if ( is_bool( $parts[5] ) ) {
-					$parts[5] = $parts[5] ? 'true' : 'false';
+				if ( is_bool( $parts[ 5 ] ) ) {
+					$parts[ 5 ] = $parts[ 5 ] ? 'true' : 'false';
 				}
 
 				switch ( $match_name ) {
@@ -947,12 +971,12 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 					case 'description':
 					case 'name':
 
-						$parts[5] = SucomUtil::encode_html_emoji( $parts[5] );
+						$parts[ 5 ] = SucomUtil::encode_html_emoji( $parts[ 5 ] );
 
 						break;
 
 					/**
-					 * Url values that must be url encoded.
+					 * URL values that must be URL encoded.
 					 */
 					case 'og:secure_url':
 					case 'og:url':
@@ -973,11 +997,11 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 					case 'hasmenu':	// Food establishment menu url.
 					case 'url':
 
-						$parts[5] = SucomUtil::esc_url_encode( $parts[5] );
+						$parts[ 5 ] = SucomUtil::esc_url_encode( $parts[ 5 ] );
 
-						if ( $parts[2] === 'itemprop' ) {	// An itemprop URL must be a 'link'.
-							$parts[1] = 'link';
-							$parts[4] = 'href';
+						if ( $parts[ 2 ] === 'itemprop' ) {	// An itemprop URL must be a 'link'.
+							$parts[ 1 ] = 'link';
+							$parts[ 4 ] = 'href';
 						}
 
 						break;
@@ -992,7 +1016,7 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 					case 'twitter:app:url:ipad':
 					case 'twitter:app:url:googleplay':
 
-						$parts[5] = SucomUtil::esc_url_encode( $parts[5], false );	// $wp_esc_url is false.
+						$parts[ 5 ] = SucomUtil::esc_url_encode( $parts[ 5 ], false );	// $wp_esc_url is false.
 
 						break;
 
@@ -1001,7 +1025,7 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 					 */
 					default:
 
-						$parts[5] = htmlentities( $parts[5], ENT_QUOTES, $charset, false );	// $double_encode is false.
+						$parts[ 5 ] = htmlentities( $parts[ 5 ], ENT_QUOTES, $charset, false );	// $double_encode is false.
 
 						break;
 				}
@@ -1009,18 +1033,18 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 				/**
 				 * Convert mixed case itemprop names (for example) to lower case to determine the option key value.
 				 */
-				$opt_name = strtolower( 'add_' . $parts[1] . '_' . $parts[2] . '_' . $parts[3] );
+				$opt_name = strtolower( 'add_' . $parts[ 1 ] . '_' . $parts[ 2 ] . '_' . $parts[ 3 ] );
 
 				if ( ! empty( $this->p->options[$opt_name] ) ) {
 
-					$parts[0] = ( empty( $parts[6] ) ? '' : '<!-- ' . $parts[6] . ' -->' ) . 
-						'<' . $parts[1] . ' ' . $parts[2] . '="' . $match_name . '" ' . $parts[4] . '="' . $parts[5] . '"/>' . "\n";
+					$parts[0] = ( empty( $parts[ 6 ] ) ? '' : '<!-- ' . $parts[ 6 ] . ' -->' ) . 
+						'<' . $parts[ 1 ] . ' ' . $parts[ 2 ] . '="' . $match_name . '" ' . $parts[ 4 ] . '="' . $parts[ 5 ] . '"/>' . "\n";
 
 				} elseif ( $this->p->debug->enabled ) {
 					$this->p->debug->log( $log_prefix . ' skipped: option is disabled' );
 				}
 
-				$singles[$num] = $parts;	// Save the HTML and encoded value.
+				$singles[ $num ] = $parts;	// Save the HTML and encoded value.
 			}
 
 			return $singles;
@@ -1033,14 +1057,14 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 		 */
 		private function apply_filters_single_mt( array &$parts, array &$mod ) {
 
-			$log_prefix  = $parts[1] . ' ' . $parts[2] . ' ' . $parts[3];
-			$filter_name = $this->p->lca . '_' . $parts[1] . '_' . $parts[2] . '_' . $parts[3] . '_' . $parts[4];
-			$new_value   = apply_filters( $filter_name, $parts[5], $parts[6], $mod );
+			$log_prefix  = $parts[ 1 ] . ' ' . $parts[ 2 ] . ' ' . $parts[ 3 ];
+			$filter_name = $this->p->lca . '_' . $parts[ 1 ] . '_' . $parts[ 2 ] . '_' . $parts[ 3 ] . '_' . $parts[ 4 ];
+			$new_value   = apply_filters( $filter_name, $parts[ 5 ], $parts[ 6 ], $mod );
 
-			if ( $parts[5] !== $new_value ) {
+			if ( $parts[ 5 ] !== $new_value ) {
 
 				if ( $this->p->debug->enabled ) {
-					$this->p->debug->log( $log_prefix . ' (original) = "' . $parts[5] . '"' );
+					$this->p->debug->log( $log_prefix . ' (original) = "' . $parts[ 5 ] . '"' );
 				}
 
 				if ( is_array( $new_value ) ) {
@@ -1051,8 +1075,8 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 							$this->p->debug->log( $log_prefix . ' (filtered:' . $key . ') = "' . $value . '"' );
 						}
 
-						$parts[6] = $parts[3] . ':' . ( is_numeric( $key ) ? $key + 1 : $key );
-						$parts[5] = $value;
+						$parts[ 6 ] = $parts[ 3 ] . ':' . ( is_numeric( $key ) ? $key + 1 : $key );
+						$parts[ 5 ] = $value;
 					}
 
 				} else {
@@ -1061,7 +1085,7 @@ if ( ! class_exists( 'WpssoHead' ) ) {
 						$this->p->debug->log( $log_prefix . ' (filtered) = "' . $new_value . '"' );
 					}
 
-					$parts[5] = $new_value;
+					$parts[ 5 ] = $new_value;
 				}
 			}
 

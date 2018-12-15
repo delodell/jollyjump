@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Wordpress File Upload\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-08-26 14:14+0200\n"
-"PO-Revision-Date: 2018-08-26 14:15+0200\n"
+"POT-Creation-Date: 2018-11-08 17:35+0200\n"
+"PO-Revision-Date: 2018-11-08 17:35+0200\n"
 "Last-Translator: nickboss <info@iptanus.com>\n"
 "Language-Team: Iptanus Team <info@iptanus.com>\n"
 "Language: en\n"
@@ -18,6 +18,16 @@ msgstr ""
 "X-Poedit-SearchPathExcluded-0: vendor\n"
 "X-Poedit-SearchPathExcluded-1: minified\n"
 "X-Poedit-SearchPathExcluded-2: unminified\n"
+
+#: extensions/wfu_facebook/wfu_facebook_constants.php:25
+msgid ""
+"Insert variable %uploaddetails% inside text. It will be replaced by a link "
+"showing details about the upload when clicked."
+msgstr ""
+
+#: extensions/wfu_facebook/wfu_facebook_constants.php:26
+msgid "You need to login as administrator to see this page!"
+msgstr ""
 
 #: lib/wfu_constants.php:10
 msgid "Upload files"

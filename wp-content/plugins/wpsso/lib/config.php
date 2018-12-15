@@ -17,11 +17,11 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 			'lca'    => 'wpsso',	// Main plugin lowercase acronym (deprecated on 2017/11/18).
 			'plugin' => array(
 				'wpsso' => array(			// Plugin acronym.
-					'version'     => '4.15.0',	// Plugin version.
-					'opt_version' => '610',		// Increment when changing default option values.
+					'version'     => '4.18.0',	// Plugin version.
+					'opt_version' => '623',		// Increment when changing default option values.
 					'short'       => 'WPSSO Core',	// Short plugin name.
 					'name'        => 'WPSSO Core [Main Plugin]',
-					'desc'        => 'WPSSO Core gives social sites and search engines better information about your content, business and authors, with complete meta tags and Schema markup for social sharing, Google Knowledge Graph / Rich Card SEO, Pinterest Rich Pins, Twitter Cards and more.',
+					'desc'        => 'WPSSO Core makes sure your content looks great on all social and search sites - no matter how it\'s crawled, shared, re-shared, posted, or embedded!',
 					'slug'        => 'wpsso',
 					'base'        => 'wpsso/wpsso.php',
 					'update_auth' => 'tid',
@@ -51,7 +51,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 						'install'   => 'https://wpsso.com/docs/plugins/wpsso/installation/',
 						'faqs'      => 'https://wpsso.com/docs/plugins/wpsso/faqs/',
 						'notes'     => 'https://wpsso.com/docs/plugins/wpsso/notes/',
-						'support'   => 'http://wpsso.support.wpsso.com/support/tickets/new',	// Pro support ticket.
+						'support'   => 'https://surniaulula.com/support/create_ticket/',	// Pro support ticket.
 						'purchase'  => 'https://wpsso.com/extend/plugins/wpsso/',		// Purchase page.
 						'info'      => 'https://wpsso.com/extend/plugins/wpsso/info/',		// License information.
 						'update'    => 'https://wpsso.com/extend/plugins/wpsso/update/',
@@ -70,16 +70,18 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 							'essential' => 'Essential',
 							'general'   => 'General',
 							'advanced'  => 'Advanced',
-							'dashboard' => 'Dashboard',
-							'setup'     => 'Setup Guide',
 							'addons'    => 'Add-ons',
 							'licenses'  => 'Licenses',
+							'dashboard' => 'Dashboard',
+							'setup'     => 'Setup Guide',
+							'tools'     => 'Tools',
 						),
 						'sitesubmenu' => array(	// Note that submenu elements must have unique keys.
-							'siteadvanced' => 'Advanced',
-							'sitesetup'    => 'Setup Guide',
-							'siteaddons'   => 'Add-ons',
-							'sitelicenses' => 'Licenses',
+							'site-advanced' => 'Advanced',
+							'site-addons'   => 'Add-ons',
+							'site-licenses' => 'Licenses',
+							'site-setup'    => 'Setup Guide',
+							'site-tools'    => 'Tools',
 						),
 						'gpl' => array(
 							'admin' => array(
@@ -193,7 +195,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 						'install'   => 'https://wpsso.com/docs/plugins/wpsso-am/installation/',
 						'faqs'      => '',
 						'notes'     => '',
-						'support'   => 'http://wpsso-am.support.wpsso.com/support/tickets/new',	// Pro support ticket.
+						'support'   => 'https://surniaulula.com/support/create_ticket/',	// Pro support ticket.
 						'purchase'  => 'https://wpsso.com/extend/plugins/wpsso-am/',		// Purchase page.
 						'info'      => 'https://wpsso.com/extend/plugins/wpsso-am/info/',	// License information.
 						'update'    => 'https://wpsso.com/extend/plugins/wpsso-am/update/',
@@ -244,7 +246,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'desc'        => 'WPSSO Core add-on to inherit the featured image and custom images from parents for posts, pages, custom post types, categories, tags, and custom taxonomies.',
 					'slug'        => 'wpsso-inherit-parent-meta',
 					'base'        => 'wpsso-inherit-parent-meta/wpsso-inherit-parent-meta.php',
-					'update_auth' => 'tid',
+					'update_auth' => '',
 					'img' => array(
 						'banners' => array(
 							'low'  => 'https://surniaulula.github.io/wpsso-inherit-parent-meta/assets/banner-772x250.jpg',
@@ -308,7 +310,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 						'install'   => 'https://wpsso.com/docs/plugins/wpsso-schema-json-ld/installation/',
 						'faqs'      => '',
 						'notes'     => 'https://wpsso.com/docs/plugins/wpsso-schema-json-ld/notes/',
-						'support'   => 'http://wpsso-schema-json-ld.support.wpsso.com/support/tickets/new',	// Pro support ticket.
+						'support'   => 'https://surniaulula.com/support/create_ticket/',	// Pro support ticket.
 						'purchase'  => 'https://wpsso.com/extend/plugins/wpsso-schema-json-ld/',		// Purchase page.
 						'info'      => 'https://wpsso.com/extend/plugins/wpsso-schema-json-ld/info/',		// License information.
 						'update'    => 'https://wpsso.com/extend/plugins/wpsso-schema-json-ld/update/',
@@ -346,7 +348,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 						'install'   => 'https://wpsso.com/docs/plugins/wpsso-organization/installation/',
 						'faqs'      => '',
 						'notes'     => '',
-						'support'   => 'http://wpsso-organization.support.wpsso.com/support/tickets/new',	// Pro support ticket.
+						'support'   => 'https://surniaulula.com/support/create_ticket/',	// Pro support ticket.
 						'purchase'  => 'https://wpsso.com/extend/plugins/wpsso-organization/',			// Purchase page.
 						'info'      => 'https://wpsso.com/extend/plugins/wpsso-organization/info/',		// License information.
 						'update'    => 'https://wpsso.com/extend/plugins/wpsso-organization/update/',
@@ -384,7 +386,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 						'install'   => 'https://wpsso.com/docs/plugins/wpsso-plm/installation/',
 						'faqs'      => '',
 						'notes'     => '',
-						'support'   => 'http://wpsso-plm.support.wpsso.com/support/tickets/new',	// Pro support ticket.
+						'support'   => 'https://surniaulula.com/support/create_ticket/',	// Pro support ticket.
 						'purchase'  => 'https://wpsso.com/extend/plugins/wpsso-plm/',			// Purchase page.
 						'info'      => 'https://wpsso.com/extend/plugins/wpsso-plm/info/',		// License information.
 						'update'    => 'https://wpsso.com/extend/plugins/wpsso-plm/update/',
@@ -498,7 +500,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 						'install'   => 'https://wpsso.com/docs/plugins/wpsso-rrssb/installation/',
 						'faqs'      => '',
 						'notes'     => 'https://wpsso.com/docs/plugins/wpsso-rrssb/notes/',
-						'support'   => 'http://wpsso-rrssb.support.wpsso.com/support/tickets/new',	// Pro support ticket.
+						'support'   => 'https://surniaulula.com/support/create_ticket/',	// Pro support ticket.
 						'purchase'  => 'https://wpsso.com/extend/plugins/wpsso-rrssb/',			// Purchase page.
 						'info'      => 'https://wpsso.com/extend/plugins/wpsso-rrssb/info/',		// License information.
 						'update'    => 'https://wpsso.com/extend/plugins/wpsso-rrssb/update/',
@@ -536,7 +538,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 						'install'   => 'https://wpsso.com/docs/plugins/wpsso-ssb/installation/',
 						'faqs'      => 'https://wpsso.com/docs/plugins/wpsso-ssb/faqs/',
 						'notes'     => 'https://wpsso.com/docs/plugins/wpsso-ssb/notes/',
-						'support'   => 'http://wpsso-ssb.support.wpsso.com/support/tickets/new',	// Pro support ticket.
+						'support'   => 'https://surniaulula.com/support/create_ticket/',	// Pro support ticket.
 						'purchase'  => 'https://wpsso.com/extend/plugins/wpsso-ssb/',			// Purchase page.
 						'info'      => 'https://wpsso.com/extend/plugins/wpsso-ssb/info/',		// License information.
 						'update'    => 'https://wpsso.com/extend/plugins/wpsso-ssb/update/',
@@ -650,7 +652,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 						'install'   => 'https://wpsso.com/docs/plugins/wpsso-tune-image-editors/installation/',
 						'faqs'      => '',
 						'notes'     => '',
-						'support'   => 'http://wpsso-tune-image-editors.support.wpsso.com/support/tickets/new',	// Pro support ticket.
+						'support'   => 'https://surniaulula.com/support/create_ticket/',	// Pro support ticket.
 						'purchase'  => 'https://wpsso.com/extend/plugins/wpsso-tune-image-editors/',		// Purchase page.
 						'info'      => 'https://wpsso.com/extend/plugins/wpsso-tune-image-editors/info/',	// License information.
 						'update'    => 'https://wpsso.com/extend/plugins/wpsso-tune-image-editors/update/',
@@ -742,7 +744,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'site_name_alt'                => '',		// (localized)
 					'site_desc'                    => '',		// (localized)
 					'site_url'                     => '',
-					'site_org_type'                => 'organization',
+					'site_org_schema_type'         => 'organization',
 					'site_place_id'                => 'none',
 					'schema_add_noscript'          => 1,
 					'schema_add_home_organization' => 1,
@@ -757,8 +759,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'schema_img_crop'              => 0,
 					'schema_img_crop_x'            => 'center',
 					'schema_img_crop_y'            => 'center',
-					'schema_desc_len'              => 250,		// Meta itemprop="description" maximum text length (hard limit).
-					'schema_author_name'           => 'display_name',
+					'schema_desc_max_len'          => 250,		// Meta itemprop="description" maximum text length (hard limit).
 
 					/**
 					 * Standard WordPress types.
@@ -800,7 +801,6 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'fb_publisher_url'             => '',			// Facebook Business Page URL (localized).
 					'fb_app_id'                    => '',			// Facebook Application ID.
 					'fb_admins'                    => '',			// or Facebook Admin Username(s).
-					'fb_author_name'               => 'display_name',	// Author Name Format.
 					'fb_locale'                    => 'en_US',		// Custom Facebook Locale.
 					'instgram_publisher_url'       => '',			// Instagram Business Page URL (localized).
 					'linkedin_publisher_url'       => '',			// LinkedIn Company Page URL (localized).
@@ -849,10 +849,10 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'og_def_img_url'               => '',			// or Default / Fallback Image URL
 					'og_author_field'              => 'facebook',		// Author Profile URL Field
 					'og_title_sep'                 => '-',
-					'og_title_len'                 => 70,
-					'og_title_warn'                => 40,
-					'og_desc_len'                  => 300,			// Maximum length in characters (hard limit).
-					'og_desc_warn'                 => 200,			// Recommended maximum length in characters for Facebook (soft limit).
+					'og_title_max_len'             => 70,
+					'og_title_warn_len'            => 40,
+					'og_desc_max_len'              => 300,			// Maximum length in characters (hard limit).
+					'og_desc_warn_len'             => 200,			// Recommended maximum length in characters for Facebook (soft limit).
 					'og_desc_hashtags'             => 0,
 					'p_publisher_url'              => '',			// (localized)
 					'p_dom_verify'                 => '',
@@ -860,9 +860,10 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'p_add_nopin_media_img_tag'    => 0,			// Add "nopin" to WordPress Media
 					'p_add_img_html'               => 0,			// Add Hidden Image for Pin It Button
 					'sc_publisher_url'             => '',
-					'seo_desc_len'                 => 156,			// Meta name="description" maximum text length (hard limit).
-					'seo_author_field'             => 'gplus',
-					'seo_publisher_url'            => '',			// (localized)
+					'seo_publisher_url'            => '',			// Google+ Business Page URL (localized)
+					'seo_desc_max_len'             => 156,			// Search / SEO Description Length (hard limit).
+					'seo_author_name'              => 'display_name',	// Author / Person Name Format
+					'seo_author_field'             => 'gplus',		// Author Link URL Profile Contact
 					'tumblr_publisher_url'         => '',
 					'yt_publisher_url'             => '',
 					
@@ -870,7 +871,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					 * Twitter Card options.
 					 */
 					'tc_site'           => '',			// Twitter Business @username (localized).
-					'tc_desc_len'       => 200,			// Maximum Description Length (hard limit).
+					'tc_desc_max_len'   => 200,			// Maximum Description Length (hard limit).
 					'tc_type_post'      => 'summary_large_image',
 					'tc_type_default'   => 'summary',
 					'tc_sum_img_width'  => 600,			// Summary Card Image Dimensions.
@@ -903,7 +904,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'add_meta_property_al:web:should_fallback'                 => 1,
 					'add_meta_property_og:altitude'                            => 1,
 					'add_meta_property_og:description'                         => 1,
-					'add_meta_property_og:image:secure_url'                    => 1,
+					'add_meta_property_og:image:secure_url'                    => 0,
 					'add_meta_property_og:image:url'                           => 0,
 					'add_meta_property_og:image'                               => 1,
 					'add_meta_property_og:image:width'                         => 1,
@@ -917,7 +918,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'add_meta_property_og:type'                                => 1,
 					'add_meta_property_og:updated_time'                        => 1,
 					'add_meta_property_og:url'                                 => 1,
-					'add_meta_property_og:video:secure_url'                    => 1,
+					'add_meta_property_og:video:secure_url'                    => 0,
 					'add_meta_property_og:video:url'                           => 0,
 					'add_meta_property_og:video'                               => 1,
 					'add_meta_property_og:video:type'                          => 1,
@@ -953,41 +954,41 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'add_meta_property_place:region'                           => 1,
 					'add_meta_property_place:postal_code'                      => 1,
 					'add_meta_property_place:country_name'                     => 1,
-					'add_meta_property_product:age_group'                      => 1,
+					'add_meta_property_product:age_group'                      => 0,
 					'add_meta_property_product:availability'                   => 1,
 					'add_meta_property_product:brand'                          => 1,
 					'add_meta_property_product:category'                       => 1,
 					'add_meta_property_product:color'                          => 1,
 					'add_meta_property_product:condition'                      => 1,
 					'add_meta_property_product:ean'                            => 1,
-					'add_meta_property_product:expiration_time'                => 1,
-					'add_meta_property_product:is_product_shareable'           => 1,
+					'add_meta_property_product:expiration_time'                => 0,
+					'add_meta_property_product:is_product_shareable'           => 0,
 					'add_meta_property_product:isbn'                           => 1,
 					'add_meta_property_product:material'                       => 1,
-					'add_meta_property_product:mfr_part_no'                    => 1,
+					'add_meta_property_product:mfr_part_no'                    => 0,
 					'add_meta_property_product:original_price:amount'          => 1,
 					'add_meta_property_product:original_price:currency'        => 1,
-					'add_meta_property_product:pattern'                        => 1,
-					'add_meta_property_product:plural_title'                   => 1,
+					'add_meta_property_product:pattern'                        => 0,
+					'add_meta_property_product:plural_title'                   => 0,
 					'add_meta_property_product:pretax_price:amount'            => 1,
 					'add_meta_property_product:pretax_price:currency'          => 1,
 					'add_meta_property_product:price:amount'                   => 1,
 					'add_meta_property_product:price:currency'                 => 1,
-					'add_meta_property_product:product_link'                   => 1,
-					'add_meta_property_product:purchase_limit'                 => 1,
-					'add_meta_property_product:retailer'                       => 1,
-					'add_meta_property_product:retailer_category'              => 1,
-					'add_meta_property_product:retailer_item_id'               => 1,
-					'add_meta_property_product:retailer_part_no'               => 1,
-					'add_meta_property_product:retailer_title'                 => 1,
+					'add_meta_property_product:product_link'                   => 0,
+					'add_meta_property_product:purchase_limit'                 => 0,
+					'add_meta_property_product:retailer'                       => 0,
+					'add_meta_property_product:retailer_category'              => 0,
+					'add_meta_property_product:retailer_item_id'               => 0,
+					'add_meta_property_product:retailer_part_no'               => 0,
+					'add_meta_property_product:retailer_title'                 => 0,
 					'add_meta_property_product:sale_price:amount'              => 1,
 					'add_meta_property_product:sale_price:currency'            => 1,
 					'add_meta_property_product:sale_price_dates:start'         => 1,
 					'add_meta_property_product:sale_price_dates:end'           => 1,
-					'add_meta_property_product:shipping_cost:amount'           => 1,
-					'add_meta_property_product:shipping_cost:currency'         => 1,
-					'add_meta_property_product:shipping_weight:value'          => 1,
-					'add_meta_property_product:shipping_weight:units'          => 1,
+					'add_meta_property_product:shipping_cost:amount'           => 0,
+					'add_meta_property_product:shipping_cost:currency'         => 0,
+					'add_meta_property_product:shipping_weight:value'          => 0,
+					'add_meta_property_product:shipping_weight:units'          => 0,
 					'add_meta_property_product:size'                           => 1,
 					'add_meta_property_product:target_gender'                  => 1,
 					'add_meta_property_product:upc'                            => 1,
@@ -1084,7 +1085,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'add_meta_itemprop_recipeinstructions'                     => 1,	// Schema Recipe.
 					
 					/**
-					 * Advanced settings - Plugin Settings tab.
+					 * Advanced settings - Plugin Behavior tab.
 					 */
 					'plugin_clean_on_uninstall' => 0,	// Remove All Settings on Uninstall.
 					'plugin_debug'              => 0,	// Add Hidden Debug Messages.
@@ -1142,25 +1143,31 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'plugin_wpseo_social_meta'      => 0,			// Read Yoast SEO Social Meta.
 					'plugin_def_currency'           => 'USD',		// Default Currency.
 					'plugin_cf_img_url'             => '_format_image_url',	// Image URL Custom Field.
-					'plugin_cf_vid_url'             => '_format_video_url',	// Video URL Custom Field.
-					'plugin_cf_vid_embed'           => '',			// Video Embed HTML Custom Field.
 					'plugin_cf_addl_type_urls'      => '',			// Microdata Type URLs Custom Field.
-					'plugin_cf_recipe_ingredients'  => '',			// Recipe Ingredients Custom Field.
-					'plugin_cf_recipe_instructions' => '',			// Recipe Instructions Custom Field.
 					'plugin_cf_product_avail'       => '',			// Product Availability Custom Field.
 					'plugin_cf_product_brand'       => '',			// Product Brand Custom Field.
 					'plugin_cf_product_color'       => '',			// Product Color Custom Field.
 					'plugin_cf_product_condition'   => '',			// Product Condition Custom Field.
 					'plugin_cf_product_material'    => '',			// Product Material Custom Field.
 					'plugin_cf_product_sku'         => '',			// Product SKU Custom Field.
+					'plugin_cf_product_ean'         => '',			// Product EAN Custom Field.
+					'plugin_cf_product_gtin8'       => '',			// Product GTIN-8 Custom Field.
+					'plugin_cf_product_gtin12'      => '',			// Product GTIN-12 Custom Field.
+					'plugin_cf_product_gtin13'      => '',			// Product GTIN-13 Custom Field.
+					'plugin_cf_product_gtin14'      => '',			// Product GTIN-14 Custom Field.
+					'plugin_cf_product_isbn'        => '',			// Product ISBN Custom Field.
 					'plugin_cf_product_price'       => '',			// Product Price Custom Field.
 					'plugin_cf_product_currency'    => '',			// Product Currency Custom Field.
 					'plugin_cf_product_size'        => '',			// Product Size Custom Field.
 					'plugin_cf_product_gender'      => '',			// Product Target Gender Custom Field.
+					'plugin_cf_recipe_ingredients'  => '',			// Recipe Ingredients Custom Field.
+					'plugin_cf_recipe_instructions' => '',			// Recipe Instructions Custom Field.
 					'plugin_cf_sameas_urls'         => '',			// Same-As URLs Custom Field.
+					'plugin_cf_vid_url'             => '_format_video_url',	// Video URL Custom Field.
+					'plugin_cf_vid_embed'           => '',			// Video Embed HTML Custom Field.
 
 					/**
-					 * Advanced settings - List Columns tab.
+					 * Advanced settings - Columns tab.
 					 */
 					'plugin_schema_type_col_media'  => 0,
 					'plugin_schema_type_col_post'   => 1,
@@ -1178,11 +1185,13 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'plugin_og_desc_col_post'       => 0,
 					'plugin_og_desc_col_term'       => 0,
 					'plugin_og_desc_col_user'       => 1,
+					'plugin_col_title_width'        => '30%',
+					'plugin_col_title_width_max'    => '15vw',
 					'plugin_col_def_width'          => '15%',
-					'plugin_col_title_width'        => '20em',
+					'plugin_col_def_width_max'      => '15vw',
 
 					/**
-					 * Advanced settings - Cache Settings tab.
+					 * Advanced settings - Cache tab.
 					 */
 					'plugin_head_cache_exp'      => WEEK_IN_SECONDS,	// Head Markup Array Cache Expiry (1 week).
 					'plugin_content_cache_exp'   => HOUR_IN_SECONDS,	// Filtered Content Text Cache Expiry (1 hour).
@@ -1191,7 +1200,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'plugin_short_url_cache_exp' => 7776000,		// Get Shortened URL Cache Expiry (90 days / 3 months).
 					'plugin_topics_cache_exp'    => MONTH_IN_SECONDS,	// Article Topics Array Cache Expiry (1 month).
 					'plugin_types_cache_exp'     => MONTH_IN_SECONDS,	// Schema Types Array Cache Expiry (1 month).
-					'plugin_clear_on_activate'   => 0,			// Clear All Caches on Activate.
+					'plugin_clear_on_activate'   => 1,			// Clear All Caches on Activate.
 					'plugin_clear_on_deactivate' => 0,			// Clear All Caches on Deactivate.
 					'plugin_clear_on_save'       => 0,			// Clear All Caches on Save Settings.
 					'plugin_clear_short_urls'    => 0,			// Refresh Short URLs on Clear Cache.
@@ -1210,8 +1219,8 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'plugin_bitly_api_key'      => '',
 					'plugin_bitly_domain'       => '',
 					'plugin_dlmyapp_api_key'    => '',
-					'plugin_google_api_key'     => '',			// Google Project API Key.
-					'plugin_google_shorten'     => 0,			// URL Shortener API is Enabled.
+					//'plugin_google_api_key'     => '',			// Google Project API Key.
+					//'plugin_google_places'      => 0,			// Places API is Enabled.
 					'plugin_owly_api_key'       => '',
 					'plugin_yourls_api_url'     => '',
 					'plugin_yourls_username'    => '',
@@ -1273,7 +1282,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'options_filtered' => false,
 					
 					/**
-					 * Advanced settings - Plugin Settings tab.
+					 * Advanced settings - Plugin Behavior tab.
 					 */
 					'plugin_clean_on_uninstall'     => 0,		// Remove All Settings on Uninstall
 					'plugin_clean_on_uninstall:use' => 'default',
@@ -1317,7 +1326,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'plugin_upscale_img_max:use'       => 'default',
 					
 					/**
-					 * Advanced settings - Cache Settings tab.
+					 * Advanced settings - Cache tab.
 					 */
 					'plugin_head_cache_exp'          => WEEK_IN_SECONDS,	// Head Markup Array Cache Expiry (1 week).
 					'plugin_head_cache_exp:use'      => 'default',
@@ -1366,7 +1375,6 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'reddit'      => 'reddit',
 					'managewp'    => 'managewp',
 					'soundcloud'  => 'sc',
-					'stumbleupon' => 'stumble',
 					'tumblr'      => 'tumblr',
 					'youtube'     => 'yt',
 					'skype'       => 'skype',
@@ -1377,31 +1385,37 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 				/**
 				 * Custom field to meta data index.
 				 */
-				'cf_md_idx' => array(
+				'cf_md_key' => array(
 					'plugin_cf_img_url'             => 'og_img_url',
-					'plugin_cf_vid_url'             => 'og_vid_url',
-					'plugin_cf_vid_embed'           => 'og_vid_embed',
-					'plugin_cf_addl_type_urls'      => 'schema_addl_type_url',
-					'plugin_cf_recipe_ingredients'  => 'schema_recipe_ingredient',
-					'plugin_cf_recipe_instructions' => 'schema_recipe_instruction',
+					'plugin_cf_addl_type_urls'      => 'schema_addl_type_url',	// Microdata Type URLs Custom Field.
 					'plugin_cf_product_avail'       => 'product_avail',
 					'plugin_cf_product_brand'       => 'product_brand',
 					'plugin_cf_product_color'       => 'product_color',
 					'plugin_cf_product_condition'   => 'product_condition',
 					'plugin_cf_product_material'    => 'product_material',
 					'plugin_cf_product_sku'         => 'product_sku',
+					'plugin_cf_product_ean'         => 'product_ean',
+					'plugin_cf_product_gtin8'       => 'product_gtin8',
+					'plugin_cf_product_gtin12'      => 'product_gtin12',
+					'plugin_cf_product_gtin13'      => 'product_gtin13',
+					'plugin_cf_product_gtin14'      => 'product_gtin14',
+					'plugin_cf_product_isbn'        => 'product_isbn',
 					'plugin_cf_product_price'       => 'product_price',
 					'plugin_cf_product_currency'    => 'product_currency',
 					'plugin_cf_product_size'        => 'product_size',
 					'plugin_cf_product_gender'      => 'product_gender',
+					'plugin_cf_recipe_ingredients'  => 'schema_recipe_ingredient',
+					'plugin_cf_recipe_instructions' => 'schema_recipe_instruction',
 					'plugin_cf_sameas_urls'         => 'schema_sameas_url',
+					'plugin_cf_vid_url'             => 'og_vid_url',
+					'plugin_cf_vid_embed'           => 'og_vid_embed',
 				),
 				
 				/**
 				 * Read meta values into numeric meta data index.
 				 */
 				'cf_md_multi' => array(
-					'schema_addl_type_url'      => true,
+					'schema_addl_type_url'      => true,	// Microdata Type URLs.
 					'schema_recipe_ingredient'  => true,
 					'schema_recipe_instruction' => true,
 					'schema_sameas_url'         => true,
@@ -1412,7 +1426,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 			 * Update manager config.
 			 */
 			'um' => array(
-				'rec_version' => '1.12.0',	// Minimum update manager version (soft limit).
+				'rec_version' => '1.14.0',	// Minimum update manager version (soft limit).
 				'check_hours' => array(
 					24  => 'Every day',
 					48  => 'Every two days',
@@ -1444,7 +1458,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 			'php' => array(
 				'label'       => 'PHP',
 				'min_version' => '5.4',		// Hard limit - deactivate the plugin when activating.
-				'rec_version' => '7.1',		// Soft limit - issue warning if lower version found.
+				'rec_version' => '7.2',		// Soft limit - issue warning if lower version found.
 				'version_url' => 'https://secure.php.net/supported-versions.php',
 				'extensions'  => array(
 					'curl' => array(	// PHP extension name.
@@ -1553,14 +1567,14 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 				 * Transient id prefix.
 				 */
 				'transient' => array(
-					'wpsso_!_' => array(	// Protect transient from being cleared automatically.
+					'wpsso_!_' => array(	// Protect from being cleared automatically.
 					),
 					'wpsso_a_' => array(
 						'label'   => 'Article Topics',
 						'opt_key' => 'plugin_topics_cache_exp',
 						'filter'  => 'wpsso_cache_expire_article_topics',
 					),
-					'wpsso_b_' => array(	// Sharing buttons HTML cache.
+					'wpsso_b_' => array(	// Sharing buttons HTML.
 					),
 					'wpsso_h_' => array(
 						'label'   => 'Head Markup',
@@ -1577,7 +1591,9 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 						'opt_key' => 'plugin_json_data_cache_exp',
 						'filter'  => 'wpsso_cache_expire_schema_json_data',
 					),
-					'wpsso_s_' => array(	// Automatic clearing is enable / disabled from settings.
+					'wpsso_p_' => array(	// Place details.
+					),
+					'wpsso_s_' => array(
 						'label'   => 'Shortened URLs',
 						'opt_key' => 'plugin_short_url_cache_exp',
 						'filter'  => 'wpsso_cache_expire_short_url',
@@ -1595,7 +1611,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'wpsso_c_' => array(	// Filtered post content cache.
 						'label'   => 'Filtered Content',
 						'opt_key' => 'plugin_content_cache_exp',
-						'filter'  => 'wpsso_cache_expire_content_text',
+						'filter'  => 'wpsso_cache_expire_the_content',
 					),
 					'wpsso_' => array(
 						'label' => 'All WP Objects',
@@ -1615,14 +1631,16 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 				'before'    => '\0229b',	// Circle asterix.
 				'icon_html' => '&oast;',	// Circle asterix.
 				'dashicons' => array(
-					'addons'        => 'star-filled',
-					'siteaddons'    => 'star-filled',
-					'licenses'      => 'editor-justify',
-					'sitelicenses'  => 'editor-justify',
-					'dashboard'     => 'dashboard',
-					'sitedashboard' => 'dashboard',
-					'setup'         => 'info',
-					'sitesetup'     => 'info',
+					'addons'         => 'star-filled',
+					'site-addons'    => 'star-filled',
+					'licenses'       => 'editor-justify',
+					'site-licenses'  => 'editor-justify',
+					'dashboard'      => 'dashboard',
+					'site-dashboard' => 'dashboard',
+					'setup'          => 'info',
+					'site-setup'     => 'info',
+					'tools'          => 'admin-tools',
+					'site-tools'     => 'admin-tools',
 				),
 			),
 			'notice' => array(
@@ -1650,7 +1668,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 			'edit' => array(			// post, term, user lists
 				'columns' => array(
 					'schema_type' => array(
-						'header'   => 'SSO Schema',
+						'header'   => 'Schema',
 						'mt_name'  => 'schema:type:id',
 						'meta_key' => '_wpsso_head_info_schema_type',
 						'orderby'  => 'meta_value',
@@ -1658,7 +1676,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 						'height'   => 'auto',
 					),
 					'og_type' => array(
-						'header'   => 'SSO Type',
+						'header'   => 'OG Type',
 						'mt_name'  => 'og:type',
 						'meta_key' => '_wpsso_head_info_og_type',
 						'orderby'  => 'meta_value',
@@ -1800,13 +1818,12 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 				 * The shortener key is also its filename under lib/pro/ext/.
 				 */
 				'shorteners' => array(
-					'none'    => '[None]',
-					'bitly'   => 'Bitly (suggested)',
-					'dlmyapp' => 'DLMY.App',
-					'googl'   => 'Google',
-					'owly'    => 'Ow.ly',
-					'tinyurl' => 'TinyURL',
-					'yourls'  => 'YOURLS',
+					'none'                 => '[None]',
+					'bitly'                => 'Bitly (suggested)',	// Requires lib/pro/ext/bitly.php.
+					'dlmyapp'              => 'DLMY.App',		// Requires lib/pro/ext/dlmy.php.
+					'owly'                 => 'Ow.ly',		// Requires lib/pro/ext/owly.php.
+					'tinyurl'              => 'TinyURL',		// Requires lib/pro/ext/tinyurl.php.
+					'yourls'               => 'YOURLS',		// Requires lib/pro/ext/yourls.php.
 				),
 				
 				/**
@@ -1835,22 +1852,28 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 				),
 				'cf_labels' => array(		// Custom field option labels.
 					'plugin_cf_img_url'             => 'Image URL Custom Field',
-					'plugin_cf_vid_url'             => 'Video URL Custom Field',
-					'plugin_cf_vid_embed'           => 'Video Embed HTML Custom Field',
 					'plugin_cf_addl_type_urls'      => 'Microdata Type URLs Custom Field',
-					'plugin_cf_recipe_ingredients'  => 'Recipe Ingredients Custom Field',
-					'plugin_cf_recipe_instructions' => 'Recipe Instructions Custom Field',
 					'plugin_cf_product_avail'       => 'Product Availability Custom Field',
 					'plugin_cf_product_brand'       => 'Product Brand Custom Field',
 					'plugin_cf_product_color'       => 'Product Color Custom Field',
 					'plugin_cf_product_condition'   => 'Product Condition Custom Field',
 					'plugin_cf_product_material'    => 'Product Material Custom Field',
 					'plugin_cf_product_sku'         => 'Product SKU Custom Field',
+					'plugin_cf_product_ean'         => 'Product EAN Custom Field',
+					'plugin_cf_product_gtin8'       => 'Product GTIN-8 Custom Field',
+					'plugin_cf_product_gtin12'      => 'Product GTIN-12 Custom Field',
+					'plugin_cf_product_gtin13'      => 'Product GTIN-13 Custom Field',
+					'plugin_cf_product_gtin14'      => 'Product GTIN-14 Custom Field',
+					'plugin_cf_product_isbn'        => 'Product ISBN Custom Field',
 					'plugin_cf_product_price'       => 'Product Price Custom Field',
 					'plugin_cf_product_currency'    => 'Product Currency Custom Field',
 					'plugin_cf_product_size'        => 'Product Size Custom Field',
 					'plugin_cf_product_gender'      => 'Product Target Gender Custom Field',
+					'plugin_cf_recipe_ingredients'  => 'Recipe Ingredients Custom Field',
+					'plugin_cf_recipe_instructions' => 'Recipe Instructions Custom Field',
 					'plugin_cf_sameas_urls'         => 'Same-As URLs Custom Field',
+					'plugin_cf_vid_url'             => 'Video URL Custom Field',
+					'plugin_cf_vid_embed'           => 'Video Embed HTML Custom Field',
 				),
 				
 				/**
@@ -1927,13 +1950,17 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 				),
 				'limit_max' => array(
 					'og_img_ratio'                => 3,
-					'schema_article_headline_len' => 110,
 					'schema_article_img_ratio'    => 2.5,
+					'schema_headline_len'         => 110,
 					'schema_img_ratio'            => 2.5,	// See https://developers.google.com/+/web/snippet/article-rendering.
 				),
 				'og_type_ns' => array(		// See http://ogp.me/#types.
 					'article'             => 'http://ogp.me/ns/article#',
 					'book'                => 'http://ogp.me/ns/book#',
+					'books.author'        => 'http://ogp.me/ns/books#',
+					'books.book'          => 'http://ogp.me/ns/books#',
+					'books.genre'         => 'http://ogp.me/ns/books#',
+					'business.business'   => 'http://ogp.me/ns/business#',
 					'music.album'         => 'http://ogp.me/ns/music#',
 					'music.playlist'      => 'http://ogp.me/ns/music#',
 					'music.radio_station' => 'http://ogp.me/ns/music#',
@@ -1953,8 +1980,8 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'product'             => 'http://ogp.me/ns/product#',	// Supported by facebook and pinterest.
 					'website'             => 'http://ogp.me/ns/website#',
 				),
-				'og_type_mt' => array(	// See https://developers.facebook.com/docs/reference/opengraph/.
-					'article' => array(	// See https://developers.facebook.com/docs/reference/opengraph/object-type/article/.
+				'og_type_mt' => array(				// See https://developers.facebook.com/docs/reference/opengraph/.
+					'article' => array(			// See https://developers.facebook.com/docs/reference/opengraph/object-type/article/.
 						'article:author'          => '', // An array of Facebook profile URLs or IDs of the authors for this article.
 						'article:publisher'       => '', // A Facebook page URL or ID of the publishing entity.
 						'article:published_time'  => '',
@@ -1968,6 +1995,45 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 						'book:isbn'         => '',
 						'book:release_date' => '',
 						'book:tag'          => '',
+					),
+					'books.author' => array(
+						'books:book'          => '',
+						'books:gender'        => '',
+						'books:genre'         => '',
+						'books:official_site' => '',
+					),
+					'books.book' => array(
+						'books:author'                  => '',
+						'books:genre'                   => '',
+						'books:initial_release_date'    => '',
+						'books:isbn'                    => '',
+						'books:language:locale'         => '',
+						'books:language:alternate'      => '',
+						'books:page_count'              => '',
+						'books:rating:value'            => '',
+						'books:rating:scale'            => '',
+						'books:rating:normalized_value' => '',
+						'books:release_date'            => '',
+						'books:sample'                  => '',
+					),
+					'books.genre' => array(
+						'books:author'         => '',
+						'books:book'           => '',
+						'books:canonical_name' => '',
+					),
+					'business.business' => array(
+						'business:contact_data:street_address' => '',
+						'business:contact_data:locality'       => '',
+						'business:contact_data:region'         => '',
+						'business:contact_data:postal_code'    => '',
+						'business:contact_data:country_name'   => '',
+						'business:contact_data:email'          => '',
+						'business:contact_data:phone_number'   => '',
+						'business:contact_data:phone_number'   => '',
+						'business:contact_data:website'        => '',
+						'business:hours:day'                   => '',
+						'business:hours:start'                 => '',
+						'business:hours:end'                   => '',
 					),
 					'music.album' => array(
 						'music:song'         => '',
@@ -2009,18 +2075,22 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 						'product:category'                => '',
 						'product:color'                   => 'product_color',
 						'product:condition'               => 'product_condition',
-						'product:ean'                     => '',
+						'product:ean'                     => 'product_ean',
 						'product:expiration_time'         => '',
+						'product:gtin8'                   => 'product_gtin8',
+						'product:gtin12'                  => 'product_gtin12',
+						'product:gtin13'                  => 'product_gtin13',
+						'product:gtin14'                  => 'product_gtin14',
 						'product:is_product_shareable'    => '',
-						'product:isbn'                    => '',
+						'product:isbn'                    => 'product_isbn',
 						'product:material'                => 'product_material',
 						'product:mfr_part_no'             => '',
-						'product:original_price:amount'   => '',	// Used by WooCommerce module.
-						'product:original_price:currency' => '',	// Used by WooCommerce module.
+						'product:original_price:amount'   => '',		// Used by WooCommerce module.
+						'product:original_price:currency' => '',		// Used by WooCommerce module.
 						'product:pattern'                 => '',
 						'product:plural_title'            => '',
-						'product:pretax_price:amount'     => '',
-						'product:pretax_price:currency'   => '',
+						'product:pretax_price:amount'     => '',		// Used by WooCommerce module.
+						'product:pretax_price:currency'   => '',		// Used by WooCommerce module.
 						'product:price:amount'            => 'product_price',
 						'product:price:currency'          => 'product_currency',
 						'product:product_link'            => '',
@@ -2030,15 +2100,16 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 						'product:retailer_item_id'        => 'product_sku',
 						'product:retailer_part_no'        => '',
 						'product:retailer_title'          => '',
-						'product:sale_price:amount'       => '',	// Used by WooCommerce module.
-						'product:sale_price:currency'     => '',	// Used by WooCommerce module.
-						'product:sale_price_dates:start'  => '',	// Used by WooCommerce module.
-						'product:sale_price_dates:end'    => '',	// Used by WooCommerce module.
+						'product:sale_price:amount'       => '',		// Used by WooCommerce module.
+						'product:sale_price:currency'     => '',		// Used by WooCommerce module.
+						'product:sale_price_dates:start'  => '',		// Used by WooCommerce module.
+						'product:sale_price_dates:end'    => '',		// Used by WooCommerce module.
 						'product:shipping_cost:amount'    => '',
 						'product:shipping_cost:currency'  => '',
 						'product:shipping_weight:value'   => '',
 						'product:shipping_weight:units'   => '',
 						'product:size'                    => 'product_size',
+						'product:sku'                     => 'product_sku',
 						'product:target_gender'           => 'product_gender',
 						'product:upc'                     => '',
 						'product:weight:value'            => '',
@@ -2133,7 +2204,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 				'schema_type' => array(	// Element of 'head' array.
 					'thing' => array(	// Most generic type.
 						'creative.work' => array(	// Creative work, including books, movies, photographs, software programs, etc.
-							'answer'  => 'https://pending.schema.org/Answer',
+							'answer'  => 'https://schema.org/Answer',
 							'article' => array(
 								'article'              => 'https://schema.org/Article',
 								'article.news'         => 'https://schema.org/NewsArticle',
@@ -2191,7 +2262,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 							'photograph'         => 'https://schema.org/Photograph',
 							'publication.issue'  => 'https://schema.org/PublicationIssue',
 							'publication.volume' => 'https://schema.org/PublicationVolume',
-							'question'           => 'https://pending.schema.org/Question',
+							'question'           => 'https://schema.org/Question',
 							'review'             => array(
 								'review'       => 'https://schema.org/Review',
 								'review.claim' => 'https://schema.org/ClaimReview',
@@ -2669,9 +2740,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					),
 				),
 				'schema_url_fix' => array(	// Element of 'head' array.
-					'https://schema.org/Answer'   => 'https://pending.schema.org/Answer',
 					'https://schema.org/FAQPage'  => 'https://pending.schema.org/FAQPage',
-					'https://schema.org/Question' => 'https://pending.schema.org/Question',
 				),
 				'schema_renamed' => array(	// Element of 'head' array.
 					'anesthesia'           => 'anesthesia.specialty',
@@ -2732,19 +2801,19 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 		public static function get_version( $add_slug = false ) {
 
 			$ext  = 'wpsso';
-			$info =& self::$cf['plugin'][$ext];
+			$info =& self::$cf[ 'plugin' ][$ext];
 
-			return $add_slug ? $info['slug'] . '-' . $info['version'] : $info['version'];
+			return $add_slug ? $info[ 'slug' ] . '-' . $info[ 'version' ] : $info[ 'version' ];
 		}
 
 		/**
 		 * get_config() is called very early, so don't apply filters unless instructed.
 		 */
-		public static function get_config( $idx = false, $apply_filters = false ) {
+		public static function get_config( $cf_key = false, $apply_filters = false ) {
 
-			if ( ! isset( self::$cf['config_filtered'] ) || self::$cf['config_filtered'] !== true ) {
+			if ( ! isset( self::$cf['config_filtered'] ) || true !== self::$cf['config_filtered'] ) {
 
-				self::$cf['*'] = array(
+				self::$cf[ '*' ] = array(
 					'base' => array(),
 					'lib' => array(
 						'gpl' => array(),
@@ -2753,7 +2822,7 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 					'version' => '',		// -wpsso3.29.0pro-wpssoplm1.5.1pro-wpssoum1.4.0gpl
 				);
 
-				self::$cf['opt']['version'] = '';	// -wpsso416pro-wpssoplm8pro
+				self::$cf[ 'opt' ][ 'version' ] = '';	// -wpsso416pro-wpssoplm8pro
 
 				if ( $apply_filters ) {
 
@@ -2761,47 +2830,46 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 
 					self::$cf = apply_filters( 'wpsso_get_config', self::$cf, self::get_version() );
 
-					foreach ( self::$cf['plugin'] as $ext => $info ) {
+					foreach ( self::$cf[ 'plugin' ] as $ext => $info ) {
 
 						if ( defined( strtoupper( $ext ) . '_PLUGINDIR' ) ) {
-							$pkg_lctype = is_dir( constant( strtoupper( $ext ) . 
-								'_PLUGINDIR' ) . 'lib/pro/' ) ? 'pro' : 'gpl';
+							$pkg_lctype = is_dir( constant( strtoupper( $ext ) . '_PLUGINDIR' ) . 'lib/pro/' ) ? 'pro' : 'gpl';
 						} else {
 							$pkg_lctype = '';
 						}
 
-						if ( isset( $info['slug'] ) ) {
-							self::$cf['*']['slug'][$info['slug']] = $ext;
+						if ( isset( $info[ 'slug' ] ) ) {
+							self::$cf[ '*' ][ 'slug' ][$info[ 'slug' ]] = $ext;
 						}
 
-						if ( isset( $info['base'] ) ) {
-							self::$cf['*']['base'][$info['base']] = $ext;
+						if ( isset( $info[ 'base' ] ) ) {
+							self::$cf[ '*' ][ 'base' ][$info[ 'base' ]] = $ext;
 						}
 
-						if ( isset( $info['lib'] ) && is_array( $info['lib'] ) ) {
-							self::$cf['*']['lib'] = SucomUtil::array_merge_recursive_distinct(
-								self::$cf['*']['lib'], $info['lib'] );
+						if ( isset( $info[ 'lib' ] ) && is_array( $info[ 'lib' ] ) ) {
+							self::$cf[ '*' ][ 'lib' ] = SucomUtil::array_merge_recursive_distinct(
+								self::$cf[ '*' ][ 'lib' ], $info[ 'lib' ] );
 						}
 
-						if ( isset( $info['version'] ) ) {
-							self::$cf['*']['version'] .= '-' . $ext . $info['version'] . $pkg_lctype;
+						if ( isset( $info[ 'version' ] ) ) {
+							self::$cf[ '*' ][ 'version' ] .= '-' . $ext . $info[ 'version' ] . $pkg_lctype;
 						}
 
 						if ( isset( $info['opt_version'] ) ) {
-							self::$cf['opt']['version'] .= '-' . $ext . $info['opt_version'] . $pkg_lctype;
+							self::$cf[ 'opt' ][ 'version' ] .= '-' . $ext . $info['opt_version'] . $pkg_lctype;
 						}
 
 						// complete relative paths in the image arrays
-						$plugin_base = trailingslashit( plugins_url( '', $info['base'] ) );
-						array_walk_recursive( self::$cf['plugin'][$ext]['img'], 
+						$plugin_base = trailingslashit( plugins_url( '', $info[ 'base' ] ) );
+						array_walk_recursive( self::$cf[ 'plugin' ][$ext]['img'], 
 							array( __CLASS__, 'maybe_prefix_base_url' ), $plugin_base );
 					}
 				}
 			}
 
-			if ( $idx !== false ) {
-				if ( isset( self::$cf[$idx] ) ) {
-					return self::$cf[$idx];
+			if ( false !== $cf_key ) {
+				if ( isset( self::$cf[$cf_key] ) ) {
+					return self::$cf[$cf_key];
 				} else {
 					return null;
 				}
@@ -2818,12 +2886,11 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 
 		public static function get_ext_sorted( $apply_filters = true, $core_first = true ) {
 
-			$idx = 'plugin';
 			$ext = self::get_config( 'plugin', $apply_filters );
 
 			uasort( $ext, array( 'self', 'sort_ext_by_name' ) );	// Sort array and maintain index association.
 
-			if ( $core_first && isset( $ext['wpsso'] ) ) {
+			if ( $core_first && isset( $ext[ 'wpsso' ] ) ) {
 				SucomUtil::move_to_front( $ext, 'wpsso' );
 			}
 
@@ -2831,8 +2898,9 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 		}
 
 		private static function sort_ext_by_name( $a, $b ) {
-			if ( isset( $a['name'] ) && isset( $b['name'] ) ) {	// Just in case.
-				return strcasecmp( $a['name'], $b['name'] );	// Case-insensitive string comparison.
+
+			if ( isset( $a[ 'name' ] ) && isset( $b[ 'name' ] ) ) {	// Just in case.
+				return strcasecmp( $a[ 'name' ], $b[ 'name' ] );	// Case-insensitive string comparison.
 			} else {
 				return 0;					// No change.
 			}
@@ -2848,12 +2916,12 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 			 * Define fixed constants.
 			 */
 			define( 'WPSSO_FILEPATH', $plugin_filepath );						
-			define( 'WPSSO_PLUGINBASE', self::$cf['plugin']['wpsso']['base'] );			// Example: wpsso/wpsso.php.
+			define( 'WPSSO_PLUGINBASE', self::$cf[ 'plugin' ][ 'wpsso' ][ 'base' ] );			// Example: wpsso/wpsso.php.
 			define( 'WPSSO_PLUGINDIR', trailingslashit( realpath( dirname( $plugin_filepath ) ) ) );
-			define( 'WPSSO_PLUGINSLUG', self::$cf['plugin']['wpsso']['slug'] );			// Example: wpsso.
+			define( 'WPSSO_PLUGINSLUG', self::$cf[ 'plugin' ][ 'wpsso' ][ 'slug' ] );			// Example: wpsso.
 			define( 'WPSSO_UNDEF', -1 );								// Undefined image width / height value.
 			define( 'WPSSO_URLPATH', trailingslashit( plugins_url( '', $plugin_filepath ) ) );
-			define( 'WPSSO_VERSION', self::$cf['plugin']['wpsso']['version'] );						
+			define( 'WPSSO_VERSION', self::$cf[ 'plugin' ][ 'wpsso' ][ 'version' ] );						
 
 			/**
 			 * Define variable constants. Default values can be changed by defining 
@@ -2915,6 +2983,11 @@ if ( ! class_exists( 'WpssoConfig' ) ) {
 			 */
 			$var_const['WPSSO_SCHEMA_ADDL_TYPE_URL_MAX']       = 5;
 			$var_const['WPSSO_SCHEMA_EVENT_OFFERS_MAX']        = 10;
+			$var_const['WPSSO_SCHEMA_HOWTO_STEPS_MAX']         = 80;
+			$var_const['WPSSO_SCHEMA_HOWTO_SUPPLIES_MAX']      = 40;
+			$var_const['WPSSO_SCHEMA_HOWTO_TOOLS_MAX']         = 20;
+			$var_const['WPSSO_SCHEMA_MOVIE_ACTORS_MAX']        = 20;
+			$var_const['WPSSO_SCHEMA_MOVIE_DIRECTORS_MAX']     = 5;
 			$var_const['WPSSO_SCHEMA_RECIPE_INGREDIENTS_MAX']  = 50;
 			$var_const['WPSSO_SCHEMA_RECIPE_INSTRUCTIONS_MAX'] = 80;
 			$var_const['WPSSO_SCHEMA_REVIEWS_PER_PAGE_MAX']    = 30;

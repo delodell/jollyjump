@@ -170,7 +170,7 @@ if ( ! class_exists( 'SucomBFO' ) ) {
 
 					foreach ( $hook_group as $hook_ref => $hook_info ) {
 
-						$new_hook_group[$hook_ref] = $hook_info;			// Add the original callback first, followed by the check.
+						$new_hook_group[ $hook_ref ] = $hook_info;			// Add the original callback first, followed by the check.
 
 						$hook_name = self::get_hook_function_name( $hook_info );	// Create a human readable class / method name.
 
@@ -178,14 +178,14 @@ if ( ! class_exists( 'SucomBFO' ) ) {
 							continue;
 						} elseif ( strpos( $hook_name, __CLASS__ . '::' ) === 0 ) {	// Exclude our own class methods from being checked.
 							continue;
-						} elseif ( strpos( $hook_ref, $bfo_check_str ) !== false ) {	// Just in case - don't check the check hooks.
+						} elseif ( false !== strpos( $hook_ref, $bfo_check_str ) ) {	// Just in case - don't check the check hooks.
 							continue;
 						}
 
 						$check_ref = $hook_ref . $bfo_check_str;			// Include the previous hook ref for visual clue.
-						$check_arg = urlencode( '[' . $hook_prio.']' . $hook_name );	// Include previous hook priority and name.
+						$check_arg = urlencode( '[' . $hook_prio . ']' . $hook_name );	// Include previous hook priority and name.
 
-						$new_hook_group[$check_ref] = array(
+						$new_hook_group[ $check_ref ] = array(
 							'function' => array(
 								$this,
 								$this->bfo_check_id . '_' . $check_arg		// Hooks the __call() method.
@@ -213,8 +213,8 @@ if ( ! class_exists( 'SucomBFO' ) ) {
 
 				foreach ( $wp_filter[ $filter_name ]->callbacks as $hook_prio => &$hook_group ) {	// Use reference to modify $hook_group.
 					foreach ( $hook_group as $hook_ref => $hook_info ) {
-						if ( strpos( $hook_ref, $bfo_check_str ) !== false ) {
-							unset( $hook_group[$hook_ref] );
+						if ( false !== strpos( $hook_ref, $bfo_check_str ) ) {
+							unset( $hook_group[ $hook_ref ] );
 						}
 					}
 				}
@@ -243,15 +243,15 @@ if ( ! class_exists( 'SucomBFO' ) ) {
 
 			if ( $text_domain !== null ) {
 				$this->text_domain = $text_domain;
-			} elseif ( ! empty( $this->p->cf['plugin'][$this->lca]['text_domain'] ) ) {
-				$this->text_domain = $this->p->cf['plugin'][$this->lca]['text_domain'];
+			} elseif ( ! empty( $this->p->cf[ 'plugin' ][ $this->lca ][ 'text_domain' ] ) ) {
+				$this->text_domain = $this->p->cf[ 'plugin' ][ $this->lca ][ 'text_domain' ];
 			}
 
 			if ( $label_transl !== null ) {
 				$this->label_transl = $label_transl;	// Argument is already translated.
-			} elseif ( ! empty( $this->p->cf['menu']['title'] ) ) {
+			} elseif ( ! empty( $this->p->cf[ 'menu' ][ 'title' ] ) ) {
 				$this->label_transl = sprintf( __( '%s Notice', $this->text_domain ),
-					_x( $this->p->cf['menu']['title'], 'menu title', $this->text_domain ) );
+					_x( $this->p->cf[ 'menu' ][ 'title' ], 'menu title', $this->text_domain ) );
 			} else {
 				$this->label_transl = __( 'Notice', $this->text_domain );
 			}
@@ -339,31 +339,31 @@ if ( ! class_exists( 'SucomBFO' ) ) {
 
 			$hook_name = '';
 
-			if ( ! isset( $hook_info['function'] ) ) {		// Just in case.
+			if ( ! isset( $hook_info[ 'function' ] ) ) {		// Just in case.
 
 				return $hook_name;				// Stop here - return an empty string.
 
-			} elseif ( is_array( $hook_info['function'] ) ) {	// Hook is a class / method.
+			} elseif ( is_array( $hook_info[ 'function' ] ) ) {	// Hook is a class / method.
 
 				$class_name    = '';
 				$function_name = '';
 
-				if ( is_object( $hook_info['function'][0] ) ) {
-					$class_name = get_class( $hook_info['function'][0] );
-				} elseif ( is_string( $hook_info['function'][0] ) ) {
-					$class_name = $hook_info['function'][0];
+				if ( is_object( $hook_info[ 'function' ][0] ) ) {
+					$class_name = get_class( $hook_info[ 'function' ][0] );
+				} elseif ( is_string( $hook_info[ 'function' ][0] ) ) {
+					$class_name = $hook_info[ 'function' ][0];
 				}
 
-				if ( is_string( $hook_info['function'][1] ) ) {
-					$function_name = $hook_info['function'][1];
+				if ( is_string( $hook_info[ 'function' ][1] ) ) {
+					$function_name = $hook_info[ 'function' ][1];
 
 				}
 
 				return $class_name . '::' . $function_name;
 
-			} elseif ( is_string ( $hook_info['function'] ) ) {	// Hook is a function.
+			} elseif ( is_string ( $hook_info[ 'function' ] ) ) {	// Hook is a function.
 
-				return $hook_info['function'];
+				return $hook_info[ 'function' ];
 			}
 
 			return $hook_name;

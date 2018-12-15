@@ -124,13 +124,13 @@ abstract class WPS_Subscription_Base {
 	public function the_name_field( $name ) {
 
 		if( !empty( $this->options['include_name_field'] ) ) {
-			printf( '<input class="regular-text name-field" type="text" name="%s" placeholder="%s">', esc_attr( $name ), esc_attr( $this->options['name_placeholder'] ) );
+			printf( '<input class="regular-text name-field" type="text" name="%s" placeholder="%s" required>', esc_attr( $name ), esc_attr( $this->options['name_placeholder'] ) );
 		}
 	}
 
 	public function the_email_field( $name ) {
 
-		printf( '<input class="regular-text email-field" type="text" name="%s" placeholder="%s">', esc_attr( $name ), esc_attr( $this->options['email_placeholder'] ) );
+		printf( '<input class="regular-text email-field" type="email" name="%s" placeholder="%s" required>', esc_attr( $name ), esc_attr( $this->options['email_placeholder'] ) );
 	}
 
 	public function the_submit_button() {

@@ -9,9 +9,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'These aren\'t the droids you\'re looking for...' );
 }
 
-if ( ! class_exists( 'WpssoSettingImagedimensions' ) && class_exists( 'WpssoAdmin' ) ) {
+if ( ! class_exists( 'WpssoSettingImageDimensions' ) && class_exists( 'WpssoAdmin' ) ) {
 
-	class WpssoSettingImagedimensions extends WpssoAdmin {
+	class WpssoSettingImageDimensions extends WpssoAdmin {
 
 		public function __construct( &$plugin, $id, $name, $lib, $ext ) {
 
@@ -25,36 +25,59 @@ if ( ! class_exists( 'WpssoSettingImagedimensions' ) && class_exists( 'WpssoAdmi
 			$this->menu_name = $name;
 			$this->menu_lib  = $lib;
 			$this->menu_ext  = $ext;
+
+			$this->p->util->add_plugin_filters( $this, array(
+				'form_button_rows' => 2,
+			), -10000 );
 		}
 
-		protected function add_plugin_hooks() {
-			$this->p->util->add_plugin_filters( $this, array(
-				'action_buttons' => 1,
-			) );
+		public function filter_form_button_rows( $form_button_rows, $menu_id ) {
+
+			$row_num = null;
+
+			switch ( $menu_id ) {
+				case 'image-dimensions':
+					$row_num = 0;
+					break;
+				case 'tools':
+					$row_num = 2;
+					break;
+			}
+
+			if ( null !== $row_num ) {
+				$form_button_rows[ $row_num ][ 'reload_default_image_sizes' ] = _x( 'Reload Default Image Sizes',
+					'submit button', 'wpsso' );
+			}
+
+			return $form_button_rows;
 		}
 
 		/**
 		 * Called by the extended WpssoAdmin class.
 		 */
 		protected function add_meta_boxes() {
-			add_meta_box( $this->pagehook.'_image_dimensions',
-				_x( 'Social and Search Image Sizes / Dimensions', 'metabox title', 'wpsso' ),
-					array( $this, 'show_metabox_image_dimensions' ), $this->pagehook, 'normal' );
-		}
 
-		public function filter_action_buttons( $action_buttons ) {
-			$action_buttons[0]['reload_default_sizes'] = _x( 'Reload Default Sizes', 'submit button', 'wpsso' );
-			return $action_buttons;
+			$metabox_id      = 'image_dimensions';
+			$metabox_title   = _x( 'Social and Search Image Sizes / Dimensions', 'metabox title', 'wpsso' );
+			$metabox_screen  = $this->pagehook;
+			$metabox_context = 'normal';
+			$metabox_prio    = 'default';
+			$callback_args   = array(	// Second argument passed to the callback function / method.
+			);
+
+			add_meta_box( $this->pagehook . '_' . $metabox_id, $metabox_title,
+				array( $this, 'show_metabox_image_dimensions' ), $metabox_screen,
+					$metabox_context, $metabox_prio, $callback_args );
 		}
 
 		public function show_metabox_image_dimensions() {
 
 			$metabox_id = $this->menu_id;
 
-			echo '<table class="sucom-settings '.$this->p->cf['lca'].'">';
+			echo '<table class="sucom-settings ' . $this->p->lca . '">';
 
 			$table_rows = array_merge( $this->get_table_rows( $metabox_id, 'general' ),
-				apply_filters( SucomUtil::sanitize_hookname( $this->p->cf['lca'].'_'.$metabox_id.'_general_rows' ),
+				apply_filters( SucomUtil::sanitize_hookname( $this->p->lca . '_' . $metabox_id . '_general_rows' ),
 					array(), $this->form ) );
 
 			sort( $table_rows );

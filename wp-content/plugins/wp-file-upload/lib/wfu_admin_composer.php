@@ -1,7 +1,6 @@
 <?php
 
 function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upload') {
-	global $wpdb;
 	global $wp_roles;
 	$siteurl = site_url();
  

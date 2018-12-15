@@ -2,20 +2,19 @@
 
 class WFU_Original_Template {
 	
-private static $instance = null;
-public static $name = "WFU_Original_Template";
+private static $instance = array();
 
 public static function get_instance() {
-	if ( null == self::$instance ) {
-		self::$instance = new static();
-		self::$name = get_called_class();
+	$that = get_called_class();
+	if ( !isset(self::$instance[$that]) ) {
+		self::$instance[$that] = new $that();
 	}
 
-	return self::$instance;
+	return self::$instance[$that];
 }
 
 public static function get_name() {
-	return self::$name;
+	return get_called_class();
 }
 
 function wfu_base_template($data) {?>
@@ -2933,8 +2932,12 @@ this.update = function(data) {
 		file_contents = file_contents.replace(/\[filesubheaderadminmessage_display\]/g, "style=\"display:none;\"");
 		file_contents = file_contents.replace(/\[filesubheader_adminmessage\]/g, file.message3);
 		// put file contents to temp div element to convert them to HTML elements
-		file_contents = "<table><tbody>" + file_contents + "<\/tbody><\/table>";  //IE6 fix: door is a div element so that innerHTML is writable
-		door.innerHTML = file_contents;
+		var door_table = document.createElement("TABLE");
+		var door_tbody = document.createElement("TBODY");
+		door_tbody.innerHTML = file_contents;
+		door_table.appendChild(door_tbody);
+		door.innerHTML = "";
+		door.appendChild(door_table);
 		// post process created file block to adjust visibility of its contents
 		headerspan = 1;
 		subheaderspan = 2;
@@ -3050,13 +3053,13 @@ this._apply_header_template = function(data) {
  *  @return string the generated HTML code
  */
 this._format_debug_data = function(debug_data) {
-	output = '<label class="file_messageblock_subheader_debugmessage_label">';
-	output += debug_data.title;
-	output += '<\/label>';
-	output += '<div class="file_messageblock_subheader_debugmessage_container">';
-	output += debug_data.data;
-	output += '<\/div>';
-	return output;
+	var lab = document.createElement("LABEL");
+	lab.className = "file_messageblock_subheader_debugmessage_label"
+	lab.innerHTML = debug_data.title;
+	var div = document.createElement("DIV");
+	div.className = "file_messageblock_subheader_debugmessage_container"
+	div.innerHTML = debug_data.data;
+	return lab.outerHTML+div.outerHTML;
 }
 
 /**
@@ -4084,7 +4087,7 @@ this._focused = function(obj) {
 	<?php if ( $p["labelposition"] == "top" || $p["labelposition"] == "left" ): ?>
 		<label id="userdata_$ID_label_<?php echo $p["key"]; ?>" for="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_label" style="<?php echo $styles2; ?>"><?php echo $p["label"]; ?></label>
 	<?php endif ?>
-		<?php if ( $p["labelposition"] == "top" ): ?><br /><?php endif ?>
+	<?php if ( $p["labelposition"] == "top" ): ?><br /><?php endif ?>
 		<div id="userdata_$ID_fieldwrapper_<?php echo $p["key"]; ?>" class="file_userdata_fieldwrapper<?php echo ( $p["required"] ? '_required' : '' ); ?>" style="<?php echo $styles3; ?>">
 			<div class="wfu_fieldwrapper_overlay" onclick="document.getElementById('userdata_$ID_field_<?php echo $p["key"]; ?>').focus();"></div>
 <!-- **** the following lines contain the HTML code of each field type ***** -->		
@@ -4164,7 +4167,7 @@ this._focused = function(obj) {
 	<?php endif ?>
 <!-- ***************** end of HTML code of each field type ***************** -->		
 		</div>
-		<?php if ( $p["labelposition"] == "bottom" ): ?><br /><?php endif ?>
+	<?php if ( $p["labelposition"] == "bottom" ): ?><br /><?php endif ?>
 	<?php if ( $p["labelposition"] == "bottom" || $p["labelposition"] == "right" ): ?>
 		<label id="userdata_$ID_label_<?php echo $p["key"]; ?>" for="userdata_$ID_field_<?php echo $p["key"]; ?>" class="file_userdata_label" style="<?php echo $styles2; ?>"><?php echo $p["label"]; ?></label>
 	<?php endif ?>

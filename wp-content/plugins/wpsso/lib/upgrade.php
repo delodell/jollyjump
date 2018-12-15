@@ -14,7 +14,7 @@ if ( ! class_exists( 'WpssoOptionsUpgrade' ) && class_exists( 'WpssoOptions' ) )
 	class WpssoOptionsUpgrade extends WpssoOptions {
 
 		private static $rename_options_keys = array(
-			'wpsso' => array(	// WPSSO Core
+			'wpsso' => array(	// WPSSO Core plugin.
 				500 => array(
 					'og_img_resize'                  => 'plugin_create_wp_sizes',
 					'plugin_tid'                     => 'plugin_wpsso_tid',
@@ -52,7 +52,6 @@ if ( ! class_exists( 'WpssoOptionsUpgrade' ) && class_exists( 'WpssoOptions' ) )
 					'tc_prod_def_label2'             => '',
 					'tc_prod_def_data2'              => '',
 					'plugin_version'                 => '',
-					'seo_author_name'                => '',
 					'plugin_columns_taxonomy'        => 'plugin_columns_term',
 					'plugin_add_to_taxonomy'         => 'plugin_add_to_term',
 					'plugin_ignore_small_img'        => 'plugin_check_img_dims',
@@ -84,7 +83,7 @@ if ( ! class_exists( 'WpssoOptionsUpgrade' ) && class_exists( 'WpssoOptions' ) )
 					'og_site_name'                   => 'site_name',
 					'og_site_description'            => 'site_desc',
 					'org_url'                        => 'site_url',
-					'org_type'                       => 'site_org_type',
+					'org_type'                       => 'site_org_schema_type',
 					'org_place_id'                   => 'site_place_id',
 					'link_def_author_id'             => '',
 					'link_def_author_on_index'       => '',
@@ -187,22 +186,61 @@ if ( ! class_exists( 'WpssoOptionsUpgrade' ) && class_exists( 'WpssoOptions' ) )
 				609 => array(
 					'p_author_name' => '',
 				),
+				616 => array(
+					'site_org_type'   => 'site_org_schema_type',
+					'schema_desc_len' => 'schema_desc_max_len',
+					'og_title_len'    => 'og_title_max_len',
+					'og_title_warn'   => 'og_title_warn_len',
+					'og_desc_len'     => 'og_desc_max_len',
+					'og_desc_warn'    => 'og_desc_warn_len',
+					'seo_desc_len'    => 'seo_desc_max_len',
+					'tc_desc_len'     => 'tc_desc_max_len',
+				),
+				618 => array(
+					'fb_author_name'     => '',
+					'schema_author_name' => 'seo_author_name',
+				),
 			),
-			'wpssoorg' => array(	// WPSSO ORG
+			'wpssoorg' => array(	// WPSSO ORG add-on.
 				2 => array(
 					'org_alt_name' => 'org_name_alt',
 				),
 			),
-			'wpssossb' => array(	// WPSSO SSB
+			'wpssorrssb' => array(	// WPSSO RRSSB add-on.
 				14 => array(
-					'stumble_js_loc'  => 'stumble_script_loc',
-					'pin_js_loc'      => 'pin_script_loc',
-					'tumblr_js_loc'   => 'tumblr_script_loc',
-					'gp_js_loc'       => 'gp_script_loc',
-					'fb_js_loc'       => 'fb_script_loc',
-					'twitter_js_loc'  => 'twitter_script_loc',
+					'email_cap_len'         => 'email_caption_max_len',
+					'twitter_cap_len'       => 'twitter_caption_max_len',
+					'pin_cap_len'           => 'pin_caption_max_len',
+					'linkedin_cap_len'      => 'linkedin_caption_max_len',
+					'reddit_cap_len'        => 'reddit_caption_max_len',
+					'tumblr_cap_len'        => 'tumblr_caption_max_len',
+					'email_cap_hashtags'    => 'email_caption_hashtags',
+					'twitter_cap_hashtags'  => 'twitter_caption_hashtags',
+					'pin_cap_hashtags'      => 'pin_caption_hashtags',
+					'linkedin_cap_hashtags' => 'linkedin_caption_hashtags',
+					'reddit_cap_hashtags'   => 'reddit_caption_hashtags',
+					'tumblr_cap_hashtags'   => 'tumblr_caption_hashtags',
+				),
+			),
+			'wpssossb' => array(	// WPSSO SSB add-on.
+				14 => array(
 					'buffer_js_loc'   => 'buffer_script_loc',
+					'fb_js_loc'       => 'fb_script_loc',
+					'gp_js_loc'       => 'gp_script_loc',
 					'linkedin_js_loc' => 'linkedin_script_loc',
+					'pin_js_loc'      => 'pin_script_loc',
+					'stumble_js_loc'  => '',
+					'tumblr_js_loc'   => 'tumblr_script_loc',
+					'twitter_js_loc'  => 'twitter_script_loc',
+				),
+				16 => array(
+					'email_cap_len'      => 'email_caption_max_len',
+					'twitter_cap_len'    => 'twitter_caption_max_len',
+					'pin_cap_len'        => 'pin_caption_max_len',
+					'linkedin_cap_len'   => 'linkedin_caption_max_len',
+					'reddit_cap_len'     => 'reddit_caption_max_len',
+					'tumblr_cap_len'     => 'tumblr_caption_max_len',
+					'email_cap_hashtags' => 'email_caption_hashtags',
 				),
 			),
 		);
@@ -272,7 +310,7 @@ if ( ! class_exists( 'WpssoOptionsUpgrade' ) && class_exists( 'WpssoOptions' ) )
 				/**
 				 * Check for schema type IDs to be renamed.
 				 */
-				$keys_preg = 'schema_type_.*|site_org_type|org_type|plm_place_schema_type';
+				$keys_preg = 'schema_type_.*|site_org_schema_type|org_schema_type|plm_place_schema_type';
 
 				foreach ( SucomUtil::preg_grep_keys( '/^(' . $keys_preg . ')(_[0-9]+)?$/', $opts ) as $key => $val ) {
 					if ( ! empty( $this->p->cf['head']['schema_renamed'][$val] ) ) {
@@ -325,12 +363,6 @@ if ( ! class_exists( 'WpssoOptionsUpgrade' ) && class_exists( 'WpssoOptions' ) )
 					}
 				}
 
-				if ( $prev_version > 0 && $prev_version <= 453 ) {
-					foreach ( array( 'og:image', 'og:video' ) as $mt_name ) {
-						$opts['add_meta_property_' . $mt_name . ':secure_url'] = 1;
-					}
-				}
-
 				if ( $prev_version > 0 && $prev_version <= 557 ) {
 
 					if ( isset( $opts['plugin_cm_fb_label'] ) && $opts['plugin_cm_fb_label'] === 'Facebook URL' ) {
@@ -369,13 +401,54 @@ if ( ! class_exists( 'WpssoOptionsUpgrade' ) && class_exists( 'WpssoOptions' ) )
 					}
 				}
 
+				/**
+				 * The Google URL Shortener was discontinued by Google in March 2018.
+				 */
+				if ( $prev_version > 0 && $prev_version <= 614 ) {
+					if ( isset( $this->p->options['plugin_shortener'] ) ) {
+						if ( $this->p->options['plugin_shortener'] === 'googl' ||
+							$this->p->options['plugin_shortener'] === 'google-url-shortener' ) {
+
+							$this->p->options['plugin_shortener'] = 'none';
+						}
+					}
+				}
+
+				if ( $prev_version > 0 && $prev_version <= 619 ) {
+					foreach ( array( 'og:image', 'og:video' ) as $mt_name ) {
+						$opts['add_meta_property_' . $mt_name . ':secure_url'] = 0;
+						$opts['add_meta_property_' . $mt_name . ':url']        = 0;
+						$opts['add_meta_property_' . $mt_name ]                = 1;
+					}
+				}
+
+				if ( $prev_version > 0 && $prev_version <= 622 ) {
+					$opts[ 'add_meta_property_product:age_group' ]              = 0;
+					$opts[ 'add_meta_property_product:expiration_time' ]        = 0;
+					$opts[ 'add_meta_property_product:is_product_shareable' ]   = 0;
+					$opts[ 'add_meta_property_product:mfr_part_no' ]            = 0;
+					$opts[ 'add_meta_property_product:pattern' ]                = 0;
+					$opts[ 'add_meta_property_product:plural_title' ]           = 0;
+					$opts[ 'add_meta_property_product:product_link' ]           = 0;
+					$opts[ 'add_meta_property_product:purchase_limit' ]         = 0;
+					$opts[ 'add_meta_property_product:retailer' ]               = 0;
+					$opts[ 'add_meta_property_product:retailer_category' ]      = 0;
+					$opts[ 'add_meta_property_product:retailer_part_no' ]       = 0;
+					$opts[ 'add_meta_property_product:retailer_title' ]         = 0;
+					$opts[ 'add_meta_property_product:shipping_cost:amount' ]   = 0;
+					$opts[ 'add_meta_property_product:shipping_cost:currency' ] = 0;
+					$opts[ 'add_meta_property_product:shipping_weight:value' ]  = 0;
+					$opts[ 'add_meta_property_product:shipping_weight:units' ]  = 0;
+					$opts[ 'add_meta_property_product:upc' ]                    = 0;
+				}
+
 			} elseif ( $options_name === constant( 'WPSSO_SITE_OPTIONS_NAME' ) ) {
 
 				$this->p->util->rename_opts_by_ext( $opts, apply_filters( $this->p->lca . '_rename_site_options_keys',
 					self::$rename_site_options_keys ) );
 			}
 
-			return $this->sanitize( $opts, $def_opts, $network );	// cleanup options and sanitize
+			return $this->sanitize( $opts, $def_opts, $network );	// Cleanup options and sanitize.
 		}
 	}
 }

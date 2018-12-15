@@ -253,18 +253,19 @@ function wfu_ajax_action_callback() {
 	//terminate it
 	if ( WFU_USVAR_exists("wfu_uploadstatus_".$unique_id) && WFU_USVAR("wfu_uploadstatus_".$unique_id) == 0 ) die('force_errorabort_code');
 	
+	//get stored shortcode parameters
+	$params_str = get_option('wfu_params_'.$arr['unique_id']);
+	$params = wfu_decode_array_from_string($params_str);
+
 	//if upload has finished then perform post upload actions
 	if ( isset($_POST["upload_finished"]) && $_POST["upload_finished"] === "1" ) {
 		$echo_str = "";
 		//execute after upload filters
-		$ret = wfu_execute_after_upload_filters($sid, $unique_id);
+		$ret = wfu_execute_after_upload_filters($sid, $unique_id, $params);
 		if ( $ret["js_script"] != "" ) $echo_str = "CBUVJS[".wfu_plugin_encode_string($ret["js_script"])."]";
 		die($echo_str);
 	}
 	
-	$params_str = get_option('wfu_params_'.$arr['unique_id']);
-	$params = wfu_decode_array_from_string($params_str);
-
 	//apply filters to determine if the upload will continue or stop
 	$ret = array( "status" => "", "echo" => "" );
 	$attr = array( "sid" => $sid, "unique_id" => $unique_id, "params" => $params );

@@ -69,7 +69,7 @@ class To_Top {
 	public function __construct() {
 
 		$this->plugin_name = 'to-top';
-		$this->version = '1.5.4';
+		$this->version = '1.7';
 
 		$this->load_dependencies();
 		$this->set_locale();

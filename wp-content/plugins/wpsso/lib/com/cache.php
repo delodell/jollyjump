@@ -67,8 +67,8 @@ if ( ! class_exists( 'SucomCache' ) ) {
 
 			if ( $text_domain !== null ) {
 				$this->text_domain = $text_domain;
-			} elseif ( ! empty( $this->p->cf['plugin'][$this->lca]['text_domain'] ) ) {
-				$this->text_domain = $this->p->cf['plugin'][$this->lca]['text_domain'];
+			} elseif ( ! empty( $this->p->cf[ 'plugin' ][$this->lca]['text_domain'] ) ) {
+				$this->text_domain = $this->p->cf[ 'plugin' ][$this->lca]['text_domain'];
 			}
 
 			if ( $label_transl !== null ) {
@@ -86,14 +86,14 @@ if ( ! class_exists( 'SucomCache' ) ) {
 
 		public function load_transient() {
 
-			if ( $this->transient['loaded'] !== true ) {
+			if ( true !== $this->transient['loaded'] ) {
 
 				$cache_md5_pre = $this->lca . '_';
 				$cache_salt    = __CLASS__ . '::transient';
 				$cache_id      = $cache_md5_pre . md5( $cache_salt );
 				$cache_ret     = get_transient( $cache_id );
 
-				if ( $cache_ret !== false ) {
+				if ( false !== $cache_ret ) {
 					$this->transient = $cache_ret;
 				}
 
@@ -354,7 +354,7 @@ if ( ! class_exists( 'SucomCache' ) ) {
 
 					$cache_data = $this->get_cache_data( $cache_salt, $cache_type, $cache_exp_secs, $file_ext );
 
-					if ( $cache_data !== false ) {
+					if ( false !== $cache_data ) {
 
 						if ( $this->p->debug->enabled ) {
 							$this->p->debug->log( 'cached data found: returning '.strlen( $cache_data ) . ' chars' );
@@ -377,7 +377,7 @@ if ( ! class_exists( 'SucomCache' ) ) {
 						if ( filemtime( $cache_file ) > time() - $file_cache_exp ) {
 
 							if ( $this->p->debug->enabled ) {
-								$this->p->debug->log( 'cached file found: returning ' . $format . ' '.
+								$this->p->debug->log( 'cached file found: returning ' . $format . ' ' . 
 									( $format === 'url' ? $cache_url : $cache_file ) );
 							}
 
@@ -461,11 +461,14 @@ if ( ! class_exists( 'SucomCache' ) ) {
 			 *
 			 */
 			if ( ! empty( $curl_opts ) ) {
-				foreach ( $curl_opts as $opt_name => $opt_value ) {
+
+				foreach ( $curl_opts as $opt_key => $opt_val ) {
+
 					if ( $this->p->debug->enabled ) {
-						$this->p->debug->log( 'curl: setting custom curl option ' . $opt_name . ' = ' . $opt_value );
+						$this->p->debug->log( 'curl: setting custom curl option ' . $opt_key . ' = ' . $opt_val );
 					}
-					curl_setopt( $ch, constant( $opt_name ), $opt_value );
+
+					curl_setopt( $ch, constant( $opt_key ), $opt_val );
 				}
 			}
 
@@ -592,7 +595,7 @@ if ( ! class_exists( 'SucomCache' ) ) {
 					break;
 			}
 
-			if ( $this->p->debug->enabled && $cache_data !== false ) {
+			if ( $this->p->debug->enabled && false !== $cache_data ) {
 				$this->p->debug->log( 'cache data retrieved from ' . $cache_type );
 			}
 
@@ -622,7 +625,7 @@ if ( ! class_exists( 'SucomCache' ) ) {
 					wp_cache_set( $cache_id, $cache_data, __CLASS__, $object_cache_exp );
 
 					if ( $this->p->debug->enabled ) {
-						$this->p->debug->log( 'cache data saved to ' . $cache_type . ' '.
+						$this->p->debug->log( 'cache data saved to ' . $cache_type . ' ' .
 							$cache_id . ' (' . $object_cache_exp . ' seconds)' );
 					}
 
@@ -637,7 +640,7 @@ if ( ! class_exists( 'SucomCache' ) ) {
 					set_transient( $cache_id, $cache_data, $object_cache_exp );
 
 					if ( $this->p->debug->enabled ) {
-						$this->p->debug->log( 'cache data saved to ' . $cache_type . ' '.
+						$this->p->debug->log( 'cache data saved to ' . $cache_type . ' ' .
 							$cache_id . ' (' . $object_cache_exp . ' seconds)' );
 					}
 

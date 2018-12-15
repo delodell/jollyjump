@@ -47,15 +47,15 @@ if ( ! class_exists( 'WpssoStyle' ) ) {
 			 */
 			wp_register_style( 'jquery-ui.js',
 				'https://ajax.googleapis.com/ajax/libs/jqueryui/' . 
-					$this->p->cf['jquery-ui']['version'] . '/themes/smoothness/jquery-ui.css',
-						array(), $this->p->cf['jquery-ui']['version'] );
+					$this->p->cf['jquery-ui'][ 'version' ] . '/themes/smoothness/jquery-ui.css',
+						array(), $this->p->cf['jquery-ui'][ 'version' ] );
 
 			/**
 			 * See http://qtip2.com/download.
 			 */
 			wp_register_style( 'jquery-qtip.js',
 				WPSSO_URLPATH . 'css/ext/jquery-qtip.' . $css_file_ext,
-					array(), $this->p->cf['jquery-qtip']['version'] );
+					array(), $this->p->cf['jquery-qtip'][ 'version' ] );
 
 			wp_register_style( 'sucom-settings-table',
 				WPSSO_URLPATH . 'css/com/settings-table.' . $css_file_ext,
@@ -86,7 +86,7 @@ if ( ! class_exists( 'WpssoStyle' ) ) {
 				/**
 				 * Any settings page. Also matches the profile_page and users_page hooks.
 				 */
-				case ( strpos( $hook_name, '_page_' . $this->p->lca . '-' ) !== false ? true : false ):
+				case ( false !== strpos( $hook_name, '_page_' . $this->p->lca . '-' ) ? true : false ):
 
 					if ( $this->p->debug->enabled ) {
 						$this->p->debug->log( 'enqueuing styles for settings page' );
@@ -121,9 +121,9 @@ if ( ! class_exists( 'WpssoStyle' ) ) {
 
 				case 'plugin-install.php':
 
-					if ( isset( $_GET['plugin'] ) ) {
-						$plugin_slug = $_GET['plugin'];
-						if ( isset( $this->p->cf['*']['slug'][$plugin_slug] ) ) {
+					if ( isset( $_GET[ 'plugin' ] ) ) {
+						$plugin_slug = $_GET[ 'plugin' ];
+						if ( isset( $this->p->cf[ '*' ][ 'slug' ][$plugin_slug] ) ) {
 							if ( $this->p->debug->enabled ) {
 								$this->p->debug->log( 'enqueuing styles for plugin install page' );
 							}
@@ -222,8 +222,7 @@ if ( ! class_exists( 'WpssoStyle' ) ) {
 			$cache_salt       .= 'hook_name:' . $hook_name;
 			$cache_salt       .= '_urlpath:' . $plugin_urlpath;
 			$cache_salt       .= '_version:' . $plugin_version;
-			$cache_salt       .= '_col_def_width:' . $this->p->options['plugin_col_def_width'];
-			$cache_salt       .= '_col_title_width:' . $this->p->options['plugin_col_title_width'];
+			$cache_salt       .= '_columns:' . implode( ',', SucomUtil::preg_grep_keys( '/^plugin_col_/', $this->p->options ) );
 			$cache_salt       .= ')';
 
 			$cache_id         = $cache_md5_pre . md5( $cache_salt );
@@ -257,9 +256,9 @@ if ( ! class_exists( 'WpssoStyle' ) ) {
 			}
 
 			$sort_cols  = WpssoMeta::get_sortable_columns();
-			$metabox_id = $this->p->cf['meta']['id'];
-			$menu       = $this->p->lca . '-' . key( $this->p->cf['*']['lib']['submenu'] );
-			$sitemenu   = $this->p->lca . '-' . key( $this->p->cf['*']['lib']['sitesubmenu'] );
+			$metabox_id = $this->p->cf['meta'][ 'id' ];
+			$menu       = $this->p->lca . '-' . key( $this->p->cf[ '*' ][ 'lib' ]['submenu'] );
+			$sitemenu   = $this->p->lca . '-' . key( $this->p->cf[ '*' ][ 'lib' ]['sitesubmenu'] );
 
 			$custom_style_css = '
 				@font-face {
@@ -373,22 +372,50 @@ if ( ! class_exists( 'WpssoStyle' ) ) {
 			/**
 			 * List table columns.
 			 */
-			if ( ! empty( $this->p->options['plugin_col_def_width'] ) ) {
-				$custom_style_css .= '
-					table.wp-list-table.pages > thead > tr > th,	/* default column width for posts and pages */
-					table.wp-list-table.posts > tbody > tr > td {
-						width:'.$this->p->options['plugin_col_def_width'].';
-					}
-				';
-			}
+			foreach ( array(
+				'.column-title' => 'plugin_col_title_width',
+				'.column-name'  => 'plugin_col_title_width',
+				''              => 'plugin_col_def_width',
+			) as $css_class => $opt_key ) {
 
-			if ( ! empty( $this->p->options['plugin_col_title_width'] ) ) {
-				$custom_style_css .= '
-					table.wp-list-table > thead > tr > th.column-title,
-					table.wp-list-table > tbody > tr > td.column-title {
-						width:'.$this->p->options['plugin_col_title_width'].';
+				$custom_style_css .= "@media (min-width: 783px) {\n";
+
+				switch ( $css_class ) {
+
+					case '':	// Only apply to posts and pages.
+
+						$custom_style_css .= "table.wp-list-table.posts > thead > tr > th,\n";
+						$custom_style_css .= "table.wp-list-table.posts > tbody > tr > td,\n";
+						$custom_style_css .= "table.wp-list-table.pages > thead > tr > th,\n";
+						$custom_style_css .= "table.wp-list-table.pages > tbody > tr > td {\n";
+
+						break;
+
+					default:	// Apply to every WP List Table.
+
+						$custom_style_css .= 'table.wp-list-table.posts > thead > tr > th' . $css_class . ",\n";
+						$custom_style_css .= 'table.wp-list-table.posts > tbody > tr > td' . $css_class . ",\n";
+						$custom_style_css .= 'table.wp-list-table.pages > thead > tr > th' . $css_class . ",\n";
+						$custom_style_css .= 'table.wp-list-table.pages > tbody > tr > td' . $css_class . ",\n";
+						$custom_style_css .= 'table.wp-list-table > thead > tr > th' . $css_class . ",\n";
+						$custom_style_css .= 'table.wp-list-table > tbody > tr > td' . $css_class . " {\n";
+
+						break;
+				}
+
+				foreach ( array(
+					'width'     => '',
+					'min-width' => '_min',
+					'max-width' => '_max',
+				) as $css_name => $opt_suffix ) {
+
+					if ( ! empty( $this->p->options[ $opt_key . $opt_suffix ] ) ) {
+						$custom_style_css .= $css_name . ':' . $this->p->options[ $opt_key . $opt_suffix ] . ";\n";
 					}
-				';
+				}
+
+				$custom_style_css .= "}\n";
+				$custom_style_css .= "}\n";
 			}
 
 			$custom_style_css .= '
@@ -411,6 +438,20 @@ if ( ! class_exists( 'WpssoStyle' ) ) {
 				table.wp-list-table > tbody > tr > td.column-tags {
 					width:15%;
 				}
+				table.wp-list-table > thead > tr > th.column-description,
+				table.wp-list-table > tbody > tr > td.column-description {
+					width:20%;
+				}
+				table.wp-list-table.plugins > thead > tr > th.column-description,	/* Plugins table */
+				table.wp-list-table.plugins > tbody > tr > td.column-description {
+					width:75%;
+				}
+				table.wp-list-table.users > thead > tr > th,	/* Users table */
+				table.wp-list-table.users > tbody > tr > td {
+					width:15%;
+				}
+				table.wp-list-table > thead > tr > th.num,
+				table.wp-list-table > tbody > tr > td.num,
 				table.wp-list-table > thead > tr > th.column-comments,
 				table.wp-list-table > tbody > tr > td.column-comments {
 					width:40px;
@@ -426,6 +467,10 @@ if ( ! class_exists( 'WpssoStyle' ) ) {
 				table.wp-list-table > thead > tr > th.column-seodesc,
 				table.wp-list-table > tbody > tr > td.column-seodesc {
 					width:20%;
+				}
+				table.wp-list-table > thead > tr > th.column-term-id,
+				table.wp-list-table > tbody > tr > td.column-term-id {
+					width:40px;
 				}
 				table.wp-list-table > thead > tr > th.column-wpseo-links,	/* Yoast SEO */
 				table.wp-list-table > tbody > tr > td.column-wpseo-links,
@@ -531,13 +576,13 @@ if ( ! class_exists( 'WpssoStyle' ) ) {
 			/**
 			 * Fix the WordPress banner resolution.
 			 */
-			if ( $plugin_slug !== false && ! empty( $this->p->cf['*']['slug'][$plugin_slug] ) ) {
+			if ( false !== $plugin_slug && ! empty( $this->p->cf[ '*' ][ 'slug' ][$plugin_slug] ) ) {
 
-				$ext = $this->p->cf['*']['slug'][$plugin_slug];
+				$ext = $this->p->cf[ '*' ][ 'slug' ][$plugin_slug];
 
-				if ( ! empty( $this->p->cf['plugin'][$ext]['img']['banners'] ) ) {
+				if ( ! empty( $this->p->cf[ 'plugin' ][$ext]['img']['banners'] ) ) {
 
-					$banners = $this->p->cf['plugin'][$ext]['img']['banners'];
+					$banners = $this->p->cf[ 'plugin' ][$ext]['img']['banners'];
 
 					if ( ! empty( $banners['low'] ) || ! empty( $banners['high'] ) ) {	// Must have at least one banner.
 

@@ -33,10 +33,10 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 					$this->p->debug->log( 'quote seed = "' . $quote_text . '"' );
 				}
 			} else {
-				if ( has_excerpt( $mod['id'] ) ) {
-					$quote_text = get_the_excerpt( $mod['id'] );
+				if ( has_excerpt( $mod[ 'id' ] ) ) {
+					$quote_text = get_the_excerpt( $mod[ 'id' ] );
 				} else {
-					$quote_text = get_post_field( 'post_content', $mod['id'] );
+					$quote_text = get_post_field( 'post_content', $mod[ 'id' ] );
 				}
 			}
 
@@ -49,12 +49,12 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 		}
 
 		/**
-		 * $type = 'title' | 'excerpt' | 'both'
-		 * $mod = true | false | post_id | array
-		 * $md_idx = true | false | string | array
+		 * $type   = 'title' | 'excerpt' | 'both'
+		 * $mod    = true | false | post_id | array
+		 * $md_key = true | false | string | array
 		 */
 		public function get_caption( $type = 'title', $max_len = 200, $mod = true, $read_cache = true,
-			$add_hashtags = true, $do_encode = true, $md_idx = '' ) {
+			$add_hashtags = true, $do_encode = true, $md_key = '' ) {
 
 			if ( $this->p->debug->enabled ) {
 				$this->p->debug->log_args( array(
@@ -64,7 +64,7 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 					'read_cache'   => $read_cache,
 					'add_hashtags' => $add_hashtags,	// true/false/numeric
 					'do_encode'    => $do_encode,
-					'md_idx'       => $md_idx,
+					'md_key'       => $md_key,
 				) );
 			}
 
@@ -73,9 +73,11 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 			 * $mod = true | false | post_id | $mod array
 			 */
 			if ( ! is_array( $mod ) ) {
+
 				if ( $this->p->debug->enabled ) {
 					$this->p->debug->log( 'optional call to get_page_mod()' );
 				}
+
 				$mod = $this->p->util->get_page_mod( $mod );
 			}
 
@@ -83,80 +85,77 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 
 			$sep = html_entity_decode( $this->p->options['og_title_sep'], ENT_QUOTES, get_bloginfo( 'charset' ) );
 
-			if ( false === $md_idx ) {	// false would return the complete meta array
+			if ( false === $md_key ) {	// false would return the complete meta array
 
-				$md_idx       = '';
-				$md_idx_title = '';
-				$md_idx_desc  = '';
+				$md_key       = '';
+				$md_key_title = '';
+				$md_key_desc  = '';
 
-			} elseif ( true === $md_idx ) {	// true signals the use of the standard / fallback value
+			} elseif ( true === $md_key ) {	// true signals the use of the standard / fallback value
 
 				switch ( $type ) {
 
 					case 'title':
 
-						$md_idx       = 'og_title';
-						$md_idx_title = 'og_title';
-						$md_idx_desc  = 'og_desc';
+						$md_key       = 'og_title';
+						$md_key_title = 'og_title';
+						$md_key_desc  = 'og_desc';
 
 						break;
 
 					case 'excerpt':
 
-						$md_idx       = 'og_desc';
-						$md_idx_title = 'og_title';
-						$md_idx_desc  = 'og_desc';
+						$md_key       = 'og_desc';
+						$md_key_title = 'og_title';
+						$md_key_desc  = 'og_desc';
 
 						break;
 
 					case 'both':
 
-						$md_idx       = 'og_caption';
-						$md_idx_title = 'og_title';
-						$md_idx_desc  = 'og_desc';
+						$md_key       = 'og_caption';
+						$md_key_title = 'og_title';
+						$md_key_desc  = 'og_desc';
 
 						break;
 				}
 
-			} else {	// $md_idx could be a string or array
+			} else {	// $md_key could be a string or array
 
-				$md_idx_title = $md_idx;
-				$md_idx_desc  = $md_idx;
+				$md_key_title = $md_key;
+				$md_key_desc  = $md_key;
 			}
 
 			/**
-			 * Skip if no metadata index / key name.
+			 * Check for custom caption if a metadata index key is provided.
 			 */
-			if ( ! empty( $md_idx ) ) {
+			if ( ! empty( $md_key ) && $md_key !== 'none' ) {
 
-				$cap_text = $mod['obj'] ? $mod['obj']->get_options_multi( $mod['id'], $md_idx ) : null;
+				$cap_text = $mod[ 'obj' ] ? $mod[ 'obj' ]->get_options_multi( $mod[ 'id' ], $md_key ) : null;
 
-				/**
-				 * Maybe add hashtags to a post caption.
-				 */
-				if ( $mod['is_post'] ) {
+				list( $cap_text, $hashtags ) = $this->get_text_and_hashtags( $cap_text, $mod, false );
 
-					if ( ! empty( $cap_text ) && ! empty( $add_hashtags ) && ! preg_match( '/( #[a-z0-9\-]+)+$/U', $cap_text ) ) {
+				if ( $max_len > 0 ) {
 
-						$hashtags = $this->get_hashtags( $mod['id'], $add_hashtags );
+					$adj_max_len = empty( $hashtags ) ? $max_len : $max_len - strlen( $hashtags ) - 1;
 
-						if ( ! empty( $hashtags ) ) {
-							$adj_max_len = $max_len - strlen( $hashtags ) - 1;
-							$cap_text = $this->p->util->limit_text_length( $cap_text, $adj_max_len, '...', false ) . ' ' . $hashtags;
-						}
+					if ( $this->p->debug->enabled ) {
+						$this->p->debug->log( 'caption strlen before limit length ' . strlen( $cap_text ) . ' (limiting to ' . $adj_max_len . ' chars)' );
 					}
+
+					$cap_text = $this->p->util->limit_text_length( $cap_text, $adj_max_len, '...', false ) . ' ' . $hashtags;
 				}
 
 				if ( $this->p->debug->enabled ) {
 					if ( empty( $cap_text ) ) {
-						$this->p->debug->log( 'no custom caption found for md_idx' );
+						$this->p->debug->log( 'no custom caption found for md_key' );
 					} else {
 						$this->p->debug->log( 'custom caption = "' . $cap_text . '"' );
 					}
 				}
 
 			} elseif ( $this->p->debug->enabled ) {
-				$this->p->debug->log( 'custom caption skipped: no md_idx value' );
+				$this->p->debug->log( 'custom caption skipped: no md_key value' );
 			}
 
 			if ( empty( $cap_text ) ) {
@@ -168,13 +167,13 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 
 					case 'title':
 
-						$cap_text = $this->get_title( $max_len, '...', $mod, $read_cache, $add_hashtags, false, $md_idx_title );
+						$cap_text = $this->get_title( $max_len, '...', $mod, $read_cache, $add_hashtags, false, $md_key_title );
 
 						break;
 
 					case 'excerpt':
 
-						$cap_text = $this->get_description( $max_len, '...', $mod, $read_cache, $add_hashtags, false, $md_idx_desc );
+						$cap_text = $this->get_description( $max_len, '...', $mod, $read_cache, $add_hashtags, false, $md_key_desc );
 
 						break;
 
@@ -183,7 +182,7 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 						/**
 						 * Get the title first.
 						 */
-						$cap_text = $this->get_title( 0, '', $mod, $read_cache, false, false, $md_idx_title );	// $add_hashtags is false.
+						$cap_text = $this->get_title( 0, '', $mod, $read_cache, false, false, $md_key_title );
 
 						/**
 						 * Add a separator between title and description.
@@ -197,11 +196,11 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 						}
 
 						/**
-						 * Reduce the requested $max_len by the title text length we already have.
+						 * Reduce the requested $max_len by the caption length we already have.
 						 */
 						$adj_max_len = $max_len - strlen( $cap_text );
 
-						$cap_text .= $this->get_description( $adj_max_len, '...', $mod, $read_cache, $add_hashtags, false, $md_idx_desc );
+						$cap_text .= $this->get_description( $adj_max_len, '...', $mod, $read_cache, $add_hashtags, false, $md_key_desc );
 
 						break;
 				}
@@ -213,15 +212,15 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 				$cap_text = html_entity_decode( SucomUtil::decode_utf8( $cap_text ), ENT_QUOTES, get_bloginfo( 'charset' ) );
 			}
 
-			return apply_filters( $this->p->lca . '_caption', $cap_text, $mod, $add_hashtags, $md_idx );
+			return apply_filters( $this->p->lca . '_caption', $cap_text, $mod, $add_hashtags, $md_key );
 		}
 
 		/**
-		 * $mod = true | false | post_id | array
-		 * $md_idx = true | false | string | array
+		 * $mod    = true | false | post_id | array
+		 * $md_key = true | false | string | array
 		 */
 		public function get_title( $max_len = 70, $dots = '', $mod = false, $read_cache = true,
-			$add_hashtags = false, $do_encode = true, $md_idx = 'og_title', $sep = null ) {
+			$add_hashtags = false, $do_encode = true, $md_key = 'og_title', $sep = null ) {
 
 			if ( $this->p->debug->enabled ) {
 				$this->p->debug->log_args( array(
@@ -231,7 +230,7 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 					'read_cache'   => $read_cache,
 					'add_hashtags' => $add_hashtags,	// true/false/numeric
 					'do_encode'    => $do_encode,
-					'md_idx'       => $md_idx,
+					'md_key'       => $md_key,
 					'sep'          => $sep,
 				) );
 			}
@@ -247,19 +246,23 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 				$mod = $this->p->util->get_page_mod( $mod );
 			}
 
-			if ( false === $md_idx ) {		// false would return the complete meta array
-				$md_idx = '';
-			} elseif ( true === $md_idx ) {		// true signals use of the standard / fallback value
-				$md_idx = array( 'og_title' );
-			} elseif ( ! is_array( $md_idx ) ) {	// use fallback by default - get_options_multi() will do array_uniq()
-				$md_idx = array( $md_idx, 'og_title' );
+			if ( false === $md_key ) {		// False would return the complete meta array.
+
+				$md_key = '';
+
+			} elseif ( true === $md_key ) {		// True signals use of the standard / fallback value.
+
+				$md_key = array( 'og_title' );
+
+			} elseif ( ! is_array( $md_key ) ) {	// Use fallback by default - get_options_multi() will do array_uniq().
+
+				$md_key = array( $md_key, 'og_title' );
 			}
 
-			$title_text = false;
-			$hashtags = '';
+			$title_text   = false;
 			$paged_suffix = '';
 			$filter_title = empty( $this->p->options['plugin_filter_title'] ) ? false : true;
-			$filter_title = apply_filters( $this->p->lca . '_filter_title', $filter_title, $mod );
+			$filter_title = apply_filters( $this->p->lca . '_can_filter_title', $filter_title, $mod );
 
 			if ( null === $sep ) {
 				$sep = html_entity_decode( $this->p->options['og_title_sep'], ENT_QUOTES, get_bloginfo( 'charset' ) );
@@ -269,29 +272,31 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 			 * Setup filters to save and restore original / pre-filtered title value.
 			 */
 			if ( ! $filter_title ) {
+
 				if ( $this->p->debug->enabled ) {
 					$this->p->debug->log( 'protecting filter value for wp_title' );
 				}
+
 				SucomUtil::protect_filter_value( 'wp_title' );
 			}
 
 			/**
-			 * Skip if no metadata index / key name.
+			 * Check for custom title if a metadata index key is provided.
 			 */
-			if ( ! empty( $md_idx ) ) {
+			if ( ! empty( $md_key ) && $md_key !== 'none' ) {
 
-				$title_text = is_object( $mod['obj'] ) ? $mod['obj']->get_options_multi( $mod['id'], $md_idx ) : null;
+				$title_text = is_object( $mod[ 'obj' ] ) ? $mod[ 'obj' ]->get_options_multi( $mod[ 'id' ], $md_key ) : null;
 
 				if ( $this->p->debug->enabled ) {
 					if ( empty( $title_text ) ) {
-						$this->p->debug->log( 'no custom title found for md_idx' );
+						$this->p->debug->log( 'no custom title found for md_key' );
 					} else {
 						$this->p->debug->log( 'custom title = "' . $title_text . '"' );
 					}
 				}
 
 			} elseif ( $this->p->debug->enabled ) {
-				$this->p->debug->log( 'custom title skipped: no md_idx value' );
+				$this->p->debug->log( 'custom title skipped: no md_key value' );
 			}
 
 			/**
@@ -299,7 +304,7 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 			 */
 			if ( empty( $title_text ) ) {
 
-				$title_text = apply_filters( $this->p->lca . '_title_seed', '', $mod, $add_hashtags, $md_idx, $sep );
+				$title_text = apply_filters( $this->p->lca . '_title_seed', '', $mod, $add_hashtags, $md_key, $sep );
 
 				if ( ! empty( $title_text ) ) {
 					if ( $this->p->debug->enabled ) {
@@ -311,36 +316,22 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 			/**
 			 * Check for hashtags in meta or seed title, remove and then add again after shorten.
 			 */
-			if ( preg_match( '/(.*)(( #[a-z0-9\-]+)+)$/U', $title_text, $match ) ) {
-
-				$title_text = $match[1];
-				$hashtags = trim( $match[2] );
-
-			} elseif ( $mod['is_post'] ) {
-
-				if ( ! empty( $add_hashtags ) && ! empty( $this->p->options['og_desc_hashtags'] ) ) {
-					$hashtags = $this->get_hashtags( $mod['id'], $add_hashtags );	// $add_hashtags = true | false | numeric
-				}
-			}
-
-			if ( $hashtags && $this->p->debug->enabled ) {
-				$this->p->debug->log( 'hashtags found = "' . $hashtags . '"' );
-			}
+			list( $title_text, $hashtags ) = $this->get_text_and_hashtags( $title_text, $mod, $add_hashtags );
 
 			/**
 			 * Construct a title of our own.
 			 */
 			if ( empty( $title_text ) ) {
 
-				if ( $mod['is_post'] ) {
+				if ( $mod[ 'is_post' ] ) {
 
-					if ( empty( $mod['id'] ) && ! empty( $mod['post_type'] ) && is_post_type_archive() ) {
+					if ( empty( $mod[ 'id' ] ) && ! empty( $mod[ 'post_type' ] ) && is_post_type_archive() ) {
 
 						if ( $this->p->debug->enabled ) {
-							$this->p->debug->log( 'getting the title for post type ' . $mod['post_type'] );
+							$this->p->debug->log( 'getting the title for post type ' . $mod[ 'post_type' ] );
 						}
 
-						$post_type_obj = get_post_type_object( $mod['post_type'] );
+						$post_type_obj = get_post_type_object( $mod[ 'post_type' ] );
 
 						if ( ! empty( $post_type_obj->labels->menu_name ) ) {
 							$title_text = sprintf( __( '%s Archive', 'wpsso' ), $post_type_obj->labels->menu_name );
@@ -356,10 +347,10 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 
 					} else {
 
-						$title_text = html_entity_decode( get_the_title( $mod['id'] ) ) . ' ';
+						$title_text = html_entity_decode( get_the_title( $mod[ 'id' ] ) ) . ' ';
 
 						if ( $this->p->debug->enabled ) {
-							$this->p->debug->log( $mod['name'] . ' id ' . $mod['id'] . ' get_the_title() = "' . $title_text . '"' );
+							$this->p->debug->log( $mod[ 'name' ] . ' id ' . $mod[ 'id' ] . ' get_the_title() = "' . $title_text . '"' );
 						}
 					}
 
@@ -374,11 +365,11 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 
 					$title_text = $this->p->util->safe_apply_filters( array( 'wp_title', $title_text, $sep, 'right' ), $mod );
 
-				} elseif ( $mod['is_term'] ) {
+				} elseif ( $mod[ 'is_term' ] ) {
 
-					$term_obj = SucomUtil::get_term_object( $mod['id'], $mod['tax_slug'] );
+					$term_obj = SucomUtil::get_term_object( $mod[ 'id' ], $mod[ 'tax_slug' ] );
 
-					if ( SucomUtil::is_category_page( $mod['id'] ) ) {
+					if ( SucomUtil::is_category_page( $mod[ 'id' ] ) ) {
 
 						/**
 						 * Includes parent names in title string if the $sep is not empty.
@@ -393,9 +384,9 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 						$this->p->debug->log( 'name property missing in term object' );
 					}
 
-				} elseif ( $mod['is_user'] ) {
+				} elseif ( $mod[ 'is_user' ] ) {
 
-					$user_obj = SucomUtil::get_user_object( $mod['id'] );
+					$user_obj = SucomUtil::get_user_object( $mod[ 'id' ] );
 
 					$title_text = apply_filters( 'wp_title', $user_obj->display_name . ' ' . $sep . ' ', $sep, 'right' );
 
@@ -429,14 +420,20 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 				}
 			}
 
-			$title_text = $this->p->util->cleanup_html_tags( $title_text );	// strip html tags before removing separator
+			/**
+			 * Strip html tags before removing separator.
+			 */
+			$title_text = $this->p->util->cleanup_html_tags( $title_text );
 
+			/**
+			 * Trim excess separator.
+			 */
 			if ( ! empty( $sep ) ) {
-				$title_text = preg_replace( '/ *' . preg_quote( $sep, '/' ) . ' *$/', '', $title_text );	// trim excess separator
+				$title_text = preg_replace( '/ *' . preg_quote( $sep, '/' ) . ' *$/', '', $title_text );
 			}
 
 			/**
-			 * Apply title filter before adjusting it's length.
+			 * Apply a title filter before adjusting it's length.
 			 */
 			$title_text = apply_filters( $this->p->lca . '_title_pre_limit', $title_text );
 
@@ -445,27 +442,38 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 			 */
 			if ( $max_len > 0 ) {
 
-				if ( $this->p->avail['seo']['*'] === false ) {	// apply seo-like title modifications
+				/**
+				 * Apply seo-like title modifications.
+				 */
+				if ( $this->p->avail['seo'][ 'any' ] === false ) {
+
 					global $wpsso_paged;
+
 					if ( is_numeric( $wpsso_paged ) ) {
 						$paged = $wpsso_paged;
 					} else {
 						$paged = get_query_var( 'paged' );
 					}
+
 					if ( $paged > 1 ) {
+
 						if ( ! empty( $sep ) ) {
 							$paged_suffix .= $sep . ' ';
 						}
+
 						$paged_suffix .= sprintf( 'Page %s', $paged );
+
 						$max_len = $max_len - strlen( $paged_suffix ) - 1;
 					}
 				}
 
-				if ( ! empty( $add_hashtags ) && ! empty( $hashtags ) ) {
-					$max_len = $max_len - strlen( $hashtags ) - 1;
+				$adj_max_len = empty( $hashtags ) ? $max_len : $max_len - strlen( $hashtags ) - 1;
+
+				if ( $this->p->debug->enabled ) {
+					$this->p->debug->log( 'title strlen before limit length ' . strlen( $title_text ) . ' (limiting to ' . $adj_max_len . ' chars)' );
 				}
 
-				$title_text = $this->p->util->limit_text_length( $title_text, $max_len, $dots, false );	// $cleanup_html = false
+				$title_text = $this->p->util->limit_text_length( $title_text, $adj_max_len, $dots, $cleanup_html = false );
 			}
 
 			if ( ! empty( $paged_suffix ) ) {
@@ -477,7 +485,7 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 			}
 
 			if ( true === $do_encode ) {
-				foreach ( array( 'title_text', 'sep' ) as $var ) {	// loop through variables
+				foreach ( array( 'title_text', 'sep' ) as $var ) {	// Loop through variables.
 					$$var = SucomUtil::encode_html_emoji( $$var );
 				}
 			}
@@ -486,18 +494,19 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 				$this->p->debug->log( 'before title filter = "' . $title_text . '"' );
 			}
 
-			return apply_filters( $this->p->lca . '_title', $title_text, $mod, $add_hashtags, $md_idx, $sep );
+			return apply_filters( $this->p->lca . '_title', $title_text, $mod, $add_hashtags, $md_key, $sep );
 		}
 
 		/**
-		 * $mod = true | false | post_id | array
-		 * $md_idx = true | false | string | array
+		 * $mod    = true | false | post_id | array
+		 * $md_key = true | false | string | array
 		 */
 		public function get_description( $max_len = 160, $dots = '...', $mod = false, $read_cache = true,
-			$add_hashtags = true, $do_encode = true, $md_idx = 'og_desc' ) {
+			$add_hashtags = true, $do_encode = true, $md_key = 'og_desc' ) {
 
 			if ( $this->p->debug->enabled ) {
-				$this->p->debug->mark( 'render description' );	// begin timer
+
+				$this->p->debug->mark( 'render description' );	// Begin timer.
 
 				$this->p->debug->log_args( array(
 					'max_len'      => $max_len,
@@ -506,7 +515,7 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 					'read_cache'   => $read_cache,
 					'add_hashtags' => $add_hashtags, 	// true | false | numeric
 					'do_encode'    => $do_encode,
-					'md_idx'       => $md_idx,
+					'md_key'       => $md_key,
 				) );
 			}
 
@@ -515,40 +524,46 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 			 * $mod = true | false | post_id | $mod array
 			 */
 			if ( ! is_array( $mod ) ) {
+
 				if ( $this->p->debug->enabled ) {
 					$this->p->debug->log( 'optional call to get_page_mod()' );
 				}
+
 				$mod = $this->p->util->get_page_mod( $mod );
 			}
 
-			if ( false === $md_idx ) {		// false would return the complete meta array
-				$md_idx = '';
-			} elseif ( true === $md_idx ) {		// true signals use of the standard / fallback value
-				$md_idx = array( 'og_desc' );
-			} elseif ( ! is_array( $md_idx ) ) {	// use fallback by default - get_options_multi() will do array_uniq()
-				$md_idx = array( $md_idx, 'og_desc' );
+			if ( false === $md_key ) {		// False would return the complete meta array.
+
+				$md_key = '';
+
+			} elseif ( true === $md_key ) {		// True signals use of the standard / fallback value.
+
+				$md_key = array( 'og_desc' );
+
+			} elseif ( ! is_array( $md_key ) ) {	// Use fallback by default - get_options_multi() will do array_uniq().
+
+				$md_key = array( $md_key, 'og_desc' );
 			}
 
 			$desc_text = false;
-			$hashtags  = '';
 
 			/**
-			 * Skip if no metadata index / key name.
+			 * Check for custom description if a metadata index key is provided.
 			 */
-			if ( ! empty( $md_idx ) ) {
+			if ( ! empty( $md_key ) && $md_key !== 'none' ) {
 
-				$desc_text = is_object( $mod['obj'] ) ? $mod['obj']->get_options_multi( $mod['id'], $md_idx ) : null;
+				$desc_text = is_object( $mod[ 'obj' ] ) ? $mod[ 'obj' ]->get_options_multi( $mod[ 'id' ], $md_key ) : null;
 
 				if ( $this->p->debug->enabled ) {
 					if ( empty( $desc_text ) ) {
-						$this->p->debug->log( 'no custom description found for md_idx' );
+						$this->p->debug->log( 'no custom description found for md_key' );
 					} else {
 						$this->p->debug->log( 'custom description = "' . $desc_text . '"' );
 					}
 				}
 
 			} elseif ( $this->p->debug->enabled ) {
-				$this->p->debug->log( 'custom description skipped: no md_idx value' );
+				$this->p->debug->log( 'custom description skipped: no md_key value' );
 			}
 
 			/**
@@ -556,7 +571,7 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 			 */
 			if ( empty( $desc_text ) ) {
 
-				$desc_text = apply_filters( $this->p->lca . '_description_seed', '', $mod, $add_hashtags, $md_idx );
+				$desc_text = apply_filters( $this->p->lca . '_description_seed', '', $mod, $add_hashtags, $md_key );
 
 				if ( ! empty( $desc_text ) ) {
 					if ( $this->p->debug->enabled ) {
@@ -568,37 +583,22 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 			/**
 			 * Check for hashtags in meta or seed desc, remove and then add again after shorten.
 			 */
-			if ( preg_match( '/^(.*)(( *#[a-z][a-z0-9\-]+)+)$/U', $desc_text, $match ) ) {
-
-				$desc_text = $match[1];
-				$hashtags  = trim( $match[2] );
-
-			} elseif ( $mod['is_post'] ) {
-
-				if ( ! empty( $add_hashtags ) && ! empty( $this->p->options['og_desc_hashtags'] ) ) {
-
-					$hashtags = $this->get_hashtags( $mod['id'], $add_hashtags );
-				}
-			}
-
-			if ( $hashtags && $this->p->debug->enabled ) {
-				$this->p->debug->log( 'hashtags found = "' . $hashtags . '"' );
-			}
+			list( $desc_text, $hashtags ) = $this->get_text_and_hashtags( $desc_text, $mod, $add_hashtags );
 
 			/**
 			 * If there's no custom description, and no pre-seed, then go ahead and generate the description value.
 			 */
 			if ( empty( $desc_text ) ) {
 
-				if ( $mod['is_post'] ) {
+				if ( $mod[ 'is_post' ] ) {
 
-					if ( empty( $mod['id'] ) && ! empty( $mod['post_type'] ) && is_post_type_archive() ) {
+					if ( empty( $mod[ 'id' ] ) && ! empty( $mod[ 'post_type' ] ) && is_post_type_archive() ) {
 
 						if ( $this->p->debug->enabled ) {
-							$this->p->debug->log( 'getting the description for post type ' . $mod['post_type'] );
+							$this->p->debug->log( 'getting the description for post type ' . $mod[ 'post_type' ] );
 						}
 
-						$post_type_obj = get_post_type_object( $mod['post_type'] );
+						$post_type_obj = get_post_type_object( $mod[ 'post_type' ] );
 
 						if ( ! empty( $post_type_obj->description ) ) {
 
@@ -607,7 +607,7 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 						} else {
 
 							if ( $this->p->debug->enabled ) {
-								$this->p->debug->log( 'post type ' . $mod['post_type'] . ' description is empty - using title value' );
+								$this->p->debug->log( 'post type ' . $mod[ 'post_type' ] . ' description is empty - using title value' );
 							}
 
 							if ( ! empty( $post_type_obj->labels->menu_name ) ) {
@@ -633,10 +633,10 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 						if ( empty( $desc_text ) ) {
 	
 							if ( $this->p->debug->enabled ) {
-								$this->p->debug->log( 'getting the content for post ID ' . $mod['id'] );
+								$this->p->debug->log( 'getting the content for post ID ' . $mod[ 'id' ] );
 							}
 	
-							$desc_text = $this->get_the_content( $mod, $read_cache, $md_idx );
+							$desc_text = $this->get_the_content( $mod, $read_cache, $md_key );
 	
 							/**
 							 * Ignore everything before the first paragraph if true.
@@ -655,34 +655,34 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 						 * Fallback to the image alt value.
 						 */
 						if ( empty( $desc_text ) ) {
-							if ( $mod['post_type'] === 'attachment' && strpos( $mod['post_mime'], 'image/' ) === 0 ) {
-								$desc_text = get_post_meta( $mod['id'], '_wp_attachment_image_alt', true );
+							if ( $mod[ 'post_type' ] === 'attachment' && strpos( $mod['post_mime'], 'image/' ) === 0 ) {
+								$desc_text = get_post_meta( $mod[ 'id' ], '_wp_attachment_image_alt', true );
 							}
 						}
 					}
 
-				} elseif ( $mod['is_term'] ) {
+				} elseif ( $mod[ 'is_term' ] ) {
 
-					if ( SucomUtil::is_tag_page( $mod['id'] ) ) {
+					if ( SucomUtil::is_tag_page( $mod[ 'id' ] ) ) {
 
-						if ( ! $desc_text = tag_description( $mod['id'] ) ) {
+						if ( ! $desc_text = tag_description( $mod[ 'id' ] ) ) {
 
-							$term_obj = get_tag( $mod['id'] );
+							$term_obj = get_tag( $mod[ 'id' ] );
 
 							if ( ! empty( $term_obj->name ) ) {
 								$desc_text = sprintf( __( 'Tagged with %s', 'wpsso' ), $term_obj->name );
 							}
 						}
 
-					} elseif ( SucomUtil::is_category_page( $mod['id'] ) ) {
+					} elseif ( SucomUtil::is_category_page( $mod[ 'id' ] ) ) {
 
-						if ( ! $desc_text = category_description( $mod['id'] ) ) {
-							$desc_text = sprintf( __( '%s Category', 'wpsso' ), get_cat_name( $mod['id'] ) );
+						if ( ! $desc_text = category_description( $mod[ 'id' ] ) ) {
+							$desc_text = sprintf( __( '%s Category', 'wpsso' ), get_cat_name( $mod[ 'id' ] ) );
 						}
 
 					} else { 	// other taxonomies
 
-						$term_obj = SucomUtil::get_term_object( $mod['id'], $mod['tax_slug'] );
+						$term_obj = SucomUtil::get_term_object( $mod[ 'id' ], $mod[ 'tax_slug' ] );
 
 						if ( ! empty( $term_obj->description ) ) {
 							$desc_text = $term_obj->description;
@@ -691,9 +691,9 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 						}
 					}
 
-				} elseif ( $mod['is_user'] ) {
+				} elseif ( $mod[ 'is_user' ] ) {
 
-					$user_obj = SucomUtil::get_user_object( $mod['id'] );
+					$user_obj = SucomUtil::get_user_object( $mod[ 'id' ] );
 
 					if ( ! empty( $user_obj->description ) ) {
 						$desc_text = $user_obj->description;
@@ -742,11 +742,11 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 					$this->p->debug->log( 'description is empty - falling back to generic description' );
 				}
 
-				if ( $mod['post_status'] === 'auto-draft' ) {
+				if ( $mod[ 'post_status' ] === 'auto-draft' ) {
 					if ( $this->p->debug->enabled ) {
 						$this->p->debug->log( 'post_status is auto-draft: using empty description' );
 					}
-				} elseif ( $mod['post_type'] === 'attachment' ) {
+				} elseif ( $mod[ 'post_type' ] === 'attachment' ) {
 					if ( $this->p->debug->enabled ) {
 						$this->p->debug->log( 'post_type is attachment: using empty description' );
 					}
@@ -759,41 +759,103 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 				}
 			}
 
+			/**
+			 * Apply a description filter before adjusting it's length.
+			 */
+			$desc_text = apply_filters( $this->p->lca . '_description_pre_limit', $desc_text );
+
+			/**
+			 * Check description against string length limits.
+			 */
 			if ( $max_len > 0 ) {
 
-				$desc_text = apply_filters( $this->p->lca . '_description_pre_limit', $desc_text );
-
-				if ( ! empty( $add_hashtags ) && ! empty( $hashtags ) ) {
-					$max_len = $max_len - strlen( $hashtags ) - 1;
-				}
+				$adj_max_len = empty( $hashtags ) ? $max_len : $max_len - strlen( $hashtags ) - 1;
 
 				if ( $this->p->debug->enabled ) {
-					$this->p->debug->log( 'description strlen before limit length ' . strlen( $desc_text ) . ' (limiting to ' . $max_len . ' chars)' );
+					$this->p->debug->log( 'description strlen before limit length ' . strlen( $desc_text ) . ' (limiting to ' . $adj_max_len . ' chars)' );
 				}
 
-				$desc_text = $this->p->util->limit_text_length( $desc_text, $max_len, $dots, false );	// $cleanup_html = false
+				$desc_text = $this->p->util->limit_text_length( $desc_text, $adj_max_len, $dots, $cleanup_html = false );
 
 			} elseif ( $this->p->debug->enabled ) {
-				$this->p->debug->log( 'skipped the description text length limit' );
+				$this->p->debug->log( 'skipped the description length limit' );
 			}
 
 			if ( ! empty( $add_hashtags ) && ! empty( $hashtags ) ) {
 				$desc_text .= ' ' . $hashtags;
 			}
 
-			if ( true === $do_encode ) {
+			if ( $do_encode ) {
 				$desc_text = SucomUtil::encode_html_emoji( $desc_text );
-			}
-
-			if ( $this->p->debug->enabled ) {
-				$this->p->debug->mark( 'render description' );	// end timer
 			}
 
 			if ( $this->p->debug->enabled ) {
 				$this->p->debug->log( 'before description filter = "' . $desc_text . '"' );
 			}
 
-			return apply_filters( $this->p->lca . '_description', $desc_text, $mod, $add_hashtags, $md_idx );
+			$desc_text = apply_filters( $this->p->lca . '_description', $desc_text, $mod, $add_hashtags, $md_key );
+
+			if ( $this->p->debug->enabled ) {
+				$this->p->debug->mark( 'render description' );	// End timer.
+			}
+
+			return $desc_text;
+		}
+
+		public function get_text( $max_len = 0, $dots = '...', $mod = false, $read_cache = true,
+			$add_hashtags = false, $do_encode = true, $md_key = 'schema_text' ) {
+
+			if ( $this->p->debug->enabled ) {
+				$this->p->debug->mark();
+			}
+
+			/**
+			 * The $mod array argument is preferred but not required.
+			 * $mod = true | false | post_id | $mod array
+			 */
+			if ( ! is_array( $mod ) ) {
+
+				if ( $this->p->debug->enabled ) {
+					$this->p->debug->log( 'optional call to get_page_mod()' );
+				}
+
+				$mod = $this->p->util->get_page_mod( $mod );
+			}
+
+			$text = $this->get_the_text( $mod, $read_cache, $md_key );
+
+			/**
+			 * Check for hashtags in meta or seed text, remove and then add again after shorten.
+			 */
+			list( $text, $hashtags ) = $this->get_text_and_hashtags( $text, $mod, $add_hashtags );
+
+			if ( $max_len > 0 ) {
+
+				$adj_max_len = empty( $hashtags ) ? $max_len : $max_len - strlen( $hashtags ) - 1;
+
+				if ( $this->p->debug->enabled ) {
+					$this->p->debug->log( 'text strlen before limit length ' . strlen( $text ) . ' (limiting to ' . $adj_max_len . ' chars)' );
+				}
+
+				$text = $this->p->util->limit_text_length( $text, $adj_max_len, $dots, $cleanup_html = false );
+
+			} elseif ( $this->p->debug->enabled ) {
+				$this->p->debug->log( 'skipped the text length limit' );
+			}
+
+			if ( ! empty( $add_hashtags ) && ! empty( $hashtags ) ) {
+				$text .= ' ' . $hashtags;
+			}
+
+			if ( $do_encode ) {
+				$text = SucomUtil::encode_html_emoji( $text );
+			}
+
+			if ( $this->p->debug->enabled ) {
+				$this->p->debug->log( 'before text filter = "' . $text . '"' );
+			}
+
+			return apply_filters( $this->p->lca . '_text', $text, $mod, $add_hashtags, $md_key );
 		}
 
 		public function get_the_excerpt( array $mod ) {
@@ -803,19 +865,19 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 			/**
 			 * Use the excerpt, if we have one.
 			 */
-			if ( $mod['is_post'] && has_excerpt( $mod['id'] ) ) {
+			if ( $mod[ 'is_post' ] && has_excerpt( $mod[ 'id' ] ) ) {
 
 				if ( $this->p->debug->enabled ) {
-					$this->p->debug->log( 'getting the excerpt for post id ' . $mod['id'] );
+					$this->p->debug->log( 'getting the excerpt for post id ' . $mod[ 'id' ] );
 				}
 
-				$excerpt_text = get_post_field( 'post_excerpt', $mod['id'] );
+				$excerpt_text = get_post_field( 'post_excerpt', $mod[ 'id' ] );
 
 				static $filter_excerpt = null;
 
 				if ( null === $filter_excerpt ) {
 					$filter_excerpt = empty( $this->p->options['plugin_filter_excerpt'] ) ? false : true;
-					$filter_excerpt = apply_filters( $this->p->lca . '_filter_excerpt', $filter_excerpt, $mod );
+					$filter_excerpt = apply_filters( $this->p->lca . '_can_filter_the_excerpt', $filter_excerpt, $mod );
 				}
 
 				if ( $filter_excerpt ) {
@@ -828,19 +890,19 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 			return $excerpt_text;
 		}
 
-		public function get_the_content( array $mod, $read_cache = true, $md_idx = '' ) {
+		public function get_the_content( array $mod, $read_cache = true, $md_key = '' ) {
 
 			if ( $this->p->debug->enabled ) {
 				$this->p->debug->log_args( array(
 					'mod'        => $mod,
 					'read_cache' => $read_cache,
-					'md_idx'     => $md_idx,
+					'md_key'     => $md_key,
 				) );
 			}
 
 			$sharing_url    = $this->p->util->get_sharing_url( $mod );
 			$filter_content = empty( $this->p->options['plugin_filter_content'] ) ? false : true;
-			$filter_content = apply_filters( $this->p->lca . '_filter_content', $filter_content, $mod );
+			$filter_content = apply_filters( $this->p->lca . '_can_filter_the_content', $filter_content, $mod );
 
 			static $cache_exp_secs = null;	// filter the cache expiration value only once
 
@@ -877,11 +939,11 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 
 					$cache_array = wp_cache_get( $cache_id, __METHOD__ );
 
-					if ( isset( $cache_array[$cache_index] ) ) {
+					if ( isset( $cache_array[ $cache_index ] ) ) {
 						if ( $this->p->debug->enabled ) {
 							$this->p->debug->log( 'exiting early: cache index found in wp_cache' );
 						}
-						return $cache_array[$cache_index];
+						return $cache_array[ $cache_index ];
 					} else {
 						if ( $this->p->debug->enabled ) {
 							$this->p->debug->log( 'cache index not in wp_cache' );
@@ -901,31 +963,33 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 				$this->p->debug->log( 'initializing new wp cache element' );
 			}
 
-			$cache_array[$cache_index] = false;		// Initialize the cache element.
+			$cache_array[ $cache_index ] = false;	// Initialize the cache element.
 
-			$content_text =& $cache_array[$cache_index];	// Reference the cache element.
-			$content_text = apply_filters( $this->p->lca . '_content_seed', '', $mod, $read_cache, $md_idx );
+			$content =& $cache_array[ $cache_index ];	// Reference the cache element.
+			$content = apply_filters( $this->p->lca . '_the_content_seed', '', $mod, $read_cache, $md_key );
 
-			if ( $content_text === false ) {
+			if ( $content === false ) {
 
 				if ( $this->p->debug->enabled ) {
 					$this->p->debug->log( 'content seed is false' );
 				}
 
-			} elseif ( ! empty( $content_text ) ) {
+			} elseif ( ! empty( $content ) ) {
 
 				if ( $this->p->debug->enabled ) {
-					$this->p->debug->log( 'content seed is "' . $content_text . '"' );
+					$this->p->debug->log( 'content seed is "' . $content . '"' );
 				}
 
-			} elseif ( $mod['is_post'] ) {
+			} elseif ( $mod[ 'is_post' ] ) {
 
-				$content_text = get_post_field( 'post_content', $mod['id'] );
+				$content = get_post_field( 'post_content', $mod[ 'id' ] );
 
-				if ( empty( $content_text ) ) {
+				if ( empty( $content ) ) {
+
 					if ( $this->p->debug->enabled ) {
-						$this->p->debug->log( 'exiting early: no post_content for post id ' . $mod['id'] );
+						$this->p->debug->log( 'exiting early: no post_content for post id ' . $mod[ 'id' ] );
 					}
+
 					return false;
 				}
 			}
@@ -933,12 +997,12 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 			/**
 			 * Save content length (for comparison) before making changes.
 			 */
-			$strlen_before_filters = strlen( $content_text );
+			$strlen_before_filters = strlen( $content );
 
 			/**
 			 * Remove singlepics, which we detect and use before-hand.
 			 */
-			$content_text = preg_replace( '/\[singlepic[^\]]+\]/', '', $content_text, -1, $count );
+			$content = preg_replace( '/\[singlepic[^\]]+\]/', '', $content, -1, $count );
 
 			if ( $count > 0 ) {
 				if ( $this->p->debug->enabled ) {
@@ -951,7 +1015,7 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 				$hook_bfo  = SucomUtil::get_const( 'WPSSO_CONTENT_BLOCK_FILTER_OUTPUT', true );
 				$mtime_max = SucomUtil::get_const( 'WPSSO_CONTENT_FILTERS_MAX_TIME', 1.50 );
 
-				$content_text = $this->p->util->safe_apply_filters( array( 'the_content', $content_text ), $mod, $mtime_max, $hook_bfo );
+				$content = $this->p->util->safe_apply_filters( array( 'the_content', $content ), $mod, $mtime_max, $hook_bfo );
 
 				/**
 				 * Cleanup for NextGEN Gallery pre-v2 album shortcode.
@@ -963,32 +1027,32 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 				$this->p->debug->log( 'the_content filters skipped (shortcodes not expanded)' );
 			}
 
-			$content_text = preg_replace( '/[\s\n\r]+/s', ' ', $content_text );		// put everything on one line
-			$content_text = preg_replace( '/^.*<!--' . $this->p->lca . '-content-->(.*)<!--\/' . 
-				$this->p->lca . '-content-->.*$/', '$1', $content_text );
+			$content = preg_replace( '/[\s\n\r]+/s', ' ', $content );		// put everything on one line
+			$content = preg_replace( '/^.*<!--' . $this->p->lca . '-content-->(.*)<!--\/' . 
+				$this->p->lca . '-content-->.*$/', '$1', $content );
 
 			/**
 			 * Remove "Google+" link and text.
 			 */
-			if ( strpos( $content_text, '>Google+<' ) !== false ) {
-				$content_text = preg_replace( '/<a +rel="author" +href="" +style="display:none;">Google\+<\/a>/', ' ', $content_text );
+			if ( false !== strpos( $content, '>Google+<' ) ) {
+				$content = preg_replace( '/<a +rel="author" +href="" +style="display:none;">Google\+<\/a>/', ' ', $content );
 			}
 
-			if ( strpos( $content_text, '<p class="wp-caption-text">' ) !== false ) {
+			if ( false !== strpos( $content, '<p class="wp-caption-text">' ) ) {
 
 				$caption_prefix = isset( $this->p->options['plugin_p_cap_prefix'] ) ?
 					$this->p->options['plugin_p_cap_prefix'] : 'Caption:';
 
 				if ( ! empty( $caption_prefix ) ) {
-					$content_text = preg_replace( '/<p class="wp-caption-text">/', '${0}' . $caption_prefix . ' ', $content_text );
+					$content = preg_replace( '/<p class="wp-caption-text">/', '${0}' . $caption_prefix . ' ', $content );
 				}
 			}
 
-			if ( strpos( $content_text, ']]>' ) !== false ) {
-				$content_text = str_replace( ']]>', ']]&gt;', $content_text );
+			if ( false !== strpos( $content, ']]>' ) ) {
+				$content = str_replace( ']]>', ']]&gt;', $content );
 			}
 
-			$strlen_after_filters = strlen( $content_text );
+			$strlen_after_filters = strlen( $content );
 
 			if ( $this->p->debug->enabled ) {
 				$this->p->debug->log( 'content strlen before ' . $strlen_before_filters . ' and after changes / filters ' . $strlen_after_filters );
@@ -997,7 +1061,7 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 			/**
 			 * Apply filters before caching.
 			 */
-			$content_text = apply_filters( $this->p->lca . '_content', $content_text, $mod, $read_cache, $md_idx );
+			$content = apply_filters( $this->p->lca . '_the_content', $content, $mod, $read_cache, $md_key );
 
 			if ( $cache_exp_secs > 0 ) {
 
@@ -1010,7 +1074,47 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 				}
 			}
 
-			return $content_text;
+			return $content;
+		}
+
+		/**
+		 * Returns the content text, stripped of all HTML tags.
+		 */
+		public function get_the_text( array $mod, $read_cache = true, $md_key = '' ) {
+
+			if ( $this->p->debug->enabled ) {
+				$this->p->debug->mark();
+			}
+
+			/**
+			 * Check for custom text if a metadata index key is provided.
+			 */
+			if ( ! empty( $md_key ) && $md_key !== 'none' ) {
+
+				$text = is_object( $mod[ 'obj' ] ) ? $mod[ 'obj' ]->get_options_multi( $mod[ 'id' ], $md_key ) : null;
+
+				if ( $this->p->debug->enabled ) {
+					if ( empty( $text ) ) {
+						$this->p->debug->log( 'no custom text found for md_key' );
+					} else {
+						$this->p->debug->log( 'custom text = "' . $text . '"' );
+					}
+				}
+
+			} elseif ( $this->p->debug->enabled ) {
+				$this->p->debug->log( 'custom text skipped: no md_key value' );
+			}
+
+			/**
+			 * If there's no custom text, then go ahead and generate the text value.
+			 */
+			if ( empty( $text ) ) {
+				$text = $this->get_the_content( $mod, $read_cache, $md_key );
+				$text = preg_replace( '/<pre[^>]*>.*<\/pre>/Ums', '', $text );
+				$text = $this->p->util->cleanup_html_tags( $text, true, $this->p->options[ 'plugin_use_img_alt' ] );
+			}
+
+			return $text;
 		}
 
 		public function get_article_section( $post_id, $allow_none = false, $use_mod_opts = true ) {
@@ -1022,7 +1126,7 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 			 */
 			if ( $use_mod_opts ) {
 				if ( ! empty( $post_id ) ) {
-					$section = $this->p->m['util']['post']->get_options( $post_id, 'og_art_section' );	// Returns null if index key not found.
+					$section = $this->p->m[ 'util' ][ 'post' ]->get_options( $post_id, 'og_art_section' );	// Returns null if index key not found.
 				}
 			}
 
@@ -1043,41 +1147,160 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 			return apply_filters( $this->p->lca . '_article_section', $section, $post_id );
 		}
 
-		public function get_hashtags( $post_id, $add_hashtags = true ) {
+		/**
+		 * Returns a comma delimited text string of keywords (ie. post tag names).
+		 */
+		public function get_keywords( array $mod, $read_cache = true, $md_key = '' ) {
 
-			if ( empty( $add_hashtags ) ) {	// check for false or 0
-				return;
-			} elseif ( is_numeric( $add_hashtags ) ) {
-				$max_hashtags = $add_hashtags;
-			} elseif ( ! empty( $this->p->options['og_desc_hashtags'] ) ) {
-				$max_hashtags = $this->p->options['og_desc_hashtags'];
-			} else {
-				return;
+			if ( $this->p->debug->enabled ) {
+				$this->p->debug->mark();
 			}
 
-			$hashtags = apply_filters( $this->p->lca . '_hashtags_seed', '', $post_id, $add_hashtags );
+			$keywords = '';
 
-			if ( ! empty( $hashtags ) ) {
+			/**
+			 * Check for custom keywords if a metadata index key is provided.
+			 */
+			if ( ! empty( $md_key ) && $md_key !== 'none' ) {
+
+				$keywords = is_object( $mod[ 'obj' ] ) ? $mod[ 'obj' ]->get_options_multi( $mod[ 'id' ], $md_key ) : null;
+
+				if ( $this->p->debug->enabled ) {
+					if ( empty( $keywords ) ) {
+						$this->p->debug->log( 'no custom keywords found for md_key' );
+					} else {
+						$this->p->debug->log( 'custom keywords = "' . $keywords . '"' );
+					}
+				}
+
+			} elseif ( $this->p->debug->enabled ) {
+				$this->p->debug->log( 'custom keywords skipped: no md_key value' );
+			}
+
+			/**
+			 * If there's no custom keywords, then go ahead and generate the keywords value.
+			 */
+			if ( empty( $keywords ) ) {
+
+				$tags = $this->get_tag_names( $mod );
+
+				if ( ! empty( $tags ) ) {
+
+					$keywords = SucomUtil::array_to_keywords( $tags );	// Returns a comma delimited text string.
+
+					if ( $this->p->debug->enabled ) {
+						$this->p->debug->log( 'keywords = "' . $keywords . '"' );
+					}
+				}
+			}
+
+			return $keywords;
+		}
+
+		public function get_text_and_hashtags( $text, array $mod, $add_hashtags = true ) {
+
+			if ( $this->p->debug->enabled ) {
+				$this->p->debug->mark();
+			}
+
+			$hashtags = '';
+
+			if ( preg_match( '/^(.*)(( *#[a-z][a-z0-9\-]+)+)$/U', $text, $match ) ) {
+
+				$text     = $match[1];
+				$hashtags = trim( $match[2] );
+
+			} elseif ( $add_hashtags ) {
+
+				$hashtags = $this->get_hashtags( $mod, $add_hashtags );
+			}
+
+			if ( $this->p->debug->enabled ) {
+				$this->p->debug->log( 'hashtags found = "' . $hashtags . '"' );
+			}
+
+			return array( $text, $hashtags );
+		}
+
+		/**
+		 * Returns a space delimited text string of hashtags.
+		 */
+		public function get_hashtags( array $mod, $add_hashtags = true ) {
+
+			if ( $this->p->debug->enabled ) {
+				$this->p->debug->mark();
+			}
+
+			/**
+			 * Determine the maximum number of hashtags to return.
+			 */
+			if ( empty( $add_hashtags ) ) {	// Check for false or 0.
+
+				return '';
+
+			} elseif ( is_numeric( $add_hashtags ) ) {	// Return a specific number of hashtags.
+
+				$max_hashtags = $add_hashtags;
+
+			} elseif ( ! empty( $this->p->options['og_desc_hashtags'] ) ) {	// Return the default number of hashtags.
+
+				$max_hashtags = $this->p->options['og_desc_hashtags'];
+
+			} else {	// Just in case.
+				return '';
+			}
+
+			$hashtags = apply_filters( $this->p->lca . '_hashtags_seed', '', $mod, $add_hashtags );
+
+			if ( ! empty( $hashtags ) ) {	// Seed hashtags returned.
+
 				if ( $this->p->debug->enabled ) {
 					$this->p->debug->log( 'hashtags seed = "' . $hashtags . '"' );
 				}
+
 			} else {
-				$tags = array_slice( $this->get_tags( $post_id ), 0, $max_hashtags );
+
+				$tags = $this->get_tag_names( $mod );
+
+				$tags = array_slice( $tags, 0, $max_hashtags );
+
 				if ( ! empty( $tags ) ) {
-					// remove special character incompatible with Twitter
+
+					/**
+					 * Remove special character incompatible with Twitter.
+					 */
 					$hashtags = SucomUtil::array_to_hashtags( $tags );
+
 					if ( $this->p->debug->enabled ) {
 						$this->p->debug->log( 'hashtags (max ' . $max_hashtags . ') = "' . $hashtags . '"' );
 					}
 				}
 			}
 
-			return apply_filters( $this->p->lca . '_hashtags', $hashtags, $post_id, $add_hashtags );
+			return apply_filters( $this->p->lca . '_hashtags', $hashtags, $mod, $add_hashtags );
 		}
 
-		public function get_tags( $post_id ) {
+		/**
+		 * Returns an array of post tags.
+		 */
+		public function get_tag_names( array $mod ) {
 
-			$tags = apply_filters( $this->p->lca . '_tags_seed', array(), $post_id );
+			if ( $this->p->debug->enabled ) {
+				$this->p->debug->mark();
+			}
+
+			static $local_cache = array();
+
+			if ( isset( $local_cache[ $mod[ 'name' ] ][ $mod[ 'id' ] ] ) ) {
+
+				if ( $this->p->debug->enabled ) {
+					$this->p->debug->log( 'exiting early: returning tags from static cache' );
+				}
+
+				return $local_cache[ $mod[ 'name' ] ][ $mod[ 'id' ] ];
+			}
+
+			$tags = apply_filters( $this->p->lca . '_tag_names_seed', array(), $mod );
 
 			if ( ! empty( $tags ) ) {
 
@@ -1087,44 +1310,24 @@ if ( ! class_exists( 'WpssoPage' ) ) {
 
 			} else {
 
-				if ( is_singular() || ! empty( $post_id ) ) {
-					$tags = $this->get_wp_tags( $post_id );
-				} elseif ( is_search() ) {
-					$tags = preg_split( '/ *, */', get_search_query( false ) );
+				if ( $mod[ 'is_post' ] ) {
+					foreach ( wp_get_post_tags( $mod[ 'id' ] ) as $tag_obj ) {
+						if ( ! empty( $tag_obj->name ) ) {
+							$tags[] = $tag_obj->name;
+						}
+					}
 				}
-
-				if ( $this->p->debug->enabled ) {
-					$this->p->debug->log( 'raw tags = "' . implode( ', ', $tags ) . '"' );
-				}
-
-				$tags = array_unique( array_map( array( 'SucomUtil', 'sanitize_tag' ), $tags ) );
-
-				if ( $this->p->debug->enabled ) {
-					$this->p->debug->log( 'sanitized tags = "' . implode( ', ', $tags ) . '"' );
-				}
+				
+				$tags = array_unique( $tags );
 			}
 
-			return apply_filters( $this->p->lca . '_tags', $tags, $post_id );
-		}
+			$tags = $local_cache[ $mod[ 'name' ] ][ $mod[ 'id' ] ] = apply_filters( $this->p->lca . '_tag_names', $tags, $mod );
 
-		public function get_wp_tags( $post_id ) {
-
-			$tags = apply_filters( $this->p->lca . '_wp_tags_seed', array(), $post_id );
-
-			if ( ! empty( $tags ) ) {
-
-				if ( $this->p->debug->enabled ) {
-					$this->p->debug->log( 'wp tags seed = "' . implode( ',', $tags ) . '"' );
-				}
-
-			} else {
-
-				foreach ( wp_get_post_tags( $post_id, array( 'fields' => 'names') ) as $tag_name ) {
-					$tags[] = $tag_name;
-				}
+			if ( $this->p->debug->enabled ) {
+				$this->p->debug->log_arr( 'tags', $tags );
 			}
 
-			return apply_filters( $this->p->lca . '_wp_tags', $tags, $post_id );
+			return $tags;
 		}
 
 		public function get_category_title( $term_id = 0, $tax_slug = '', $sep = null ) {

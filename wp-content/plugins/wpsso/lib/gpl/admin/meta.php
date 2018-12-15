@@ -40,9 +40,11 @@ if ( ! class_exists( 'WpssoGplAdminMeta' ) ) {
 				$this->p->debug->mark();
 			}
 
-			$dots       = '...';
-			$read_cache = true;
-			$do_encode  = true;
+			$dots           = '...';
+			$read_cache     = true;
+			$no_hashtags    = false;
+			$maybe_hashtags = true;
+			$do_encode      = true;
 
 			/**
 			 * The 'add_link_rel_canonical' and 'add_meta_name_description' options will be empty if an SEO plugin is detected.
@@ -54,25 +56,23 @@ if ( ! class_exists( 'WpssoGplAdminMeta' ) ) {
 			$sharing_url   = $this->p->util->get_sharing_url( $mod, false );	// $add_page is false.
 			$canonical_url = $this->p->util->get_canonical_url( $mod, false );	// $add_page is false.
 
-			$og_title_max_len    = $this->p->options['og_title_len'];
-			$og_title_warn_len   = $this->p->options['og_title_warn'];
-			$og_desc_max_len     = $this->p->options['og_desc_len'];
-			$og_desc_warn_len    = $this->p->options['og_desc_warn'];
-			$seo_desc_max_len    = $this->p->options['seo_desc_len'];
-			$tc_desc_max_len     = $this->p->options['tc_desc_len'];
-			$schema_desc_max_len = $this->p->options['schema_desc_len'];
+			$og_title_max_len    = $this->p->options['og_title_max_len'];
+			$og_desc_max_len     = $this->p->options['og_desc_max_len'];
+			$seo_desc_max_len    = $this->p->options['seo_desc_max_len'];
+			$tc_desc_max_len     = $this->p->options['tc_desc_max_len'];
+			$schema_desc_max_len = $this->p->options['schema_desc_max_len'];
+			$schema_desc_md_key  = array( 'seo_desc', 'og_desc' );
 
-			$def_og_title    = $this->p->page->get_title( $og_title_max_len, $dots, $mod, $read_cache, false, $do_encode, 'none' );
-			$def_og_desc     = $this->p->page->get_description( $og_desc_max_len, $dots, $mod, $read_cache, true, $do_encode, 'none' );
-			$def_seo_desc    = $add_meta_name_desc ? $this->p->page->get_description( $seo_desc_max_len, $dots, $mod, $read_cache, false ) : '';
+			$def_og_title    = $this->p->page->get_title( $og_title_max_len, $dots, $mod, $read_cache, $no_hashtags, $do_encode, 'none' );
+			$def_og_desc     = $this->p->page->get_description( $og_desc_max_len, $dots, $mod, $read_cache, $maybe_hashtags, $do_encode, 'none' );
+			$def_seo_desc    = $add_meta_name_desc ? $this->p->page->get_description( $seo_desc_max_len, $dots, $mod, $read_cache, $no_hashtags ) : '';
 			$def_tc_desc     = $this->p->page->get_description( $tc_desc_max_len, $dots, $mod, $read_cache );
-			$def_schema_desc = $this->p->page->get_description( $schema_desc_max_len, $dots, $mod, $read_cache, false, $do_encode, array( 'seo_desc', 'og_desc' ) );
+			$def_schema_desc = $this->p->page->get_description( $schema_desc_max_len, $dots, $mod, $read_cache, $no_hashtags, $do_encode, $schema_desc_md_key );
 
-			if ( empty( $this->p->cf['plugin']['wpssojson']['version'] ) ) {
+			if ( empty( $this->p->cf[ 'plugin' ][ 'wpssojson' ][ 'version' ] ) ) {
 
-				$json_ext        = 'wpssojson';
-				$json_info       = $this->p->cf['plugin'][$json_ext];
-				$json_addon_link = $this->p->util->get_admin_url( 'addons#' . $json_ext, $json_info['name'] );
+				$json_info       = $this->p->cf[ 'plugin' ][ 'wpssojson' ];
+				$json_addon_link = $this->p->util->get_admin_url( 'addons#wpssojson', $json_info[ 'name' ] );
 				$json_msg_transl = '<p class="status-msg smaller">' . 
 					sprintf( __( 'Activate the %s add-on for additional Schema markup features and options.',
 						'wpsso' ), $json_addon_link ) . '</p>';
@@ -143,7 +143,7 @@ if ( ! class_exists( 'WpssoGplAdminMeta' ) ) {
 				'schema_desc' => array(
 					'th_class' => 'medium',
 					'td_class' => 'blank',
-					'label'    => _x( 'Schema Description', 'option label', 'wpsso' ),
+					'label'    => _x( 'Description', 'option label', 'wpsso' ),
 					'tooltip'  => 'meta-schema_desc',
 					'content'  => $form->get_no_textarea_value( $def_schema_desc, '', '', $schema_desc_max_len ) . $json_msg_transl,
 				),
@@ -158,20 +158,20 @@ if ( ! class_exists( 'WpssoGplAdminMeta' ) ) {
 				$this->p->debug->mark();
 			}
 
-			if ( $mod['is_post'] && ( empty( $mod['post_status'] ) || $mod['post_status'] === 'auto-draft' ) ) {
+			if ( $mod[ 'is_post' ] && ( empty( $mod[ 'post_status' ] ) || $mod[ 'post_status' ] === 'auto-draft' ) ) {
 
 				$table_rows[] = '<td><blockquote class="status-info"><p class="centered">' . 
 					sprintf( __( 'Save a draft version or publish the %s to display these options.',
-						'wpsso' ), SucomUtil::titleize( $mod['post_type'] ) ) . '</p></td>';
+						'wpsso' ), SucomUtil::titleize( $mod[ 'post_type' ] ) ) . '</p></td>';
 
 				return $table_rows;	// abort
 			}
 
 			$media_info = $this->p->og->get_media_info( $this->p->lca . '-opengraph',
-				array( 'pid', 'img_url' ), $mod, 'none', 'og' );	// $md_pre is 'none'.
+				array( 'pid', 'img_url' ), $mod, $md_pre = 'none', $mt_pre = 'og' );
 
 			$table_rows[] = '<td colspan="2">' .
-				( $mod['is_post'] ? $this->p->msgs->get( 'pro-about-msg-post-media' ) : '' ) .
+				( $mod[ 'is_post' ] ? $this->p->msgs->get( 'pro-about-msg-post-media' ) : '' ) .
 					$this->p->msgs->get( 'pro-feature-msg' ) . '</td>';
 
 			$form_rows['subsection_opengraph'] = array(
@@ -186,7 +186,7 @@ if ( ! class_exists( 'WpssoGplAdminMeta' ) ) {
 				'label'    => _x( 'Priority Image Information', 'metabox title', 'wpsso' )
 			);
 
-			if ( $mod['is_post'] ) {
+			if ( $mod[ 'is_post' ] ) {
 				$form_rows['og_img_max'] = array(
 					'tr_class' => $form->get_css_class_hide( 'basic', 'og_img_max' ),
 					'th_class' => 'medium',
@@ -238,7 +238,7 @@ if ( ! class_exists( 'WpssoGplAdminMeta' ) ) {
 				'content'  => $form->get_no_checkbox( 'og_vid_prev_img' ),
 			);
 
-			if ( $mod['is_post'] ) {
+			if ( $mod[ 'is_post' ] ) {
 				$form_rows['og_vid_max'] = array(
 					'tr_class' => $form->get_css_class_hide( 'basic', 'og_vid_max' ),
 					'th_class' => 'medium',
@@ -351,7 +351,7 @@ if ( ! class_exists( 'WpssoGplAdminMeta' ) ) {
 				'label'    => _x( 'Structured Data / Schema Markup / Pinterest', 'metabox title', 'wpsso' )
 			);
 
-			if ( $mod['is_post'] ) {
+			if ( $mod[ 'is_post' ] ) {
 				$form_rows['schema_img_max'] = array(
 					'tr_class' => $form->get_css_class_hide( 'basic', 'schema_img_max' ),
 					'th_class' => 'medium',

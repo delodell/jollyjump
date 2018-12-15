@@ -13,7 +13,7 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 
 	/**
 	 * This class is extended by gpl/util/user.php or pro/util/user.php
-	 * and the class object is created as $this->p->m['util']['user'].
+	 * and the class object is created as $this->p->m[ 'util' ][ 'user' ].
 	 */
 	class WpssoUser extends WpssoMeta {
 
@@ -23,6 +23,10 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 		}
 
 		protected function add_actions() {
+
+			$is_admin   = is_admin();
+			$doing_ajax = defined( 'DOING_AJAX' ) && DOING_AJAX ? true : false;
+			$cm_fb_name = $this->p->options['plugin_cm_fb_name'];
 
 			if ( ! SucomUtil::role_exists( 'person' ) ) {
 				add_role( 'person', _x( 'Person', 'user role', 'wpsso' ), array() );
@@ -36,16 +40,14 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 				}
 			}
 
-			$fb_cm_name_value = $this->p->options['plugin_cm_fb_name'];
-
 			add_filter( 'user_contactmethods', array( $this, 'add_contact_methods' ), 20, 2 );
-			add_filter( 'user_' . $fb_cm_name_value . '_label', array( $this, 'fb_contact_label' ), 20, 1 );
+			add_filter( 'user_' . $cm_fb_name . '_label', array( $this, 'fb_contact_label' ), 20, 1 );
 
 			/**
 			 * Hook a minimum number of admin actions to maximize performance. The user_id argument is 
 			 * always present when we're editing a user, but missing when viewing our own profile page.
 			 */
-			if ( is_admin() ) {
+			if ( $is_admin ) {
 
 				if ( ! empty( $_GET ) ) {
 
@@ -80,9 +82,11 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 				$user_id = SucomUtil::get_request_value( 'user_id' );	// uses sanitize_text_field
 
 				if ( empty( $user_id ) ) {
+
 					if ( $this->p->debug->enabled ) {
 						$this->p->debug->log( 'exiting early: empty user_id' );
 					}
+
 					return;
 				}
 
@@ -109,14 +113,14 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 
 			$mod = WpssoMeta::$mod_defaults;
 
-			$mod['id']   = (int) $mod_id;
-			$mod['name'] = 'user';
-			$mod['obj']  =& $this;
+			$mod[ 'id' ]   = (int) $mod_id;
+			$mod[ 'name' ] = 'user';
+			$mod[ 'obj' ]  =& $this;
 
 			/**
 			 * User
 			 */
-			$mod['is_user'] = true;
+			$mod[ 'is_user' ] = true;
 
 			return apply_filters( $this->p->lca . '_get_user_mod', $mod, $mod_id );
 		}
@@ -169,7 +173,7 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 
 			if ( $this->p->debug->enabled ) {
 				$this->p->debug->log( 'calling get_posts() for posts authored by ' . 
-					$mod['name'] . ' id ' . $mod['id'] . ' (posts_per_page is ' . $ppp . ')' );
+					$mod[ 'name' ] . ' id ' . $mod[ 'id' ] . ' (posts_per_page is ' . $ppp . ')' );
 			}
 
 			$posts_args = array_merge( array(
@@ -177,10 +181,10 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 				'orderby'        => 'date',
 				'order'          => 'DESC',
 				'paged'          => $paged,
-				'post_status'    => 'publish',
+				'post_status'    => 'publish',		// Only 'publish', not 'pending', 'draft', 'auto-draft', 'future', 'private', 'inherit', or 'trash'.
 				'post_type'      => 'any',		// Return post, page, or any custom post type.
 				'posts_per_page' => $ppp,
-				'author'         => $mod['id'],
+				'author'         => $mod[ 'id' ],
 			), $posts_args, array( 'fields' => 'ids' ) );	// Return an array of post ids.
 
 			$mtime_max   = SucomUtil::get_const( 'WPSSO_GET_POSTS_MAX_TIME', 0.10 );
@@ -190,11 +194,11 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 
 			if ( $mtime_max > 0 && $mtime_total > $mtime_max ) {
 
-				$info = $this->p->cf['plugin'][$this->p->lca];
+				$info = $this->p->cf[ 'plugin' ][$this->p->lca];
 
 				if ( $this->p->debug->enabled ) {
 					$this->p->debug->log( sprintf( 'slow query detected - WordPress get_posts() took %1$0.3f secs'.
-						' to get posts authored by user ID %2$d', $mtime_total, $mod['id'] ) );
+						' to get posts authored by user ID %2$d', $mtime_total, $mod[ 'id' ] ) );
 				}
 
 				// translators: %1$0.3f is a number of seconds
@@ -202,7 +206,7 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 
 				// translators: %1$0.3f is a number of seconds, %2$d is an ID number, %3$s is a recommended max
 				$error_msg = sprintf( __( 'Slow query detected - WordPress get_posts() took %1$0.3f secs to get posts authored by user ID %2$d (%3$s).',
-					'wpsso' ), $mtime_total, $mod['id'], $rec_max_msg );
+					'wpsso' ), $mtime_total, $mod[ 'id' ], $rec_max_msg );
 
 				/**
 				 * Show an admin warning notice, if notices not already shown.
@@ -212,7 +216,7 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 				}
 
 				// translators: %s is the short plugin name
-				$error_pre = sprintf( __( '%s warning:', 'wpsso' ), $info['short'] );
+				$error_pre = sprintf( __( '%s warning:', 'wpsso' ), $info[ 'short' ] );
 
 				SucomUtil::safe_error_log( $error_pre . ' ' . $error_msg );
 			}
@@ -267,9 +271,9 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 
 			if ( ! empty( $user_id ) && strpos( $column_name, $this->p->lca . '_' ) === 0 ) {	// just in case
 
-				$col_idx = str_replace( $this->p->lca . '_', '', $column_name );
+				$col_key = str_replace( $this->p->lca . '_', '', $column_name );
 
-				if ( ( $col_info = self::get_sortable_columns( $col_idx ) ) !== null ) {
+				if ( ( $col_info = self::get_sortable_columns( $col_key ) ) !== null ) {
 					if ( isset( $col_info['meta_key'] ) ) {	// just in case
 						$value = $this->get_meta_cache_value( $user_id, $col_info['meta_key'] );
 					}
@@ -295,14 +299,14 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 			return $value;
 		}
 
-		public function update_sortable_meta( $user_id, $col_idx, $content ) {
+		public function update_sortable_meta( $user_id, $col_key, $content ) {
 
 			if ( $this->p->debug->enabled ) {
 				$this->p->debug->mark();
 			}
 
 			if ( ! empty( $user_id ) ) {	// just in case
-				if ( ( $sort_cols = self::get_sortable_columns( $col_idx ) ) !== null ) {
+				if ( ( $sort_cols = self::get_sortable_columns( $col_key ) ) !== null ) {
 					if ( isset( $sort_cols['meta_key'] ) ) {	// just in case
 						update_user_meta( $user_id, $sort_cols['meta_key'], $content );
 					}
@@ -348,7 +352,7 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 			/**
 			 * All meta modules set this property, so use it to optimize code execution.
 			 */
-			if ( WpssoMeta::$head_meta_tags !== false || ! isset( $screen->id ) ) {
+			if ( false !== WpssoMeta::$head_meta_tags || ! isset( $screen->id ) ) {
 				return;
 			}
 
@@ -418,7 +422,7 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 
 						if ( $this->p->notice->is_admin_pre_notices() ) {	// Skip if notices already shown.
 
-							$notice_key = $mod['name'] . '-' . $mod['id'] . '-notice-missing-og-' . $mt_suffix;
+							$notice_key = $mod[ 'name' ] . '-' . $mod[ 'id' ] . '-notice-missing-og-' . $mt_suffix;
 							$error_msg  = $this->p->msgs->get( 'notice-missing-og-' . $mt_suffix );
 
 							$this->p->notice->err( $error_msg, null, $notice_key );
@@ -437,18 +441,28 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 					$this->p->debug->log( 'found action query: ' . $action_name );
 
 				}
+
 				if ( empty( $_GET[ WPSSO_NONCE_NAME ] ) ) {	// WPSSO_NONCE_NAME is an md5() string
+
 					if ( $this->p->debug->enabled ) {
 						$this->p->debug->log( 'nonce token query field missing' );
 					}
+
 				} elseif ( ! wp_verify_nonce( $_GET[ WPSSO_NONCE_NAME ], WpssoAdmin::get_nonce_action() ) ) {
+
 					$this->p->notice->err( sprintf( __( 'Nonce token validation failed for %1$s action "%2$s".',
 						'wpsso' ), 'user', $action_name ) );
+
 				} else {
+
 					$_SERVER['REQUEST_URI'] = remove_query_arg( array( $action_query, WPSSO_NONCE_NAME ) );
+
 					switch ( $action_name ) {
+
 						default:
+
 							do_action( $this->p->lca . '_load_meta_page_user_' . $action_name, $user_id, $screen->id );
+
 							break;
 					}
 				}
@@ -470,13 +484,8 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 				return;
 			}
 
-			$metabox_id      = $this->p->cf['meta']['id'];
-			$metabox_title   = _x( $this->p->cf['meta']['title'], 'metabox title', 'wpsso' );
-			$metabox_screen  = $this->p->lca . '-user';
-			$metabox_context = 'normal';
-			$metabox_prio    = 'default';
-			$add_metabox     = empty( $this->p->options[ 'plugin_add_to_user' ] ) ? false : true;
-			$add_metabox     = apply_filters( $this->p->lca . '_add_metabox_user', $add_metabox, $user_id );
+			$add_metabox = empty( $this->p->options[ 'plugin_add_to_user' ] ) ? false : true;
+			$add_metabox = apply_filters( $this->p->lca . '_add_metabox_user', $add_metabox, $user_id );
 
 			if ( $this->p->debug->enabled ) {
 				$this->p->debug->log( 'add metabox for user ID ' . $user_id . ' is ' . 
@@ -484,9 +493,19 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 			}
 
 			if ( $add_metabox ) {
+
+				$metabox_id      = $this->p->cf['meta'][ 'id' ];
+				$metabox_title   = _x( $this->p->cf['meta']['title'], 'metabox title', 'wpsso' );
+				$metabox_screen  = $this->p->lca . '-user';
+				$metabox_context = 'normal';
+				$metabox_prio    = 'default';
+				$callback_args   = array(	// Second argument passed to the callback.
+					'__block_editor_compatible_meta_box' => true,
+				);
+
 				add_meta_box( $this->p->lca . '_' . $metabox_id, $metabox_title,
 					array( $this, 'show_metabox_custom_meta' ), $metabox_screen,
-						$metabox_context, $metabox_prio );
+						$metabox_context, $metabox_prio, $callback_args );
 			}
 		}
 
@@ -515,7 +534,7 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 			$metabox_context = 'normal';
 
 			echo "\n" . '<!-- ' . $this->p->lca . ' user metabox section begin -->' . "\n";
-			echo '<h3 id="' . $this->p->lca . '-metaboxes">' . WpssoAdmin::$pkg[$this->p->lca]['short'] . '</h3>' . "\n";
+			echo '<h3 id="' . $this->p->lca . '-metaboxes">' . WpssoAdmin::$pkg[$this->p->lca][ 'short' ] . '</h3>' . "\n";
 			echo '<div id="poststuff">' . "\n";
 
 			do_meta_boxes( $metabox_screen, $metabox_context, $user_obj );
@@ -524,12 +543,11 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 			echo '<!-- ' . $this->p->lca . ' user metabox section end -->' . "\n";
 		}
 
+		public function ajax_metabox_custom_meta() {
+			die( '-1' );	// Nothing to do.
+		}
+
 		public function show_metabox_custom_meta( $user_obj ) {
-
-			if ( $this->p->debug->enabled ) {
-				$this->p->debug->mark();
-			}
-
 			echo $this->get_metabox_custom_meta( $user_obj );
 		}
 
@@ -539,7 +557,8 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 				$this->p->debug->mark();
 			}
 
-			$metabox_id = $this->p->cf['meta']['id'];
+			$doing_ajax = defined( 'DOING_AJAX' ) ? DOING_AJAX : false;
+			$metabox_id = $this->p->cf['meta'][ 'id' ];
 			$mod        = $this->get_mod( $user_obj->ID );
 			$tabs       = $this->get_custom_meta_tabs( $metabox_id, $mod );
 			$opts       = $this->get_options( $user_obj->ID );
@@ -554,34 +573,47 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 
 			$table_rows = array();
 
-			foreach ( $tabs as $key => $title ) {
-				$table_rows[$key] = array_merge( $this->get_table_rows( $metabox_id, $key, WpssoMeta::$head_meta_info, $mod ),
-					apply_filters( $this->p->lca . '_' . $mod['name'] . '_' . $key . '_rows',
-						array(), $this->form, WpssoMeta::$head_meta_info, $mod ) );
+			foreach ( $tabs as $tab_key => $title ) {
+
+				$filter_name = $this->p->lca . '_' . $mod[ 'name' ] . '_' . $tab_key . '_rows';
+
+				$table_rows[ $tab_key ] = array_merge(
+					$this->get_table_rows( $metabox_id, $tab_key, WpssoMeta::$head_meta_info, $mod ),
+					(array) apply_filters( $filter_name, array(), $this->form, WpssoMeta::$head_meta_info, $mod )
+				);
 			}
 
-			$metabox_html = $this->p->util->get_metabox_tabbed( $metabox_id, $tabs, $table_rows );
+			$tabbed_args = array(
+				'layout' => 'vertical',
+			);
+
+			$metabox_html = $this->p->util->get_metabox_tabbed( $metabox_id, $tabs, $table_rows, $tabbed_args );
+
+			if ( $doing_ajax ) {
+				$metabox_html .= '<script type="text/javascript">sucomInitTooltips();</script>' . "\n";
+			}
+
+			$container_id = $this->p->lca . '_metabox_' . $metabox_id . '_inside';
+			$metabox_html = "\n" . '<div id="' . $container_id . '">' . $metabox_html . '</div><!-- #'. $container_id . ' -->' . "\n";
 
 			if ( $this->p->debug->enabled ) {
-				$this->p->debug->mark( $metabox_id . ' table rows' );	// end timer
+				$this->p->debug->mark( $metabox_id . ' table rows' );	// End timer.
 			}
 
-			return "\n" . '<div id="' . $this->p->lca . '_metabox_' . $metabox_id . '">' . $metabox_html . '</div>' . "\n";
+			return $metabox_html;
 		}
 
 		public function get_form_contact_fields( $fields = array() ) {
-			return array_merge(
-				array( 'none' => '[None]' ), 	// make sure none is first
-				$this->add_contact_methods( array(
-					'author' => 'Author Archive',
-					'url' => 'WebSite'
-				) )
-			);
+
+			return array( 'none' => '[None]' ) + $this->add_contact_methods( array(
+				'author' => 'Author Archive',
+				'url' => 'WebSite'
+			) );
 		}
 
 		public function add_contact_methods( $fields = array(), $user = null ) {
 
-			$has_pdir = $this->p->avail['*']['p_dir'];
+			$has_pdir = $this->p->avail[ '*' ][ 'p_dir' ];
 			$has_pp   = $this->p->check->pp( $this->p->lca, true, $has_pdir );
 
 			/**
@@ -766,12 +798,12 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 
 			$author_id = false;
 
-			if ( $mod['is_post'] ) {
-				if ( $mod['post_author'] ) {
-					$author_id = $mod['post_author'];
+			if ( $mod[ 'is_post' ] ) {
+				if ( $mod[ 'post_author' ] ) {
+					$author_id = $mod[ 'post_author' ];
 				}
-			} elseif ( $mod['is_user'] ) {
-				$author_id = $mod['id'];
+			} elseif ( $mod[ 'is_user' ] ) {
+				$author_id = $mod[ 'id' ];
 			}
 
 			return $author_id;
@@ -949,8 +981,8 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 								/**
 								 * Remove the box, no matter its position in the array.
 								 */
-								if ( $key = array_search( $pagehook . '_' . $box_id, $boxes ) !== false ) {
-									unset( $boxes[$key] );
+								if ( false !== ( $key = array_search( $pagehook . '_' . $box_id, $boxes ) ) ) {
+									unset( $boxes[ $key ] );
 								}
 
 								/**
@@ -971,11 +1003,16 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 							/**
 							 * If we're not targetting, then clear it, otherwise if we want a state, add if it's missing.
 							 */
-							if ( empty( $meta_name ) && $key !== false ) {
-								unset( $user_opts[$key] );
+							if ( empty( $meta_name ) && false !== $key ) {
+
+								unset( $user_opts[ $key ] );
+
 								$is_changed = true;
+
 							} elseif ( ! empty( $meta_name ) && false === $key ) {
+
 								$user_opts[] = $pagehook . '_' . $box_id;
+
 								$is_changed = true;
 							}
 						}
@@ -990,27 +1027,28 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 
 		/**
 		 * Called by the WpssoRegister::uninstall_plugin() method.
+		 * Do not use Wpsso::get_instance() since the Wpsso class may not exist.
 		 */
-		public static function delete_metabox_prefs( $user_id = false ) {
-
-			$user_id = empty( $user_id ) ? get_current_user_id() : $user_id;
+		public static function delete_metabox_prefs( $user_id = false, $slug_prefix = 'wpsso' ) {
 
 			$cf = WpssoConfig::get_config( false, true );
 
+			$user_id = empty( $user_id ) ? get_current_user_id() : $user_id;
+
 			$parent_slug = 'options-general.php';
 
-			foreach ( array_keys( $cf['*']['lib']['setting'] ) as $lib_id ) {
+			foreach ( array_keys( $cf[ '*' ][ 'lib' ]['setting'] ) as $lib_id ) {
 
-				$menu_slug = $cf['lca'] . '-' . $lib_id;
+				$menu_slug = $slug_prefix . '-' . $lib_id;
 
 				self::delete_metabox_pagehook( $user_id, $menu_slug, $parent_slug );
 			}
 
-			$parent_slug = $cf['lca'] . '-' . key( $cf['*']['lib']['submenu'] );
+			$parent_slug = $slug_prefix . '-' . key( $cf[ '*' ][ 'lib' ]['submenu'] );
 
-			foreach ( array_keys( $cf['*']['lib']['submenu'] ) as $lib_id ) {
+			foreach ( array_keys( $cf[ '*' ][ 'lib' ]['submenu'] ) as $lib_id ) {
 
-				$menu_slug = $cf['lca'] . '-' . $lib_id;
+				$menu_slug = $slug_prefix . '-' . $lib_id;
 
 				self::delete_metabox_pagehook( $user_id, $menu_slug, $parent_slug );
 			}
@@ -1083,11 +1121,11 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 			}
 		}
 
-		public static function get_pref( $idx = false, $user_id = false ) {
+		public static function get_pref( $pref_key = false, $user_id = false ) {
 
 			$user_id = empty( $user_id ) ? get_current_user_id() : $user_id;
 
-			if ( ! isset( self::$cache_pref[$user_id]['prefs_filtered'] ) || self::$cache_pref[$user_id]['prefs_filtered'] !== true ) {
+			if ( ! isset( self::$cache_pref[$user_id]['prefs_filtered'] ) || true !== self::$cache_pref[$user_id]['prefs_filtered'] ) {
 
 				$wpsso =& Wpsso::get_instance();
 
@@ -1106,9 +1144,9 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 				}
 			}
 
-			if ( $idx !== false ) {
-				if ( isset( self::$cache_pref[$user_id][$idx] ) ) {
-					return self::$cache_pref[$user_id][$idx];
+			if ( false !== $pref_key ) {
+				if ( isset( self::$cache_pref[$user_id][$pref_key] ) ) {
+					return self::$cache_pref[$user_id][$pref_key];
 				} else {
 					return false;
 				}
@@ -1118,10 +1156,12 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 		}
 
 		public static function is_show_all( $user_id = false ) {
+
 			return self::show_opts( 'all', $user_id );
 		}
 
 		public static function get_show_val( $user_id = false ) {
+
 			return self::show_opts( false, $user_id );
 		}
 
@@ -1146,7 +1186,7 @@ if ( ! class_exists( 'WpssoUser' ) ) {
 			$mod           = $this->get_mod( $user_id );
 			$col_meta_keys = WpssoMeta::get_column_meta_keys();
 
-			foreach ( $col_meta_keys as $col_idx => $meta_key ) {
+			foreach ( $col_meta_keys as $col_key => $meta_key ) {
 				delete_user_meta( $user_id, $meta_key );
 			}
 

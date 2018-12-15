@@ -1,6 +1,4 @@
 (function() {
-	// Load plugin specific language pack
-	tinymce.PluginManager.requireLangPack('wpspanel');
 	tinymce.create('tinymce.plugins.wpspanel', {
 		/**
 		 * Initializes the plugin, this will be executed after the plugin has been created.

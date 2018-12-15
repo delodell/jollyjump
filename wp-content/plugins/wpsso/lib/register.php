@@ -112,12 +112,12 @@ if ( ! class_exists( 'WpssoRegister' ) ) {
 
 			$this->check_required( WpssoConfig::$cf );
 
-			$this->p->set_config( true );  // Apply filters and define $cf['*'] array ( $activate = true ).
-			$this->p->set_options( true ); // Read / create options and site_options ( $activate = true ).
-			$this->p->set_objects( true ); // Load all the class objects ( $activate = true ).
+			$this->p->set_config( $activate = true );  // Apply filters and define the $cf[ '*' ] array.
+			$this->p->set_options( $activate = true ); // Read / create options and site_options.
+			$this->p->set_objects( $activate = true ); // Load all the class objects.
 
 			/**
-			 * Clear All Caches on Activate.
+			 * Clear all caches on activate.
 			 */
 			if ( ! empty( $this->p->options['plugin_clear_on_activate'] ) ) {
 
@@ -133,7 +133,7 @@ if ( ! class_exists( 'WpssoRegister' ) ) {
 			/**
 			 * Save plugin install, activation, update times.
 			 */
-			$plugin_version = WpssoConfig::$cf['plugin']['wpsso']['version'];
+			$plugin_version = WpssoConfig::$cf[ 'plugin' ][ 'wpsso' ][ 'version' ];
 
 			if ( $this->p->debug->enabled ) {
 				$this->p->debug->log( 'saving all times for wpsso v' . $plugin_version );
@@ -157,7 +157,8 @@ if ( ! class_exists( 'WpssoRegister' ) ) {
 		private function deactivate_plugin() {
 
 			/**
-			 * Clear All Caches on Deactivate.
+			 * Clear all caches on deactivate. Do not use the schedule_clear_all_cache() method
+			 * since WPSSO will be deactivated before the scheduled task can begin.
 			 */
 			if ( ! empty( $this->p->options['plugin_clear_on_deactivate'] ) ) {
 				$this->p->util->clear_all_cache( $user_id = 0, $clear_other = true, $clear_short = true, $refresh_all = false );
@@ -238,13 +239,13 @@ if ( ! class_exists( 'WpssoRegister' ) ) {
 
 		private static function check_required( $cf ) {
 
-			$plugin_name    = $cf['plugin']['wpsso']['name'];
-			$plugin_short   = $cf['plugin']['wpsso']['short'];
-			$plugin_version = $cf['plugin']['wpsso']['version'];
+			$plugin_name    = $cf[ 'plugin' ][ 'wpsso' ][ 'name' ];
+			$plugin_short   = $cf[ 'plugin' ][ 'wpsso' ][ 'short' ];
+			$plugin_version = $cf[ 'plugin' ][ 'wpsso' ][ 'version' ];
 
 			foreach ( array( 'wp', 'php' ) as $key ) {
 
-				if ( empty( $cf[$key]['min_version'] ) ) {
+				if ( empty( $cf[$key][ 'min_version' ] ) ) {
 					return;
 				}
 
@@ -259,7 +260,7 @@ if ( ! class_exists( 'WpssoRegister' ) ) {
 				}
 
 				$app_label   = $cf[$key]['label'];
-				$min_version = $cf[$key]['min_version'];
+				$min_version = $cf[$key][ 'min_version' ];
 				$version_url = $cf[$key]['version_url'];
 
 				if ( version_compare( $app_version, $min_version, '>=' ) ) {
@@ -275,7 +276,7 @@ if ( ! class_exists( 'WpssoRegister' ) ) {
 				if ( method_exists( 'SucomUtil', 'safe_error_log' ) ) {
 
 					// translators: %s is the short plugin name.
-					$error_pre = sprintf( __( '%s warning:', 'wpsso' ), $info['short'] );
+					$error_pre = sprintf( __( '%s warning:', 'wpsso' ), $info[ 'short' ] );
 
 					// translators: %1$s is the short plugin name, %2$s is the application name, %3$s is the application version number.
 					$error_msg = sprintf( __( '%1$s requires %2$s version %3$s or higher and has been deactivated.',

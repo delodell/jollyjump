@@ -82,45 +82,45 @@ if ( ! class_exists( 'SucomDebug' ) ) {
 			$this->enable( $name, false );
 		}
 
-		public function log_args( array $arr, $class_idx = 1, $function_idx = false ) {
+		public function log_args( array $arr, $class_seq = 1, $func_seq = false ) {
 
-			if ( $this->enabled !== true ) {
+			if ( ! $this->enabled ) {
 				return;
 			}
 
-			if ( is_int( $class_idx ) ) {
-				if ( false === $function_idx ) {
-					$function_idx = $class_idx;
+			if ( is_int( $class_seq ) ) {
+				if ( false === $func_seq ) {
+					$func_seq = $class_seq;
 				}
-				$class_idx++;
+				$class_seq++;
 			}
 
-			if ( is_int( $function_idx ) ) {
-				$function_idx++;
-			} elseif ( false === $function_idx ) {
-				$function_idx = 2;
+			if ( is_int( $func_seq ) ) {
+				$func_seq++;
+			} elseif ( false === $func_seq ) {
+				$func_seq = 2;
 			}
 
-			$this->log( 'args ' . self::pretty_array( $arr, true ), $class_idx, $function_idx );
+			$this->log( 'args ' . self::pretty_array( $arr, true ), $class_seq, $func_seq );
 		}
 
-		public function log_arr( $prefix, $mixed, $class_idx = 1, $function_idx = false ) {
+		public function log_arr( $prefix, $mixed, $class_seq = 1, $func_seq = false ) {
 
-			if ( $this->enabled !== true ) {
+			if ( ! $this->enabled ) {
 				return;
 			}
 
-			if ( is_int( $class_idx ) ) {
-				if ( false === $function_idx ) {
-					$function_idx = $class_idx;
+			if ( is_int( $class_seq ) ) {
+				if ( false === $func_seq ) {
+					$func_seq = $class_seq;
 				}
-				$class_idx++;
+				$class_seq++;
 			}
 
-			if ( is_int( $function_idx ) ) {
-				$function_idx++;
-			} elseif ( false === $function_idx ) {
-				$function_idx = 2;
+			if ( is_int( $func_seq ) ) {
+				$func_seq++;
+			} elseif ( false === $func_seq ) {
+				$func_seq = 2;
 			}
 
 			if ( is_object( $mixed ) ) {
@@ -129,15 +129,15 @@ if ( ! class_exists( 'SucomDebug' ) ) {
 			}
 
 			if ( is_array( $mixed ) ) {
-				$this->log( $prefix . ' ' . trim( print_r( self::pretty_array( $mixed, false ), true ) ), $class_idx, $function_idx );
+				$this->log( $prefix . ' ' . trim( print_r( self::pretty_array( $mixed, false ), true ) ), $class_seq, $func_seq );
 			} else {
-				$this->log( $prefix . ' ' . $mixed, $class_idx, $function_idx );
+				$this->log( $prefix . ' ' . $mixed, $class_seq, $func_seq );
 			}
 		}
 
-		public function log( $input = '', $class_idx = 1, $function_idx = false ) {
+		public function log( $input = '', $class_seq = 1, $func_seq = false ) {
 
-			if ( $this->enabled !== true ) {
+			if ( ! $this->enabled ) {
 				return;
 			}
 
@@ -146,26 +146,22 @@ if ( ! class_exists( 'SucomDebug' ) ) {
 			$stack      = debug_backtrace();
 			$log_msg    = '';
 
-			if ( is_int( $class_idx ) ) {
-				if ( false === $function_idx ) {
-					$function_idx = $class_idx;
+			if ( is_int( $class_seq ) ) {
+				if ( false === $func_seq ) {
+					$func_seq = $class_seq;
 				}
-				$log_msg .= sprintf( $first_col,
-					( empty( $stack[$class_idx]['class'] ) ?
-						'' : $stack[$class_idx]['class'] ) );
+				$log_msg .= sprintf( $first_col, ( empty( $stack[$class_seq][ 'class' ] ) ? '' : $stack[$class_seq][ 'class' ] ) );
 			} else {
-				if ( false === $function_idx ) {
-					$function_idx = 1;
+				if ( false === $func_seq ) {
+					$func_seq = 1;
 				}
-				$log_msg .= sprintf( $first_col, $class_idx );
+				$log_msg .= sprintf( $first_col, $class_seq );
 			}
 
-			if ( is_int( $function_idx ) ) {
-				$log_msg .= sprintf( $second_col,
-					( empty( $stack[$function_idx]['function'] ) ?
-						'' : $stack[$function_idx]['function'] ) );
+			if ( is_int( $func_seq ) ) {
+				$log_msg .= sprintf( $second_col, ( empty( $stack[$func_seq][ 'function' ] ) ? '' : $stack[$func_seq][ 'function' ] ) );
 			} else {
-				$log_msg .= sprintf( $second_col, $function_idx );
+				$log_msg .= sprintf( $second_col, $func_seq );
 			}
 
 			if ( is_multisite() ) {
@@ -196,7 +192,7 @@ if ( ! class_exists( 'SucomDebug' ) ) {
 
 		public function mark( $id = false, $comment = '' ) {
 
-			if ( $this->enabled !== true ) {
+			if ( ! $this->enabled ) {
 				return;
 			}
 
@@ -209,7 +205,7 @@ if ( ! class_exists( 'SucomDebug' ) ) {
 				$this->start_stats = $cur_stats;
 			}
 
-			if ( $id !== false ) {
+			if ( false !== $id ) {
 
 				$append_text = '- - - - - - ' . $id;
 
@@ -238,7 +234,7 @@ if ( ! class_exists( 'SucomDebug' ) ) {
 			$mem_diff   = $cur_stats['mem'] - $this->start_stats['mem'];
 			$stats_text = $this->get_time_text( $mtime_diff ) . ' / ' . $this->get_mem_text( $mem_diff );
 
-			$this->log( 'mark (' . $stats_text . ')' . ( $comment ? ' ' . $comment : '' ) . ( $id !== false ? "\n\t" . $append_text : '' ), 2 );
+			$this->log( 'mark (' . $stats_text . ')' . ( $comment ? ' ' . $comment : '' ) . ( false !== $id ? "\n\t" . $append_text : '' ), 2 );
 		}
 
 		private function get_time_text( $time ) {
@@ -259,33 +255,33 @@ if ( ! class_exists( 'SucomDebug' ) ) {
 
 		public function show_html( $data = null, $title = null ) {
 
-			if ( $this->is_enabled( 'html' ) !== true ) {
+			if ( ! $this->is_enabled( 'html' ) ) {
 				return;
 			}
 
 			echo $this->get_html( $data, $title, 2 );
 		}
 
-		public function get_html( $data = null, $title = null, $class_idx = 1, $function_idx = false ) {
+		public function get_html( $data = null, $title = null, $class_seq = 1, $func_seq = false ) {
 
-			if ( $this->is_enabled( 'html' ) !== true ) {
+			if ( ! $this->is_enabled( 'html' ) ) {
 				return;
 			}
 
-			if ( false === $function_idx ) {
-				$function_idx = $class_idx;
+			if ( false === $func_seq ) {
+				$func_seq = $class_seq;
 			}
 
 			$from  = '';
 			$html  = '<!-- ' . $this->display_name . ' debug';
 			$stack = debug_backtrace();
 
-			if ( ! empty( $stack[$class_idx]['class'] ) ) {
-				$from .= $stack[$class_idx]['class'] . '::';
+			if ( ! empty( $stack[$class_seq][ 'class' ] ) ) {
+				$from .= $stack[$class_seq][ 'class' ] . '::';
 			}
 
-			if ( ! empty( $stack[$function_idx]['function'] ) ) {
-				$from .= $stack[$function_idx]['function'];
+			if ( ! empty( $stack[$func_seq][ 'function' ] ) ) {
+				$from .= $stack[$func_seq][ 'function' ];
 			}
 
 			if ( null === $data ) {
@@ -302,21 +298,29 @@ if ( ! class_exists( 'SucomDebug' ) ) {
 			}
 
 			if ( ! empty( $data ) ) {
+
 				$html .= ' : ';
+
 				if ( is_array( $data ) ) {
+
 					$html .= "\n";
+
 					$is_assoc = SucomUtil::is_assoc( $data );
+
 					if ( $is_assoc ) {
 						ksort( $data );
 					}
+
 					foreach ( $data as $key => $val ) {
-						if ( is_string( $val ) && strpos( $val, '<!--' ) !== false ) {	// Remove HTML comments.
+						if ( is_string( $val ) && false !== strpos( $val, '<!--' ) ) {	// Remove HTML comments.
 							$val = preg_replace( '/<!--.*-->/Ums', '', $val );
 						} elseif ( is_array( $val ) ) {	// Just in case.
 							$val = print_r( $val, true );
 						}
+
 						$html .= $is_assoc ? "\t$key = $val\n" : "\t$val\n";
 					}
+
 				} else {
 					$html .= $data;
 				}

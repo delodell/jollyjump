@@ -4,7 +4,7 @@ Plugin Name: WP Shortcode by MyThemeShop
 Plugin URI: http://mythemeshop.com/
 Description: With the vast array of shortcodes, you can quickly and easily build content for your posts and pages and turbocharge your blogging experience.
 Author: MyThemeShop
-Version: 1.4.14
+Version: 1.4.15
 Author URI: http://mythemeshop.com/
 */
 

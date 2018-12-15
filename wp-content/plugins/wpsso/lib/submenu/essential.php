@@ -21,30 +21,48 @@ if ( ! class_exists( 'WpssoSubmenuEssential' ) && class_exists( 'WpssoAdmin' ) )
 				$this->p->debug->mark();
 			}
 
-			$this->menu_id = $id;
+			$this->menu_id   = $id;
 			$this->menu_name = $name;
-			$this->menu_lib = $lib;
-			$this->menu_ext = $ext;
+			$this->menu_lib  = $lib;
+			$this->menu_ext  = $ext;
 		}
 
-		// called by the extended WpssoAdmin class
+		/**
+		 * Called by the extended WpssoAdmin class.
+		 */
 		protected function add_meta_boxes() {
 
 			$this->maybe_show_language_notice();
 
-			add_meta_box( $this->pagehook . '_general',
-				_x( 'Essential General Settings', 'metabox title', 'wpsso' ),
-					array( $this, 'show_metabox_general' ), $this->pagehook, 'normal' );
+			$metabox_id      = 'general';
+			$metabox_title   = _x( 'Essential General Settings', 'metabox title', 'wpsso' );
+			$metabox_screen  = $this->pagehook;
+			$metabox_context = 'normal';
+			$metabox_prio    = 'default';
+			$callback_args   = array(	// Second argument passed to the callback function / method.
+			);
 
-			add_meta_box( $this->pagehook . '_advanced',
-				_x( 'Optional Advanced Settings', 'metabox title', 'wpsso' ),
-					array( $this, 'show_metabox_advanced' ), $this->pagehook, 'normal' );
+			add_meta_box( $this->pagehook . '_' . $metabox_id, $metabox_title,
+				array( $this, 'show_metabox_general' ), $metabox_screen,
+					$metabox_context, $metabox_prio, $callback_args );
+
+			$metabox_id      = 'advanced';
+			$metabox_title   = _x( 'Optional Advanced Settings', 'metabox title', 'wpsso' );
+			$metabox_screen  = $this->pagehook;
+			$metabox_context = 'normal';
+			$metabox_prio    = 'default';
+			$callback_args   = array(	// Second argument passed to the callback function / method.
+			);
+
+			add_meta_box( $this->pagehook . '_' . $metabox_id, $metabox_title,
+				array( $this, 'show_metabox_advanced' ), $metabox_screen,
+					$metabox_context, $metabox_prio, $callback_args );
 
 			/**
 			 * Issues a warning notice if the default image size is too small.
 			 * Unless the WPSSO_CHECK_DEFAULT_IMAGE constant has been defined as false.
 			 */
-			if ( SucomUtil::get_const( 'WPSSO_CHECK_DEFAULT_IMAGE' ) !== false ) {
+			if ( false !== SucomUtil::get_const( 'WPSSO_CHECK_DEFAULT_IMAGE' ) ) {
 				$this->p->media->get_default_images( 1, $this->p->lca . '-opengraph', false );
 			}
 		}
@@ -64,8 +82,10 @@ if ( ! class_exists( 'WpssoSubmenuEssential' ) && class_exists( 'WpssoAdmin' ) )
 			$table_rows = array();
 
 			foreach ( $tabs as $tab_key => $title ) {
-				$table_rows[$tab_key] = apply_filters( $this->p->lca . '_' . $metabox_id . '_' . $tab_key . '_rows',
-					$this->get_table_rows( $metabox_id, $tab_key ), $this->form );
+
+				$filter_name = $this->p->lca . '_' . $metabox_id . '_' . $tab_key . '_rows';
+
+				$table_rows[ $tab_key ] = apply_filters( $filter_name, $this->get_table_rows( $metabox_id, $tab_key ), $this->form );
 			}
 
 			$this->p->util->do_metabox_tabbed( $metabox_id, $tabs, $table_rows );
@@ -174,8 +194,8 @@ if ( ! class_exists( 'WpssoSubmenuEssential' ) && class_exists( 'WpssoAdmin' ) )
 					/**
 					 * Don't show these options in the Essential settings page.
 					 */
-					unset ( $table_rows['plugin_debug'] );
-					unset ( $table_rows['plugin_hide_pro'] );
+					unset ( $table_rows[ 'plugin_debug' ] );
+					unset ( $table_rows[ 'plugin_hide_pro' ] );
 
 					break;
 			}

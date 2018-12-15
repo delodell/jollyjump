@@ -149,6 +149,17 @@ There is an option in plugin's settings in Dashboard to relax the CSS rules, so 
 
 == Changelog ==
 
+= 4.10.0 =
+* plugin code improved to support files containing single quote characters (') in their filename
+* corrected bug where plugin was deactivated after update
+
+= 4.9.1 =
+* added Maintenance action 'Purge All Data' that entirely erases the plugin from the website and deactivates it
+* added advanced option 'Hide Invalid Uploaded Files' so that Uploaded Files page in Dashboard can show only valid uploads
+* added advanced option 'Restrict Front-End Loading' to load the plugin only on specific pages or posts in order to reduce unnecessary workload on pages not containing the plugin
+* code improved for better operation of the plugin when the website works behind a proxy
+* added option in Clean Log to erase the files together with plugin data
+
 = 4.9.0 =
 * code further improved to reduce "Iptanus Server unreachable..." errors
 * checked Weglot Translate compatibility; /wp-admin/admin-ajax.php needs to be added to Exclusion URL list of Weglot configuration so that uploads can work
@@ -794,6 +805,12 @@ Added the option to allow anyone to upload files, by setting the attribute uploa
 Initial version.
 
 == Upgrade Notice ==
+
+= 4.10.0 =
+Regular update to introduce some new features and improvements.
+
+= 4.9.1 =
+Regular update to introduce some new features and improvements and fix some bugs.
 
 = 4.9.0 =
 Significant update to introduce some new features and improvements and fix some bugs.

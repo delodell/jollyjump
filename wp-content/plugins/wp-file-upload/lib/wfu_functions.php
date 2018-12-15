@@ -1144,6 +1144,10 @@ function wfu_debug_log($message) {
 	file_put_contents($logpath, $message, FILE_APPEND);
 }
 
+function wfu_debug_log_obj($obj) {
+	wfu_debug_log(print_r($obj, true));
+}
+
 function wfu_safe_store_filepath($path) {
 	$code = wfu_create_random_string(16);
 	$safe_storage = ( WFU_USVAR_exists('wfu_filepath_safe_storage') ? WFU_USVAR('wfu_filepath_safe_storage') : array() );
@@ -1281,7 +1285,7 @@ function wfu_log_action($action, $filepath, $userid, $uploadid, $pageid, $blogid
 			// calculate file size
 			$filesize = filesize($filepath);
 			// first make obsolete records having the same file path because the old file has been replaced
-			$oldrecs = $wpdb->get_results('SELECT * FROM '.$table_name1.' WHERE filepath = \''.$relativepath.'\' AND date_to = 0');
+			$oldrecs = $wpdb->get_results('SELECT * FROM '.$table_name1.' WHERE filepath = \''.esc_sql($relativepath).'\' AND date_to = 0');
 			if ( $oldrecs ) {
 				foreach ( $oldrecs as $oldrec ) wfu_make_rec_obsolete($oldrec);
 			}
@@ -1310,7 +1314,7 @@ function wfu_log_action($action, $filepath, $userid, $uploadid, $pageid, $blogid
 			// if new log record has been created, also create user data records
 			if ( $userdata != null && $uploadid != '' ) {
 				foreach ( $userdata as $userdata_key => $userdata_field ) {
-					$existing = $wpdb->get_row('SELECT * FROM '.$table_name2.' WHERE uploadid = \''.$uploadid.'\' AND property = \''.$userdata_field['label'].'\' AND date_to = 0');
+					$existing = $wpdb->get_row('SELECT * FROM '.$table_name2.' WHERE uploadid = \''.$uploadid.'\' AND property = \''.esc_sql($userdata_field['label']).'\' AND date_to = 0');
 					if ($existing == null)
 						$wpdb->insert($table_name2,
 							array(
@@ -1643,11 +1647,11 @@ function wfu_get_file_rec($filepath, $include_userdata) {
 	//if file hash is enabled, then search file based on its path and hash, otherwise find file based on its path and size
 	if ( isset($plugin_options['hashfiles']) && $plugin_options['hashfiles'] == '1' ) {
 		$filehash = md5_file($filepath);
-		$filerec = $wpdb->get_row('SELECT * FROM '.$table_name1.' WHERE filepath = \''.$relativepath.'\' AND filehash = \''.$filehash.'\' AND date_to = 0 ORDER BY date_from DESC');
+		$filerec = $wpdb->get_row('SELECT * FROM '.$table_name1.' WHERE filepath = \''.esc_sql($relativepath).'\' AND filehash = \''.$filehash.'\' AND date_to = 0 ORDER BY date_from DESC');
 	}
 	else {
 		$stat = stat($filepath);
-		$filerec = $wpdb->get_row('SELECT * FROM '.$table_name1.' WHERE filepath = \''.$relativepath.'\' AND filesize = '.$stat['size'].' AND date_to = 0 ORDER BY date_from DESC');
+		$filerec = $wpdb->get_row('SELECT * FROM '.$table_name1.' WHERE filepath = \''.esc_sql($relativepath).'\' AND filesize = '.$stat['size'].' AND date_to = 0 ORDER BY date_from DESC');
 	}
 	//get user data
 	if ( $filerec != null && $include_userdata ) {
@@ -1657,6 +1661,21 @@ function wfu_get_file_rec($filepath, $include_userdata) {
 		}
 	}
 	return $filerec;
+}
+
+function wfu_get_valid_affected_files($recs) {
+	$valid_affected_files = array();
+	$files_checked = array();
+	foreach ($recs as $rec)
+		if ( $latestrec = wfu_get_latest_rec_from_id($rec->idlog) ) {
+			$file = wfu_path_rel2abs($latestrec->filepath);
+			if ( !in_array($file, $files_checked) ) {
+				if ( file_exists($file) ) array_push($valid_affected_files, $file);
+				array_push($files_checked, $file);
+			}
+		}
+	
+	return $valid_affected_files;
 }
 
 //get database record for id
@@ -1677,9 +1696,6 @@ function wfu_get_file_rec_from_id($idlog, $include_userdata = false) {
 }
 
 function wfu_get_userdata_from_id($idlog) {
-	global $wpdb;
-	$table_name2 = $wpdb->prefix . "wfu_userdata";
-
 	$userdata = array();
 	$filerec = wfu_get_file_rec_from_id($idlog, true);
 	if ( $filerec != null && $filerec->userdata != null )
@@ -1712,6 +1728,15 @@ function wfu_get_userdata_from_rec($filerec) {
 	}
 
 	return $userdata;
+}
+
+function wfu_get_oldestrec_from_uniqueid($uniqueid) {
+	global $wpdb;
+	$table_name1 = $wpdb->prefix . "wfu_log";
+	$filerecs = $wpdb->get_results('SELECT * FROM '.$table_name1.' WHERE idlog IN (SELECT MIN(idlog) FROM '.$table_name1.' WHERE uploadid = \''.$uniqueid.'\')');
+	if ( $filerecs == null ) return null;
+	if ( count($filerecs) > 0 ) return $filerecs[0];
+	else return null;
 }
 
 function wfu_get_latest_rec_from_id($idlog) {
@@ -1810,11 +1835,14 @@ function wfu_get_filedata_from_rec($filerec, $is_new = false, $update_transfer =
 	return $filedata;
 }
 
-function wfu_save_filedata_from_id($idlog, $filedata) {
+function wfu_save_filedata_from_id($idlog, $filedata, $store_in_latest_rec = true) {
 	global $wpdb;
 	$table_name1 = $wpdb->prefix . "wfu_log";
-	$latestrec = wfu_get_latest_rec_from_id($idlog);
-	return $wpdb->update($table_name1, array( 'filedata' => wfu_encode_array_to_string($filedata) ), array( 'idlog' => $latestrec->idlog ), array( '%s' ), array( '%d' ));
+	if ( $store_in_latest_rec ) {
+		$latestrec = wfu_get_latest_rec_from_id($idlog);
+		$idlog = $latestrec->idlog;
+	}
+	return $wpdb->update($table_name1, array( 'filedata' => wfu_encode_array_to_string($filedata) ), array( 'idlog' => $idlog ), array( '%s' ), array( '%d' ));
 }
 
 //get userdata from uploadid
@@ -1995,16 +2023,16 @@ function wfu_get_filtered_recs($filter) {
 	}
 	// construct userdata filter
 	if ( isset($filter['userdata']) ) {
-		if ( $filter['userdata']['criterion'] == "equal to" ) $valuecriterion = 'propvalue = \''.$filter['userdata']['value'].'\'';
-		elseif ( $filter['userdata']['criterion'] == "starts with" ) $valuecriterion = 'propvalue LIKE \''.$filter['userdata']['value'].'%\'';
-		elseif ( $filter['userdata']['criterion'] == "ends with" ) $valuecriterion = 'propvalue LIKE \'%'.$filter['userdata']['value'].'\'';
-		elseif ( $filter['userdata']['criterion'] == "contains" ) $valuecriterion = 'propvalue LIKE \'%'.$filter['userdata']['value'].'%\'';
-		elseif ( $filter['userdata']['criterion'] == "not equal to" ) $valuecriterion = 'propvalue <> \''.$filter['userdata']['value'].'\'';
-		elseif ( $filter['userdata']['criterion'] == "does not start with" ) $valuecriterion = 'propvalue NOT LIKE \''.$filter['userdata']['value'].'%\'';
-		elseif ( $filter['userdata']['criterion'] == "does not end with" ) $valuecriterion = 'propvalue NOT LIKE \'%'.$filter['userdata']['value'].'\'';
-		elseif ( $filter['userdata']['criterion'] == "does not contain" ) $valuecriterion = 'propvalue NOT LIKE \'%'.$filter['userdata']['value'].'%\'';
-		else $valuecriterion = 'propvalue = \''.$filter['userdata']['value'].'\'';
-		$query = 'uploadid in (SELECT DISTINCT uploadid FROM '.$table_name2.' WHERE date_to = 0 AND property = \''.$filter['userdata']['field'] .'\' AND '.$valuecriterion.')';
+		if ( $filter['userdata']['criterion'] == "equal to" ) $valuecriterion = 'propvalue = \''.esc_sql($filter['userdata']['value']).'\'';
+		elseif ( $filter['userdata']['criterion'] == "starts with" ) $valuecriterion = 'propvalue LIKE \''.esc_sql($filter['userdata']['value']).'%\'';
+		elseif ( $filter['userdata']['criterion'] == "ends with" ) $valuecriterion = 'propvalue LIKE \'%'.esc_sql($filter['userdata']['value']).'\'';
+		elseif ( $filter['userdata']['criterion'] == "contains" ) $valuecriterion = 'propvalue LIKE \'%'.esc_sql($filter['userdata']['value']).'%\'';
+		elseif ( $filter['userdata']['criterion'] == "not equal to" ) $valuecriterion = 'propvalue <> \''.esc_sql($filter['userdata']['value']).'\'';
+		elseif ( $filter['userdata']['criterion'] == "does not start with" ) $valuecriterion = 'propvalue NOT LIKE \''.esc_sql($filter['userdata']['value']).'%\'';
+		elseif ( $filter['userdata']['criterion'] == "does not end with" ) $valuecriterion = 'propvalue NOT LIKE \'%'.esc_sql($filter['userdata']['value']).'\'';
+		elseif ( $filter['userdata']['criterion'] == "does not contain" ) $valuecriterion = 'propvalue NOT LIKE \'%'.esc_sql($filter['userdata']['value']).'%\'';
+		else $valuecriterion = 'propvalue = \''.esc_sql($filter['userdata']['value']).'\'';
+		$query = 'uploadid in (SELECT DISTINCT uploadid FROM '.$table_name2.' WHERE date_to = 0 AND property = \''.esc_sql($filter['userdata']['field']).'\' AND '.$valuecriterion.')';
 		array_push($queries, $query);
 	}
 	
@@ -2132,6 +2160,118 @@ function wfu_export_uploaded_files($params) {
 	file_put_contents($path, $contents);
 	
 	return $path;
+}
+
+function wfu_get_all_plugin_options() {
+	//structure of $options array; every item has the following properties:
+	//  0: name of option, an asterisk (*) denotes many occurencies
+	//  1: location of option, "db" or "session"
+	//  2: delete this option when purging all plugin data
+	//  3: store this option when extracting plugin data
+	$options = array(
+		//stored plugin's Settings
+		array( "wordpress_file_upload_options", "db", true, true ),
+		//wfu_log table version
+		array( "wordpress_file_upload_table_log_version", "db", true, true ),
+		//wfu_userdata version
+		array( "wordpress_file_upload_table_userdata_version", "db", true, true ),
+		//wfu_dbxqueue version
+		array( "wordpress_file_upload_table_dbxqueue_version", "db", true, true ),
+		//stored hooks
+		array( "wordpress_file_upload_hooks", "db", true, true ),
+		//transfer manager properties
+		array( "wfu_transfermanager_props", "db", true, true ),
+		//last file record that was read
+		array( "wordpress_file_upload_last_idlog", "db", true, false ),
+		//indices of stored shortcode parameters
+		array( "wfu_params_index", "db", true, false ),
+		//stored shortcode parameters
+		array( "wfu_params_*", "db", true, false ),
+		//stored advanced environment variables
+		array( "wfu_environment_variables", "db", true, true ),
+		//stored global tokens
+		array( "wfu_gst_*", "db", true, false ),
+		//data of unfinished uploaded files
+		array( "wordpress_file_upload_unfinished_data", "db", true, false ),
+		//list of stored variables in dboption user state
+		array( "wfu_userstate_list", "db", true, false ),
+		//stored variable value in dboption user state
+		array( "wfu_userstate_*", "db", true, false ),
+		//last time dboption user state was checked
+		array( "wfu_userstate_list_last_check", "db", true, false ),
+		//stored personal data policies
+		array( "wordpress_file_upload_pd_policies", "db", true, true ),
+		//last time admin was notified about DOS attack
+		array( "wfu_admin_notification_about_DOS", "db", true, false ),
+		//stored Dropbox authorization object 
+		array( "wfu_Dropbox_WebAuth", "session", true, false ),
+		//stored Google Client object 
+		array( "wfu_GDrive_Client", "session", true, false ),
+		//stored token for adding uploader shortcode
+		array( "wfu_add_shortcode_ticket_for_wordpress_file_upload", "session", true, false ),
+		//stored token for adding file viewer shortcode
+		array( "wfu_add_shortcode_ticket_for_wordpress_file_upload_browser", "session", true, false ),
+		//session array holding dir and file paths
+		array( "wfu_filepath_safe_storage", "session", true, false ),
+		//stored rename file flag when renaming file
+		array( "wfu_rename_file", "session", true, false ),
+		//stored rename file error when renaming file
+		array( "wfu_rename_file_error", "session", true, false ),
+		//stored create dir flag when creating dir
+		array( "wfu_create_dir", "session", true, false ),
+		//stored create dir error when creating dir
+		array( "wfu_create_dir_error", "session", true, false ),
+		//stored file details error when updating file details
+		array( "wfu_filedetails_error", "session", true, false ),
+		//stored hook data key when updating a hook
+		array( "wfu_hook_data_key", "session", true, false ),
+		//stored hook data title when updating a hook
+		array( "wfu_hook_data_title", "session", true, false ),
+		//stored hook data description when updating a hook
+		array( "wfu_hook_data_description", "session", true, false ),
+		//stored hook data code when updating a hook
+		array( "wfu_hook_data_code", "session", true, false ),
+		//stored hook data status when updating a hook
+		array( "wfu_hook_data_status", "session", true, false ),
+		//stored hook data scope when updating a hook
+		array( "wfu_hook_data_scope", "session", true, false ),
+		//stored hook data error message when updating a hook
+		array( "wfu_hook_data_message", "session", true, false ),
+		//stored data of file transfers tab
+		array( "wfu_transfers_data", "session", true, false ),
+		//stored token of upload form
+		array( "wfu_token_*", "session", true, false ),
+		//stored data of uploaded files
+		array( "filedata_*", "session", true, false ),
+		//stored status of upload
+		array( "wfu_uploadstatus_*", "session", true, false ),
+		//flag determining if this is the first pass of an upload
+		array( "wfu_upload_first_pass_*", "session", true, false ),
+		//stored approved captcha verification code
+		array( "wfu_approvedcaptcha_*", "session", true, false ),
+		//stored short tokens
+		array( "wfu_ust_*", "session", true, false ),
+		//stored shortcode data
+		array( "wfu_shortcode_data_safe_storage", "session", true, false ),
+		//stored number of deleted thumbnails
+		array( "wfu_deleted_thumbnails_counter", "session", true, false ),
+		//stored number of added thumbnails
+		array( "wfu_added_thumbnails_counter", "session", true, false ),
+		//stored consent data
+		array( "WFU_Consent_Data", "session", true, false ),
+		//stored browser actions
+		array( "wfu_browser_actions_safe_storage", "session", true, false ),
+		//stored data of chunked uploads
+		array( "chunkdata_*", "session", true, false ),
+		//stored flag of uploader form refresh status
+		array( "wfu_check_refresh_*", "session", true, false ),
+		//stored upload start time
+		array( "wfu_start_time_*", "session", true, false ),
+		//stored upload start time
+		array( "wfu_start_time_*", "session", true, false )
+	);
+	
+	return $options;
 }
 
 //********************* Widget Functions ****************************************************************************************
@@ -2997,6 +3137,21 @@ function wfu_get_browser_params_from_safe($code) {
 
 //********************* POST/GET Requests Functions ****************************************************************************************************
 
+function wfu_add_proxy_param(&$config) {
+	//include proxy support
+	$proxy = new \WP_HTTP_Proxy();
+	$proxy_enabled = $proxy->is_enabled();
+	if ( $proxy_enabled ) {
+		$config['proxy']['http'] = 'http://'.( $proxy->use_authentication() ? $proxy->authentication().'@' : '' ).$proxy->host().":".$proxy->port();
+		$config['proxy']['https'] = 'http://'.( $proxy->use_authentication() ? $proxy->authentication().'@' : '' ).$proxy->host().":".$proxy->port();
+		//make sure that wildcard asterisks (*) are removed from bypass hosts
+		//to make it compatible with Guzzle format
+		if ( defined('WP_PROXY_BYPASS_HOSTS') ) $config['proxy']['no'] = preg_split('|,\s*|', str_replace('*', '', WP_PROXY_BYPASS_HOSTS));
+	}
+	
+	return $proxy_enabled;
+}
+
 function wfu_decode_socket_response($response) {
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$ret = "";
@@ -3024,6 +3179,15 @@ function wfu_decode_socket_response($response) {
 function wfu_post_request($url, $params, $verifypeer = true, $internal_request = false, $timeout = 0) {
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
+	$default_args = array(
+		'url' => $url,
+		'params' => $params,
+		'verifypeer' => $verifypeer,
+		'internal_request' => $internal_request,
+		'timeout' => $timeout
+	);
+	//check proxy
+	$proxy = new WP_HTTP_Proxy();
 	if ( isset($plugin_options['postmethod']) && $plugin_options['postmethod'] == 'curl' ) {
 		// POST request using CURL
 		$ch = curl_init($url);
@@ -3036,7 +3200,8 @@ function wfu_post_request($url, $params, $verifypeer = true, $internal_request =
 			CURLINFO_HEADER_OUT => false,
 			CURLOPT_HEADER => false,
 			CURLOPT_RETURNTRANSFER => true,
-			CURLOPT_SSL_VERIFYPEER => $verifypeer
+			CURLOPT_SSL_VERIFYPEER => $verifypeer,
+			CURLOPT_SSL_VERIFYHOST => ( $verifypeer ? CURLOPT_SSL_VERIFYHOST : false )
 		);
 		if ( $timeout > 0 ) $options[CURLOPT_TIMEOUT] = $timeout;
 		//for internal requests to /wp-admin area that is password protected
@@ -3046,6 +3211,17 @@ function wfu_post_request($url, $params, $verifypeer = true, $internal_request =
 			$options[CURLOPT_USERPWD] = WFU_VAR("WFU_DASHBOARD_USERNAME").":".WFU_VAR("WFU_DASHBOARD_PASSWORD");
 		}
 		if ( WFU_VAR("WFU_RELAX_CURL_VERIFY_HOST") == "true" ) $options[CURLOPT_SSL_VERIFYHOST] = false;
+		//configure cURL request for proxy
+		if ( $proxy->is_enabled() && $proxy->send_through_proxy($url) ) {
+			$options[CURLOPT_PROXYTYPE] = CURLPROXY_HTTP;
+			$options[CURLOPT_PROXY] = $proxy->host().":".$proxy->port();
+			if ( $proxy->use_authentication() ) {
+				$options[CURLOPT_PROXYAUTH] = CURLAUTH_ANY;
+				$options[CURLOPT_PROXYUSERPWD] = $proxy->authentication();
+			}
+		}
+		//customize request options before dispatching to destination
+		$options = apply_filters("_wfu_post_request_options", $options, "curl", $default_args);
 		curl_setopt_array($ch, $options);
 		$result = curl_exec($ch);
 		curl_close ($ch);
@@ -3058,30 +3234,50 @@ function wfu_post_request($url, $params, $verifypeer = true, $internal_request =
 		$errno = 0;
         $errstr = '';
 		$ret = '';
-		$url = parse_url($url);
-		$host = $url['host'];
-		$path = $url['path'];
-		if ( $url['scheme'] == 'https' ) { 
+		$url_parts = parse_url($url);
+		$host = $url_parts['host'];
+		$socket_host = $host;
+		$path = $url_parts['path'];
+		if ( $url_parts['scheme'] == 'https' ) { 
 			$scheme = "ssl://";
 			$port = 443;
 			if ( $timeout == 0 ) $timeout = 30;
 		}
 		elseif ( $url['scheme'] != 'http' ) return '';
-		$handle = fsockopen($scheme.$host, $port, $errno, $errstr, ($timeout == 0 ? ini_get("default_socket_timeout") : $timeout));
+		//configure sockets request for proxy
+		if ( $proxy->is_enabled() && $proxy->send_through_proxy($url) ) {
+			$scheme = "";
+			$socket_host = $proxy->host();
+			$port = $proxy->port();
+			$path = $url;
+		}
+		if ( $verifypeer ) $handle = fsockopen($scheme.$socket_host, $port, $errno, $errstr, ($timeout == 0 ? ini_get("default_socket_timeout") : $timeout));
+		else {
+			$context = stream_context_create(array(
+				'ssl' => array(
+					'verify_peer' => false,
+					'verify_peer_name' => false
+			)));
+			$handle = stream_socket_client($scheme.$socket_host.":".$port, $errno, $errstr, ($timeout == 0 ? ini_get("default_socket_timeout") : $timeout), STREAM_CLIENT_CONNECT, $context);
+		}
 		if ( $errno !== 0 || $errstr !== '' ) $handle = false;
 		if ( $handle !== false ) {
 			$content = http_build_query($params);
 			$request = "POST " . $path . " HTTP/1.1\r\n";
-            $request .= "Host: " . $host . "\r\n";
-            $request .= "Content-Type: application/x-www-form-urlencoded\r\n";
+			$request .= "Host: " . $host . "\r\n";
+			$request .= "Content-Type: application/x-www-form-urlencoded\r\n";
 			//for internal requests to /wp-admin area that is password protected
 			//authorization is required
-			if ( $internal_request && WFU_VAR("WFU_DASHBOARD_PROTECTED") == "true" ) {
+			if ( $internal_request && WFU_VAR("WFU_DASHBOARD_PROTECTED") == "true" )
 				$request .= "Authorization: Basic ".base64_encode(WFU_VAR("WFU_DASHBOARD_USERNAME").":".WFU_VAR("WFU_DASHBOARD_PASSWORD"))."\r\n";
-			}
-           $request .= "Content-length: " . strlen($content) . "\r\n";
-            $request .= "Connection: close\r\n\r\n";
-            $request .= $content . "\r\n\r\n";
+			//add proxy authentication if exists and is required
+			if ( $proxy->is_enabled() && $proxy->send_through_proxy($url) && $proxy->use_authentication() )
+				$request .= $proxy->authentication_header()."\r\n";
+			$request .= "Content-length: " . strlen($content) . "\r\n";
+			$request .= "Connection: close\r\n\r\n";
+			$request .= $content . "\r\n\r\n";
+			//customize request options before dispatching to destination
+			$request = apply_filters("_wfu_post_request_options", $request, "socket", $default_args);
 			fwrite($handle, $request, strlen($request));
 			$response = '';
 			while ( !feof($handle) ) {
@@ -3103,6 +3299,12 @@ function wfu_post_request($url, $params, $verifypeer = true, $internal_request =
 			'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
 			'content' => http_build_query($params)
 		);
+		//configure fopen request for proxy
+		if ( $proxy->is_enabled() && $proxy->send_through_proxy($url) ) {
+			$http_array['proxy'] = 'tcp://'.$proxy->host().":".$proxy->port();
+			if ( $proxy->use_authentication() )
+				$http_array['header'] .= $proxy->authentication_header()."\r\n";
+		}
 		if ( $timeout > 0 ) $http_array['timeout'] = $timeout;
 		//for internal requests to /wp-admin area that is password protected
 		//authorization is required
@@ -3111,6 +3313,8 @@ function wfu_post_request($url, $params, $verifypeer = true, $internal_request =
 		}
 		$context_params = array( 'http' => $http_array );
 		if ( !$verifypeer ) $context_params['ssl'] = array( 'verify_peer' => false, 'allow_self_signed' => true, 'verify_peer_name' => false );
+		//customize request options before dispatching to destination
+		$context_params = apply_filters("_wfu_post_request_options", $context_params, "fopen", $default_args);
 		$context = stream_context_create($context_params);
 		return file_get_contents($url, false, $context);
 	}

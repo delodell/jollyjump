@@ -19,9 +19,13 @@ function wfu_uploadedfiles_manager($page = 1, $only_table_rows = false) {
 	$maxrows = (int)WFU_VAR("WFU_UPLOADEDFILES_TABLE_MAXROWS");
 
 	//get log data from database
-	$files_total = $wpdb->get_var('SELECT COUNT(idlog) FROM '.$table_name1.' WHERE action = \'upload\'');
-	$filerecs = $wpdb->get_results('SELECT * FROM '.$table_name1.' WHERE action = \'upload\' ORDER BY date_from DESC'.( $maxrows > 0 ? ' LIMIT '.$maxrows.' OFFSET '.(($page - 1) * $maxrows) : '' ));
-
+	//$files_total = $wpdb->get_var('SELECT COUNT(idlog) FROM '.$table_name1.' WHERE action = \'upload\'');
+	//$filerecs = $wpdb->get_results('SELECT * FROM '.$table_name1.' WHERE action = \'upload\' ORDER BY date_from DESC'.( $maxrows > 0 ? ' LIMIT '.$maxrows.' OFFSET '.(($page - 1) * $maxrows) : '' ));
+	$files_total = 0;
+	$filerecs = array();
+	$has_history = false;
+	extract(wfu_uploadedfiles_get_filerecs($page));
+	
 	//get last record already read
 	$last_idlog = get_option( "wordpress_file_upload_last_idlog", array( "pre" => 0, "post" => 0, "time" => 0 ) );
 	
@@ -130,9 +134,11 @@ function wfu_uploadedfiles_manager($page = 1, $only_table_rows = false) {
 		$i ++;
 		$initialrec = $filerec;
 		//get all newer associated file records
-		$filerecs = wfu_get_rec_new_history($initialrec->idlog);
+		$historyrecs = array();
+		if ( $has_history ) $historyrecs = $filerec->history;
+		else $historyrecs = wfu_get_rec_new_history($initialrec->idlog);
 		//get the latest record of this upload
-		$filerec = $filerecs[count($filerecs) - 1];
+		$filerec = $historyrecs[count($historyrecs) - 1];
 		$filedata = wfu_get_filedata_from_rec($filerec, false, true, false);
 		if ( $filedata == null ) $filedata = array();
 
@@ -266,6 +272,48 @@ function wfu_uploadedfiles_manager($page = 1, $only_table_rows = false) {
 	//allow scripts to customize HTML output before return
 	$echo_str = apply_filters("_wfu_uploadedfiles_output", $echo_str, $page, $only_table_rows);
 	return $echo_str;
+}
+
+function wfu_uploadedfiles_get_filerecs($page) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	global $wpdb;
+	$table_name1 = $wpdb->prefix . "wfu_log";
+	$maxrows = (int)WFU_VAR("WFU_UPLOADEDFILES_TABLE_MAXROWS");
+	$ret = array(
+		"files_total"	=> 0,
+		"filerecs"		=> array(),
+		"has_history"	=> false
+	);
+
+	if ( WFU_VAR("WFU_UPLOADEDFILES_HIDEINVALID") != "true" ) {
+		$ret["files_total"] = $wpdb->get_var('SELECT COUNT(idlog) FROM '.$table_name1.' WHERE action = \'upload\'');
+		$ret["filerecs"] = $wpdb->get_results('SELECT * FROM '.$table_name1.' WHERE action = \'upload\' ORDER BY date_from DESC'.( $maxrows > 0 ? ' LIMIT '.$maxrows.' OFFSET '.(($page - 1) * $maxrows) : '' ));
+	}
+	else {
+		$filerecs = $wpdb->get_results('SELECT * FROM '.$table_name1.' WHERE action = \'upload\' ORDER BY date_from DESC');
+		foreach ( $filerecs as $ind => $filerec ) {
+			$initialrec = $filerec;
+			//get all newer associated file records
+			$historyrecs = wfu_get_rec_new_history($initialrec->idlog);
+			//get the latest record of this upload
+			$filerec = $historyrecs[count($historyrecs) - 1];
+			$file_abspath = wfu_path_rel2abs($filerec->filepath);
+			//check if file is stored in FTP location
+			$file_in_ftp = ( substr($file_abspath, 0, 6) == 'ftp://' || substr($file_abspath, 0, 7) == 'ftps://' || substr($file_abspath, 0, 7) == 'sftp://' );
+			//check if file exists for non-ftp uploads
+			$file_exists = ( $file_in_ftp ? true : file_exists($file_abspath) );
+			//check if record is obsolete
+			$obsolete = ( $filerec->date_to != "0000-00-00 00:00:00" );
+			if ( !$file_exists || $obsolete ) unset($filerecs[$ind]);
+			else $filerecs[$ind]->history = $historyrecs;
+		}
+		$ret["files_total"] = count($filerecs);
+		if (  $maxrows > 0 ) $filerecs = array_slice($filerecs, ($page - 1) * $maxrows, $maxrows);
+		$ret["filerecs"] = $filerecs;
+		$ret["has_history"] = true;
+	}
+	
+	return $ret;
 }
 
 function wfu_init_uploadedfiles_properties() {

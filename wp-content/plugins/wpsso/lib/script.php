@@ -74,7 +74,7 @@ if ( ! class_exists( 'WpssoScript' ) ) {
 			 */
 			wp_register_script( 'jquery-qtip', 
 				WPSSO_URLPATH . 'js/ext/jquery-qtip.' . $js_file_ext, 
-					array( 'jquery' ), $this->p->cf['jquery-qtip']['version'], true );
+					array( 'jquery' ), $this->p->cf['jquery-qtip'][ 'version' ], true );
 
 			wp_register_script( 'sucom-settings-page', 
 				WPSSO_URLPATH . 'js/com/jquery-settings-page.' . $js_file_ext, 
@@ -115,7 +115,7 @@ if ( ! class_exists( 'WpssoScript' ) ) {
 				/**
 				 * Any settings page. Also matches the profile_page and users_page hooks.
 				 */
-				case ( strpos( $hook_name, '_page_' . $this->p->lca . '-' ) !== false ? true : false ):
+				case ( false !== strpos( $hook_name, '_page_' . $this->p->lca . '-' ) ? true : false ):
 
 					if ( $this->p->debug->enabled ) {
 						$this->p->debug->log( 'enqueuing scripts for settings page' );
@@ -165,11 +165,11 @@ if ( ! class_exists( 'WpssoScript' ) ) {
 
 				case 'plugin-install.php':
 
-					if ( isset( $_GET['plugin'] ) ) {
+					if ( isset( $_GET[ 'plugin' ] ) ) {
 
-						$plugin_slug = $_GET['plugin'];
+						$plugin_slug = $_GET[ 'plugin' ];
 
-						if ( isset( $this->p->cf['*']['slug'][$plugin_slug] ) ) {
+						if ( isset( $this->p->cf[ '*' ][ 'slug' ][$plugin_slug] ) ) {
 
 							if ( $this->p->debug->enabled ) {
 								$this->p->debug->log( 'enqueuing scripts for plugin install page' );
@@ -212,25 +212,36 @@ if ( ! class_exists( 'WpssoScript' ) ) {
 					array( 'wp-data' ), $plugin_version, true );
 
 			wp_localize_script( 'sucom-block-editor-admin', 'sucomBlockEditorL10n',
-				$this->get_admin_block_editor_script_data() );
+				$this->get_block_editor_admin_script_data() );
 		}
 
 		/**
-		 * Start localized variable names with an underscore.
+		 * Always start localized variable names with an underscore.
 		 */
-		public function get_admin_block_editor_script_data() {
+		public function get_block_editor_admin_script_data() {
+
+			$metabox_id   = $this->p->cf['meta'][ 'id' ];
+			$container_id = $this->p->lca . '_metabox_' . $metabox_id . '_inside';
 
 			$no_notices_text = sprintf( __( 'No new %s notifications.', 'wpsso' ), $this->p->cf['menu']['title'] );
 			$no_notices_html = '<div class="ab-item ab-empty-item">' . $no_notices_text . '</div>';
 
+			$option_labels = array( 'robots'   => _x( 'Robots', 'option label', 'wpsso' ) );
+			$container_ids = array( $container_id );
+
+			$option_labels = apply_filters( $this->p->lca . '_block_editor_admin_option_labels', $option_labels );
+
+			/**
+			 * Each metabox ID is sanitized by the jQuery wpssoUpdateMetabox() function.
+			 */
+			$container_ids = apply_filters( $this->p->lca . '_block_editor_admin_container_ids', $container_ids );
+
 			return array(
 				'_ajax_nonce'      => wp_create_nonce( WPSSO_NONCE_NAME ),
-				'_metabox_id'      => $this->p->lca . '_metabox_' . $this->p->cf['meta']['id'],
-				'_tb_notices'      => $this->tb_notices,
+				'_tb_notices'      => $this->tb_notices,	// Maybe null, true, false, or array.
 				'_no_notices_html' => $no_notices_html,
-				'_option_labels'   => array(
-					'robots'   => _x( 'Robots', 'option label', 'wpsso' ),
-				),
+				'_option_labels'   => $option_labels,
+				'_container_ids'   => $container_ids,
 			);
 		}
 
@@ -249,7 +260,7 @@ if ( ! class_exists( 'WpssoScript' ) ) {
 			/**
 			 * Just in case - no use getting notices if there's nothing to get.
 			 */
-			if ( empty( $this->tb_notices ) ) {
+			if ( empty( $this->tb_notices ) || ! is_array( $this->tb_notices ) ) {
 				return;
 			}
 
@@ -354,8 +365,8 @@ jQuery( document ).ready( function(){
 
 		if ( window.top.location.href.indexOf( "page=' . $this->p->lca . '-" ) ) {
 
-			var plugin_url = jQuery( this ).attr( "href" );
-			var pageref_url_arg = "&' . $this->p->lca . '_pageref_url=" + encodeURIComponent( window.top.location.href );
+			var plugin_url        = jQuery( this ).attr( "href" );
+			var pageref_url_arg   = "&' . $this->p->lca . '_pageref_url=" + encodeURIComponent( window.top.location.href );
 			var pageref_title_arg = "&' . $this->p->lca . '_pageref_title=" + encodeURIComponent( jQuery( "h1", window.parent.document ).text() );
 
 			window.top.location.href = plugin_url + pageref_url_arg + pageref_title_arg;
